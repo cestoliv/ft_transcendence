@@ -1,0 +1,14 @@
+FROM node:alpine
+
+# Copy streaks sources
+WORKDIR /transcendence
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+
+# Install npm dependencies
+RUN npm i
+
+# Expose port 3000
+EXPOSE 3000
+
+CMD [ "npm", "run", "start" ]

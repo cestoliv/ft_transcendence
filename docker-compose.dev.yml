@@ -1,0 +1,56 @@
+version: "3"
+services:
+  db:
+    image: postgres:15
+    restart: always
+    volumes:
+      - "./docker/data/db:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 5050:8080
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      - "./docker/nginx.conf:/etc/nginx/nginx.conf"
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: always
+    volumes:
+      - ./frontend:/transcendence
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: always
+    volumes:
+      - ./backend:/transcendence
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      API42_CLIENT_ID: ${API42_CLIENT_ID}
+      API42_CLIENT_SECRET: ${API42_CLIENT_SECRET}
+      API42_REDIRECT_URI: ${API42_REDIRECT_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+      FRONTEND_REDIRECT_URL: ${FRONTEND_REDIRECT_URL}

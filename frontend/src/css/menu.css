@@ -1,0 +1,36 @@
+.menu {
+    font-size: 1.2em;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgb(218, 215, 215);
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.menu-right {
+    border-color: black;
+    border-width: 2px;
+    border: solid;
+}
+
+ul {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 30%;
+}
+
+li {
+    align-self: center;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.activeLink{
+    font-weight: bold;
+    color: #07c5fa;
+}

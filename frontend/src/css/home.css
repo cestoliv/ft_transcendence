@@ -1,0 +1,15 @@
+.home{
+	background-color: black;
+	color: #fff;
+}
+
+.home h1 {
+	text-align: center;
+	margin: 0;
+	padding: 15px 0;
+}
+
+.button-start-game {
+	background-color: red;
+	align-self: center;
+}
