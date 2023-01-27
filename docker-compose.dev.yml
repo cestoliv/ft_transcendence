@@ -34,6 +34,10 @@ services:
     restart: always
     volumes:
       - ./frontend:/transcendence
+    environment:
+      API_URL: ${API_URL}
+    ports:
+      - "3000:3000"
 
   backend:
     build:
@@ -54,3 +58,4 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN}
       FRONTEND_REDIRECT_URL: ${FRONTEND_REDIRECT_URL}
+      API_URL: ${API_URL}
