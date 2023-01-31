@@ -18,7 +18,7 @@ const submitTOTP = async (
 	removeCookie: RemoveCookie,
 ) => {
 	const response = await fetch(
-		`http://api.transcendence.local/api/v1/auth/totp/${totp}`,
+		`${process.env.REACT_APP_API_URL}/auth/totp/${totp}`,
 		{
 			method: 'POST',
 			headers: {
@@ -28,12 +28,13 @@ const submitTOTP = async (
 	);
 
 	const data = await response.json();
+	console.log(data);
 	if (response.ok) {
 		// User is logged
 		setCookie('bearer', data.bearer, {
 			path: '/',
 			sameSite: 'strict',
-			domain: '.transcendence.local',
+			domain: process.env.REACT_APP_COOKIE_DOMAIN,
 		});
 		setAuth({ bearer: data.bearer, otp_ok: true });
 	} else if (response.status === 401 && data.message === 'Invalid TOTP') {

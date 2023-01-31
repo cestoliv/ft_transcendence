@@ -22,7 +22,7 @@ function App() {
 
 	const fetchUser = async () => {
 		const response = await fetch(
-			'http://api.transcendence.local/api/v1/users/me',
+			process.env.REACT_APP_API_URL + '/users/me',
 			{
 				method: 'GET',
 				headers: {

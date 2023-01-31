@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
 	SubscribeMessage,
 	WebSocketGateway,
@@ -8,7 +9,8 @@ import { UsersService } from './users.service';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://transcendence.local',
+		// TODO: Should use ConfigService instead of process.env
+		origin: process.env.FRONTEND_URL || '*',
 		credentials: true,
 	},
 })
@@ -16,9 +18,16 @@ export class UsersGateway {
 	@WebSocketServer()
 	server: Server;
 
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly configService: ConfigService,
+	) {}
 
-	// @UseGuards(WsGuard)
+	/*
+	 * This function is called when a client connects to the socket
+	 * We use it to authenticate the user
+	 * If the user is not authenticated, we reject the connection
+	 */
 	async handleConnection(socket: Socket) {
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
@@ -33,7 +42,6 @@ export class UsersGateway {
 		}
 	}
 
-	// @UseGuards(WsGuard)
 	@SubscribeMessage('message')
 	handleMessage(client: any, payload: any): string {
 		return `Hello ${client.user.username}, you said: ${payload}`;
