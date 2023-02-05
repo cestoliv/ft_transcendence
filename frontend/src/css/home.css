@@ -1,15 +1,21 @@
 .home{
-	background-color: black;
-	color: #fff;
-}
-
-.home h1 {
-	text-align: center;
-	margin: 0;
-	padding: 15px 0;
+    display: flex;
+    justify-content: center;
+    background-color: black;
+    flex-grow: 1;
 }
 
 .button-start-game {
-	background-color: red;
-	align-self: center;
+    background-color: #64B5F6;
+    padding: 15px;
+    border-radius: 13px;
+    border-style: none;
+    font-size: 20px;
+    align-self: center;
+}
+
+.button-start-game:hover {
+    background-color: #1976D2;
+    border-style: none;
+    cursor: pointer;
 }
