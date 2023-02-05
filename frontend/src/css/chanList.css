@@ -1,0 +1,11 @@
+.ChanList-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+
+.ChanList-wrapper div {
+    border-radius: 15px;
+    border: none;
+    padding: 10px 20px;
+}

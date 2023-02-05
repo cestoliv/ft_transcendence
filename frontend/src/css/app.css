@@ -1,3 +1,14 @@
 @import './login.css';
 @import './menu.css';
 @import './home.css';
+@import './friends.css';
+@import './infosconv.css';
+@import './chat.css';
+@import './friendsList.css';
+@import './chanList.css';
+@import './searchGame.css';
+@import './stats.css';
+@import './settings.css';
+@import './pong.css';
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');

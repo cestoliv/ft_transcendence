@@ -1,12 +1,8 @@
-import { IUser } from '../interfaces';
-
-const Home = (props: { user: IUser }) => {
-	return (
-		<div className="home">
-			<h1>My progression</h1>
-			<p>User: {props.user.username}</p>
-		</div>
-	);
-};
-
-export default Home;
+import React from 'react';
+export default function Home() {
+    return (
+        <div className="home">
+            <button className="button-start-game">Start a game</button>
+        </div>
+    )
+}

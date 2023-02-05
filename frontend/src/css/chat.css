@@ -1,0 +1,74 @@
+.chat-nav{
+    height: 60px;
+    background-color: rgb(78, 74, 74);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.public-private {
+    display: flex;
+}
+
+.chat-nav-right{
+    display: flex;
+}
+
+.chat-nav-right div {
+    margin-right: 20px;
+}
+
+.wrapper-settings {
+    background-color: rgb(78, 74, 74);
+    display: flex;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+/* .visible {
+    visibility: visible;
+} */
+
+/* form */
+
+#mdp {
+    width: 100px;
+    margin-right: 5px;
+    border: none;
+    background-color: rgb(114, 110, 110);
+    border-radius: 15px;
+}
+
+#mdp-label {
+    margin-right: 5px;
+}
+
+#mdp-submit-button {
+    background-color: rgb(114, 110, 110);
+    border-radius: 15px;
+    border: none;
+    padding: 5px;
+}
+
+#mdp-submit-button:hover {
+    cursor: pointer;
+    color: rgb(114, 110, 110);
+    background-color: black;
+    border-radius: 15px;
+    border: none;
+    padding: 5px;
+}
+
+.e-settings {
+    /* background-color: rgb(78, 74, 74); */
+}
+
+.e-settings:hover {
+    cursor: pointer;
+}
+
+/* checkbox */

@@ -5,15 +5,12 @@
     background-color: rgb(218, 215, 215);
     padding-left: 20px;
     padding-right: 20px;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    height: 100px;
 }
 
-.menu-right {
-    border-color: black;
-    border-width: 2px;
-    border: solid;
-}
-
-ul {
+.menu ul {
     list-style: none;
     display: flex;
     flex-direction: row;
@@ -21,8 +18,10 @@ ul {
     width: 30%;
 }
 
-li {
+.menu ul li {
     align-self: center;
+    background-color: none;
+    font-family: 'VT323', monospace;
 }
 
 a {
@@ -33,4 +32,8 @@ a {
 .activeLink{
     font-weight: bold;
     color: #07c5fa;
+}
+
+.e-settings {
+    background-color: none;
 }

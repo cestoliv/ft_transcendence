@@ -1,0 +1,16 @@
+.friendsList-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.friendsList-wrapper div {
+    border-radius: 15px;
+    border: none;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
