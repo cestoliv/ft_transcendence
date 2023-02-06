@@ -1,4 +1,4 @@
 export default interface IChansList {
-    name : string;
-    mdp : string;
+	name: string;
+	mdp: string;
 }

@@ -1,43 +1,117 @@
 import '../src/css/app.css';
-import React from 'react';
-
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Dashboard from './components/Dashboard/Dashboard';
-import Preferences from './components/Preferences/Preferences';
+import { useCookies } from 'react-cookie';
 import Login from './components/Login/Login';
 import Menu from './components/Menu/Menu';
 import Home from './pages/Home';
+import Otp from './components/Otp/Otp';
+import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
-import SearchGame from './pages/SearchGame';
-import Stats from './pages/Stats';
-import Settings from './pages/Settings';
+import OtherUserProfile from './pages/OtherUserProfile';
 import Pong from './pages/Pong';
-import { OtherUserProfile } from './pages/OtherUserProfile';
-import NoUserFound from './pages/404';
+import SearchGame from './pages/SearchGame';
+import Settings from './pages/Settings';
+import Stats from './pages/Stats';
+import { IAuth, IUser } from './interfaces';
 
 function App() {
-  // const [token, setToken] = useState();
+	const socket = useContext(SocketContext);
+	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
+	const [auth, setAuth] = useState({
+		bearer: cookies.bearer,
+		otp_ok: false,
+	} as IAuth);
+	const [user, setUser] = useState({} as IUser);
 
-  // if(!token) {
-  //   return <Login setToken={setToken} />
-  // }
+	const fetchUser = async () => {
+		const response = await fetch(
+			process.env.REACT_APP_API_URL + '/users/me',
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${cookies.bearer}`,
+				},
+			},
+		);
+		const data = await response.json();
+		if (response.ok) {
+			setUser(data);
+			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
+				setAuth({ bearer: cookies.bearer, otp_ok: true });
 
-  return (      
-    <>
-      <Menu />
-      <Routes>
-        <Route path="/" element={<Home /> } />
-        <Route path="/friends" element={<Friends /> } />
-        <Route path="/searchGame" element={<SearchGame /> } />
-        <Route path="/stats" element={<Stats /> } />
-        <Route path="/profile/:userId" element={<OtherUserProfile /> } />
-        <Route path="/404" element={<NoUserFound /> } />
-        <Route path="/settings" element={<Settings /> } />
-        <Route path="/pong" element={<Pong /> } />
-      </Routes>
-    </>
-  );
+			// Connect to socket
+			socket.connect();
+		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
+			// User need to enter a TOTP
+			if (auth.bearer !== cookies.bearer || auth.otp_ok !== false)
+				setAuth({ bearer: cookies.bearer, otp_ok: false });
+		} else if (response.status === 401) {
+			// User is not connected
+			if (auth.bearer !== null || auth.otp_ok !== false)
+				setAuth({ bearer: null, otp_ok: false });
+		} else console.error(data);
+	};
+
+	socket.on('connect', () => {
+		console.log('Socket connected');
+	});
+	socket.on('disconnect', () => {
+		console.log('Socket disconnected');
+	});
+	socket.on('connect_error', (error: any) => {
+		console.log('Socket connect_error:', error);
+	});
+	socket.on('error', (error: any) => {
+		console.log('Socket error:', error);
+		if (error.code === 401) {
+			// User is not connected
+			if (auth.bearer !== null || auth.otp_ok !== false)
+				setAuth({ bearer: null, otp_ok: false });
+		}
+	});
+
+	useEffect(() => {
+		if (auth.bearer != null) {
+			fetchUser();
+		}
+	}, [auth]);
+
+	// If user is not connected, show login page
+	if (auth.bearer == null) {
+		return <Login />;
+	}
+
+	// If user is connected but need to enter a TOTP, show TOTP page
+	if (auth.bearer != null && !auth.otp_ok) {
+		return (
+			<Otp
+				auth={auth}
+				setAuth={setAuth}
+				fetchUser={fetchUser}
+				setCookie={setCookie}
+				removeCookie={removeCookie}
+			/>
+		);
+	}
+
+	// If user is connected and has entered a TOTP, show app
+	return (
+		<SocketContext.Provider value={socket}>
+			<Menu />
+			<Routes>
+				<Route path="/" element={<Home user={user} auth={auth} />} />
+				<Route path="/friends" element={<Friends />} />
+				<Route path="/searchGame" element={<SearchGame />} />
+				<Route path="/stats" element={<Stats />} />
+				<Route path="/profile/:userId" element={<OtherUserProfile />} />
+				{/* <Route path="/404" element={<NoUserFound />} /> */}
+				<Route path="/settings" element={<Settings />} />
+				<Route path="/pong" element={<Pong />} />
+			</Routes>
+		</SocketContext.Provider>
+	);
 }
 
 export default App;

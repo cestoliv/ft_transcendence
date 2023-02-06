@@ -1,4 +1,5 @@
 export default interface IChan {
-    name : string;
-    mdp: string;
+	id: number;
+	name: string;
+	mdp: string;
 }

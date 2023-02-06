@@ -9,12 +9,18 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+      - db
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 5050:8080
+    networks:
+      - db
 
   nginx:
     image: nginx:alpine
@@ -26,6 +32,9 @@ services:
       - "443:443"
     depends_on:
       - frontend
+      - backend
+    networks:
+      - nginx
 
   frontend:
     build:
@@ -34,6 +43,14 @@ services:
     restart: always
     volumes:
       - ./frontend:/transcendence
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: ${API_URL}
+      REACT_APP_SOCKET_URL: ${SOCKET_URL}
+      REACT_APP_COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+    networks:
+      - nginx
 
   backend:
     build:
@@ -53,4 +70,14 @@ services:
       API42_REDIRECT_URI: ${API42_REDIRECT_URI}
       JWT_SECRET: ${JWT_SECRET}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN}
-      FRONTEND_REDIRECT_URL: ${FRONTEND_REDIRECT_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      API_URL: ${API_URL}
+    networks:
+      - nginx
+      - db
+
+networks:
+  nginx:
+    driver: bridge
+  db:
+    driver: bridge
