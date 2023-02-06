@@ -15,6 +15,7 @@ import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
 import { IAuth, IUser } from './interfaces';
+import NoUserFound from './pages/404';
 
 function App() {
 	const socket = useContext(SocketContext);
@@ -106,7 +107,7 @@ function App() {
 				<Route path="/searchGame" element={<SearchGame />} />
 				<Route path="/stats" element={<Stats />} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
-				{/* <Route path="/404" element={<NoUserFound />} /> */}
+				<Route path="/404" element={<NoUserFound />} />
 				<Route path="/settings" element={<Settings />} />
 				<Route path="/pong" element={<Pong />} />
 			</Routes>

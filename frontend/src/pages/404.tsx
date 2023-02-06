@@ -2,7 +2,7 @@ import * as React from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-export const noUserFound = () => {
+export const NoUserFound = () => {
 	return (
 		<div className="noUserFound">
 			<h1>No user found</h1>
@@ -10,4 +10,4 @@ export const noUserFound = () => {
 	);
 };
 
-export default noUserFound;
+export default NoUserFound;
