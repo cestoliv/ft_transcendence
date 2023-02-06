@@ -16,6 +16,8 @@ export class ChannelsGateway {
 		private readonly channelsService: ChannelsService,
 		private readonly usersService: UsersService,
 	) {}
+	// TODO: Make all the permissions checks on the service and not on the gateway
+	// The gateway should only check the payload and call the service
 
 	/*
 	 * This function is called when a client connects to the socket
@@ -207,11 +209,17 @@ export class ChannelsGateway {
 			};
 		// Check that the channel is not private
 		if (channel.visibility == Visibility.Private) {
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['Channel is private'],
-			};
+			// Check that the client have been invited
+			if (
+				!channel.invited.find(
+					(invitation) => invitation.user.id == client.user.id,
+				)
+			)
+				return {
+					code: 403,
+					message: 'Forbidden',
+					errors: ['Channel is private'],
+				};
 		}
 		// Check that the channel is not password protected or that the password is correct
 		else if (channel.visibility == Visibility.PasswordProtected) {
@@ -511,6 +519,6 @@ export class ChannelsGateway {
 			};
 
 		// Update channel
-		return this.channelsService.inviteUser(client, user, channel);
+		return this.channelsService.inviteUser(client.user, user, channel);
 	}
 }

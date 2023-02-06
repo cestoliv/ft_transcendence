@@ -77,6 +77,7 @@ export class ChannelsService {
 	async save(channel: Channel) {
 		delete channel.banned;
 		delete channel.muted;
+		delete channel.invited;
 		await this.channelsRepository.save(channel);
 		return this.findOne(channel.id);
 	}
@@ -107,6 +108,12 @@ export class ChannelsService {
 				});
 			} else return bannedUser.until;
 		}
+
+		// Remove user from invited
+		this.channelInvitedUsersRepository.delete({
+			userId: user.id,
+			channelId: channel.id,
+		});
 
 		// Add user to members array
 		channel.members.push(user);
@@ -183,6 +190,9 @@ export class ChannelsService {
 		newInvitedUser.user = user;
 		newInvitedUser.inviter = inviter;
 		newInvitedUser.channel = channel;
+		newInvitedUser.invited_at = new Date();
+
+		console.log(newInvitedUser);
 
 		await this.channelInvitedUsersRepository.save(newInvitedUser);
 
