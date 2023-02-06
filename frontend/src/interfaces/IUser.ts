@@ -1,6 +1,6 @@
 export default interface IUser {
     pseudo : string;
     avatar : string;
-    id : number;
+    idd : number;
     states : string;
 }

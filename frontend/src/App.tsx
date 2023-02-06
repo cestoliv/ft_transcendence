@@ -13,6 +13,8 @@ import SearchGame from './pages/SearchGame';
 import Stats from './pages/Stats';
 import Settings from './pages/Settings';
 import Pong from './pages/Pong';
+import { OtherUserProfile } from './pages/OtherUserProfile';
+import NoUserFound from './pages/404';
 
 function App() {
   // const [token, setToken] = useState();
@@ -25,10 +27,12 @@ function App() {
     <>
       <Menu />
       <Routes>
-        <Route path="/home" element={<Home /> } />
+        <Route path="/" element={<Home /> } />
         <Route path="/friends" element={<Friends /> } />
         <Route path="/searchGame" element={<SearchGame /> } />
         <Route path="/stats" element={<Stats /> } />
+        <Route path="/profile/:userId" element={<OtherUserProfile /> } />
+        <Route path="/404" element={<NoUserFound /> } />
         <Route path="/settings" element={<Settings /> } />
         <Route path="/pong" element={<Pong /> } />
       </Routes>

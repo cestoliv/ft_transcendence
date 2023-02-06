@@ -37,7 +37,7 @@ export const FriendsList = (props: PersonListProps) => {
     return (
         <div className="friendsList-wrapper">
             {users.map((user) => (
-                <Friend name={user.pseudo} states={user.states} activeConv={props.activeConv}/>
+                <Friend name={user.pseudo} states={user.states} idd={user.idd} activeConv={props.activeConv}/>
             ))}
             {/* <form className='add-friend-form'>
                 <label>

@@ -8,6 +8,28 @@
     padding: 0px 80px;
 }
 
+.profil {
+    height: 60%;
+    width: 400px;
+    background-color: #816C61;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 20px;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.avatar {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    background-color: black;
+    margin-top: 50px;
+}
+
 .historic {
     height: 80%;
     width: 400px;

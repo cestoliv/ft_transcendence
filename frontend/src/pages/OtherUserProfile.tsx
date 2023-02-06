@@ -1,18 +1,44 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
+import { useParams, Navigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import "../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css";
 
+import users from '../mock-data/users';
+import IUser from '../interfaces/IUser';
+import { render } from '@testing-library/react';
 
-export const Stats = () => {
-// export default function Stats({ Stats }: StatsProps) {
 
+export const OtherUserProfile = () => {
+
+const params = useParams();
+
+    let [redirect, setRedirect] = useState<boolean>(false);
+
+    const [user, setUser] = useState<IUser | undefined>(undefined);
+
+    useEffect(() => {
+        if (params.userId)
+            var x: number = +params.userId;
+        const dataUser = users.find(element => element.idd === x);
+        if (dataUser)
+            setUser(dataUser);
+        else
+            setRedirect(true);
+    })
+
+    const renderRedirect = () => {
+        if (redirect) {
+          return <Navigate to='/404' />
+        }
+      }
 
     return (
         <div className="stats-wrapper">
+            {renderRedirect()}
             <div className='profil'>
                  <div className="avatar"></div>
-                 <h1>Pseudo</h1>
+                 <h1>{user?.pseudo}</h1>
                  <h2>1306 points</h2>
             </div>
             <div className='historic'>
@@ -128,4 +154,4 @@ export const Stats = () => {
     );
 }
 
-export default Stats;
+export default OtherUserProfile;
