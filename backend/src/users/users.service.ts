@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 import { AuthService } from 'src/auth/auth.service';
-import { Repository } from 'typeorm';
+import { FindOneOptions, FindOptionsSelect, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -32,12 +32,22 @@ export class UsersService {
 		return this.usersRepository.find();
 	}
 
-	findOne(id: number) {
-		return this.usersRepository.findOneBy({ id });
+	findOne(id: number, withTotp = false) {
+		const select = ['id', 'id42', 'username'];
+		if (withTotp) select.push('otp');
+		return this.usersRepository.findOne({
+			where: { id },
+			select: select as FindOptionsSelect<User>,
+		});
 	}
 
-	findOneBy42Id(id42: number) {
-		return this.usersRepository.findOneBy({ id42 });
+	findOneBy42Id(id42: number, withTotp = false) {
+		const select = ['id', 'id42', 'username'];
+		if (withTotp) select.push('otp');
+		return this.usersRepository.findOne({
+			where: { id42 },
+			select: select as FindOptionsSelect<User>,
+		});
 	}
 
 	update(id: number, updateUserDto: UpdateUserDto) {
@@ -45,7 +55,7 @@ export class UsersService {
 	}
 
 	remove(id: number) {
-		return `This action removes a #${id} user`;
+		return this.usersRepository.delete({ id });
 	}
 
 	async getUserFromSocket(socket: any): Promise<User> {

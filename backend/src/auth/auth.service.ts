@@ -21,15 +21,15 @@ export class AuthService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	async validateToken(token: string): Promise<any> {
-		const payload = this.jwtService.verify(token);
-		if (!payload) return false;
+	// async validateToken(token: string): Promise<any> {
+	// 	const payload = this.jwtService.verify(token);
+	// 	if (!payload) return false;
 
-		const user = await this.usersService.findOne(payload.id);
-		if (!user) return false;
+	// 	const user = await this.usersService.findOne(payload.id, true);
+	// 	if (!user) return false;
 
-		return user;
-	}
+	// 	return user;
+	// }
 
 	async signToken(data: any): Promise<string> {
 		return this.jwtService.sign(data);
@@ -42,7 +42,7 @@ export class AuthService {
 		} catch (error) {
 			throw new Error('Invalid token');
 		}
-		return this.usersService.findOne(payload.id);
+		return this.usersService.findOne(payload.id, true);
 	}
 
 	async oauthCallback(code: string): Promise<string> {
@@ -80,7 +80,7 @@ export class AuthService {
 		}
 
 		// Create user if not exists
-		let user = await this.usersService.findOneBy42Id(userData.id);
+		let user = await this.usersService.findOneBy42Id(userData.id, true);
 		if (!user) {
 			user = await this.usersService.create({
 				id42: userData.id,
@@ -117,7 +117,7 @@ export class AuthService {
 		}
 
 		// Get user and check TOTP
-		const user = await this.usersService.findOne(userPayload['id']);
+		const user = await this.usersService.findOne(userPayload['id'], true);
 
 		const isTotpValid = authenticator.check(otp, user.otp);
 

@@ -1,3 +1,6 @@
+# Important things to do
+- Remove the OTP secret return from every api return (user, channels, games, ...)
+
 # Developing
 
 Create an `.env` file at the base of the project (next to the `docker-compose.dev.yml`)

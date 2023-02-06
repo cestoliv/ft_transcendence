@@ -37,6 +37,7 @@ export class UsersGateway {
 			socket.emit('error', {
 				code: 401,
 				message: 'Unauthorized',
+				error: error.message,
 			});
 			socket.disconnect(true);
 		}

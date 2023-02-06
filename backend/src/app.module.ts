@@ -6,6 +6,11 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/entities/user.entity';
+import { ChannelsModule } from './channels/channels.module';
+import { Channel } from './channels/entities/channel.entity';
+import { ChannelBannedUser } from './channels/entities/channel-banned.entity';
+import { ChannelMutedUser } from './channels/entities/channel-muted.entity';
+import { ChannelInvitedUser } from './channels/entities/channel-invited.entity';
 
 @Module({
 	imports: [
@@ -22,13 +27,20 @@ import { User } from './users/entities/user.entity';
 				username: configService.get('DB_USER'),
 				password: configService.get('DB_PASS'),
 				database: configService.get('DB_NAME'),
-				entities: [User],
+				entities: [
+					User,
+					Channel,
+					ChannelBannedUser,
+					ChannelMutedUser,
+					ChannelInvitedUser,
+				],
 				synchronize: true,
 			}),
 			inject: [ConfigService],
 		}),
 		UsersModule,
 		AuthModule,
+		ChannelsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

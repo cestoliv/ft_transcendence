@@ -15,7 +15,9 @@ async function bootstrap() {
 	);
 	const config = app.get<ConfigService>(ConfigService);
 
-	app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+	app.useGlobalPipes(
+		new ValidationPipe({ whitelist: true, transform: true }),
+	);
 	app.enableCors({
 		origin: config.get('FRONTEND_URL'),
 	});

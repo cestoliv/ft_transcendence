@@ -4,6 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from '@socket.io/component-emitter';
+
+declare global {
+	interface Window {
+		socket?: Socket<DefaultEventsMap, DefaultEventsMap>;
+	}
+}
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement,
