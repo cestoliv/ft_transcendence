@@ -122,7 +122,7 @@ let Friends: React.FC = ({}) => {
 
     const addFriend = (event: any) : void => {
         event?.preventDefault();
-        const newFriend = {pseudo: firstName, avatar: "wayne", id: 4, states: "connected"}
+        const newFriend = {pseudo: firstName, avatar: "wayne", idd: 4, states: "connected"}
         users.push(newFriend);
         setFirstName("");
     }

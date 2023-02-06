@@ -4,25 +4,25 @@ const users: Array<IUser> = [
     {
         pseudo : "had",
         avatar : "string",
-        id : 1,
+        idd : 1,
         states : "connected",
     },
     {
         pseudo : "don",
         avatar : "string",
-        id : 1,
+        idd : 2,
         states : "disconnected",
     },
     {
         pseudo : "adel",
         avatar : "string",
-        id : 1,
+        idd : 3,
         states : "ingame",
     },
     {
         pseudo : "had",
         avatar : "string",
-        id : 1,
+        idd : 4,
         states : "connected",
     },
 ]
