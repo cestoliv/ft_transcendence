@@ -1,0 +1,77 @@
+.settings-wrapper{
+    flex-grow: 1;
+    background-color: #131B23;
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+}
+
+.settings {
+    background-color: #30343F;;
+    border-radius: 30px;
+    width: 20%;
+    height: 50%;
+}
+
+.change-settings-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.change-settings-form div {
+    margin-bottom: 20px;
+}
+
+.form-name {
+    display: flex;
+    justify-content: start;
+}
+
+.form-name label {
+    width: 25%;
+}
+
+.form-name input {
+    background-color: #191b22;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.form-lastname {
+    display: flex;
+    justify-content: start;
+}
+
+.form-lastname label {
+    width: 25%;
+}
+
+.form-lastname input {
+    background-color: #191b22;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.googl-auth-div {
+    display: flex;
+    justify-content: start;
+}
+
+.change-settings-form-submit-button {
+    border-radius: 20px;
+    padding: 10px;
+    width: 100px;
+    align-self: center;
+    background-color: #191b22;
+    color: white;
+}
+
+.change-settings-form-submit-button:hover {
+    background-color: black;
+    border-color: #191b22;
+    cursor: pointer;
+}

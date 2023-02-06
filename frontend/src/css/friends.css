@@ -1,0 +1,242 @@
+.friends-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.chan-list {
+    width: 15%;
+    height: 100%;
+    background-color: rgb(52, 63, 62);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.priv-conv-list {
+    width: 15%;
+    height: 100%;
+    background-color: rgb(80, 90, 91);
+}
+
+.chat {
+    width: 55%;
+    height: 100%;
+    background-color: rgb(148, 176, 218);
+}
+
+.infos-conv {
+    width: 15%;
+    height: 100%;
+    background-color: rgb(143, 145, 162);
+}
+
+.chan-list ul{
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    justify-content: flex-start;
+}
+
+.chan-list ul li {
+    padding: 5px 0px 5px 15px;
+    position: relative;
+    left: -20px;
+    margin-bottom: 15px;
+    border-radius: 7px;
+}
+
+/* .chan-list ul li span{
+    position: relative;
+} */
+
+.active-conv-bg {
+    background-color: rgb(60, 70, 69);
+}
+
+.priv-conv-list ul{
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    justify-content: flex-start;
+}
+
+.priv-conv-list ul li {
+    left: -10px;
+    margin-bottom: 15px;
+}
+
+.priv-conv-list ul li span{
+    position: relative;
+    left: -25px;
+}
+
+.chan-list-buttons {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 40px;
+}
+
+.chan-list-buttons button {
+    background-color: rgb(60, 70, 69);
+    border: none;
+    border-radius: 5px;
+    font-family: 'VT323', monospace;
+    margin-bottom: 10px;
+    height: 40px;
+}
+
+.chan-list-buttons button:hover {
+    background-color: black;
+    cursor: pointer;
+    color: rgb(60, 70, 69);
+}
+
+.add-friend-form {
+    padding-left: 15px;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.add-friend-form input {
+    background-color: rgb(60, 70, 69);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-family: 'VT323', monospace;
+}
+
+.add-friend-form-submit-button {
+    background-color: rgb(60, 70, 69);
+    border: none;
+    border-radius: 5px;
+    font-family: 'VT323', monospace;
+    padding: 5px 20px;
+}
+
+.add-friend-form-submit-button:hover {
+    color: rgb(60, 70, 69);
+    background-color: black;
+    cursor: pointer;
+}
+
+.add-friend-form label input{
+    padding: 5px;
+    margin-right: 5px;
+}
+
+/* .status {
+    position: relative;
+    background-color: #fff;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    align-self: center;
+    left: -10px;
+} */
+
+.connected {
+    color: #539C55;
+}
+
+.ingame {
+    color: #539C55;
+}
+
+.disconnected {
+    color: #D32F2F;
+}
+
+/* create chan modal */
+
+.create-chan-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+}
+
+.create-channel-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+}
+
+.create-channel-form > * {
+    margin-bottom: 10px;
+}
+.create-channel-form label input {
+    background-color: rgb(60, 70, 69);
+    border-radius: 15px;
+    border: 0px solid black;
+    padding: 5px;
+}
+
+.create-channel-form label input:focus {
+    outline: none;
+}
+
+.create-channel-form button {
+    border-radius: 15px;
+    background-color: black;
+    padding: 10px 0px;
+    color: white;
+}
+
+.create-channel-form button:hover {
+    cursor: pointer;
+    background-color: rgb(46, 43, 43)
+}
+
+/* join chan modal */
+
+.join-chan-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+}
+
+.join-channel-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+}
+
+.join-channel-form > * {
+    margin-bottom: 10px;
+}
+.join-channel-form label input {
+    background-color: rgb(60, 70, 69);
+    border-radius: 15px;
+    border: 0px solid black;
+    padding: 5px;
+}
+
+.join-channel-form label input:focus {
+    outline: none;
+}
+
+.join-channel-form button {
+    border-radius: 15px;
+    background-color: black;
+    padding: 10px 0px;
+    color: white;
+}
+
+.join-channel-form button:hover {
+    cursor: pointer;
+    background-color: rgb(46, 43, 43)
+}

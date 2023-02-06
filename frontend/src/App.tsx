@@ -1,15 +1,20 @@
-import './css/app.css';
-import React, { useContext, useEffect, useState } from 'react';
+import '../src/css/app.css';
+import React, { useContext, useEffect } from 'react';
+import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import Dashboard from './components/Dashboard/Dashboard';
-import Preferences from './components/Preferences/Preferences';
 import Login from './components/Login/Login';
 import Menu from './components/Menu/Menu';
 import Home from './pages/Home';
 import Otp from './components/Otp/Otp';
-import { IAuth, IUser } from './interfaces';
 import { SocketContext } from './context/socket';
+import Friends from './pages/Friends';
+import OtherUserProfile from './pages/OtherUserProfile';
+import Pong from './pages/Pong';
+import SearchGame from './pages/SearchGame';
+import Settings from './pages/Settings';
+import Stats from './pages/Stats';
+import { IAuth, IUser } from './interfaces';
 
 function App() {
 	const socket = useContext(SocketContext);
@@ -96,12 +101,14 @@ function App() {
 		<SocketContext.Provider value={socket}>
 			<Menu />
 			<Routes>
-				<Route
-					path="/home"
-					element={<Home user={user} auth={auth} />}
-				/>
-				<Route path="/dashboard" element={<Dashboard />} />
-				<Route path="/preferences" element={<Preferences />} />
+				<Route path="/" element={<Home user={user} auth={auth} />} />
+				<Route path="/friends" element={<Friends />} />
+				<Route path="/searchGame" element={<SearchGame />} />
+				<Route path="/stats" element={<Stats />} />
+				<Route path="/profile/:userId" element={<OtherUserProfile />} />
+				{/* <Route path="/404" element={<NoUserFound />} /> */}
+				<Route path="/settings" element={<Settings />} />
+				<Route path="/pong" element={<Pong />} />
 			</Routes>
 		</SocketContext.Provider>
 	);

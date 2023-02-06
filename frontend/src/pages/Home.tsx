@@ -29,6 +29,8 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 			) : (
 				<div>Socket Not Connected</div>
 			)}
+
+			<button className="button-start-game">Start a game</button>
 		</div>
 	);
 };

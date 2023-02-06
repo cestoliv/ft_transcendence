@@ -1,10 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import '@syncfusion/ej2-icons/styles/bootstrap.css';
-// import { FaGamepad } from "react-icons/fa";
-// import { FaUserFriends } from "react-icons/fa";
-// import { DiAptana } from "react-icons/di";
-// import { SiBookmeter } from "react-icons/si";
+import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
 export default function Menu() {
 	return (
@@ -14,7 +10,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/home"
-						className={({ isActive }) =>
+						className={({ isActive }: { isActive: boolean }) =>
 							isActive ? 'activeLink' : undefined
 						}
 					>
@@ -23,8 +19,8 @@ export default function Menu() {
 				</li>
 				<li>
 					<NavLink
-						to="/game"
-						className={({ isActive }) =>
+						to="/friends"
+						className={({ isActive }: { isActive: boolean }) =>
 							isActive ? 'activeLink' : undefined
 						}
 					>
@@ -33,8 +29,8 @@ export default function Menu() {
 				</li>
 				<li>
 					<NavLink
-						to="/friends"
-						className={({ isActive }) =>
+						to="/searchGame"
+						className={({ isActive }: { isActive: boolean }) =>
 							isActive ? 'activeLink' : undefined
 						}
 					>
@@ -43,8 +39,8 @@ export default function Menu() {
 				</li>
 				<li>
 					<NavLink
-						to="/Stats"
-						className={({ isActive }) =>
+						to="/stats"
+						className={({ isActive }: { isActive: boolean }) =>
 							isActive ? 'activeLink' : undefined
 						}
 					>
@@ -54,11 +50,21 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/settings"
-						className={({ isActive }) =>
+						className={({ isActive }: { isActive: boolean }) =>
 							isActive ? 'activeLink' : undefined
 						}
 					>
 						<span className="e-icons e-large e-settings"></span>
+					</NavLink>
+				</li>
+				<li>
+					<NavLink
+						to="/pong"
+						className={({ isActive }: { isActive: boolean }) =>
+							isActive ? 'activeLink' : undefined
+						}
+					>
+						<span>Pong</span>
 					</NavLink>
 				</li>
 			</ul>
