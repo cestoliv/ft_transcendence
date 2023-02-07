@@ -42,7 +42,14 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     volumes:
-      - ./frontend:/transcendence
+     # Lots of lines, but we don't want node_modules to be mounted
+      - ./frontend/public:/transcendence/public
+      - ./frontend/src:/transcendence/src
+      - ./frontend/.eslintrc.js:/transcendence/.eslintrc.js
+      - ./frontend/package-lock.json:/transcendence/package-lock.json
+      - ./frontend/package.json:/transcendence/package.json
+      - ./frontend/prettier.config.js:/transcendence/prettier.config.js
+      - ./frontend/tsconfig.json:/transcendence/tsconfig.json
     ports:
       - "3000:3000"
     environment:
@@ -58,7 +65,14 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     volumes:
-      - ./backend:/transcendence
+      # Lots of lines, but we don't want node_modules to be mounted
+      - ./backend/src:/transcendence/src
+      - ./backend/.eslintrc.js:/transcendence/.eslintrc.js
+      - ./backend/nest-cli.json:/transcendence/nest-cli.json
+      - ./backend/package-lock.json:/transcendence/package-lock.json
+      - ./backend/package.json:/transcendence/package.json
+      - ./backend/prettier.config.js:/transcendence/prettier.config.js
+      - ./backend/tsconfig.json:/transcendence/tsconfig.json
     environment:
       DB_HOST: db
       DB_PORT: 5432
