@@ -474,6 +474,59 @@ export class ChannelsGateway {
 	}
 
 	/*
+	 * Mute a user from a channel for a limited time.
+	 * The client need to be an admin of the channel.
+	 */
+	@SubscribeMessage('channels_muteUser')
+	async mute(client: any, payload: any) {
+		const errors: Array<string> = [];
+
+		// Check that payload is not undefined
+		if (payload === undefined) errors.push('Empty payload');
+		if (payload.id === undefined)
+			errors.push('Channel id is not specified');
+		if (payload.user_id === undefined)
+			errors.push('User id is not specified');
+		if (payload.until === undefined) errors.push('Until is not specified');
+
+		const until = DateTime.fromISO(payload.until);
+		if (!until.isValid) errors.push('Until date: ', until.invalidReason);
+
+		if (errors.length != 0)
+			return {
+				code: 400,
+				message: 'Bad request',
+				errors: errors,
+			};
+
+		// Check that the client is an admin of the channel
+		const channel = await this.channelsService.findOne(payload.id);
+		if (!channel)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['Channel not found'],
+			};
+		else if (!channel.admins.find((u) => u.id == client.user.id))
+			return {
+				code: 403,
+				message: 'Forbidden',
+				errors: ['You are not an admin of the channel'],
+			};
+		// Check that the user to mute exists
+		const user = await this.usersService.findOne(payload.user_id);
+		if (!user)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['User not found'],
+			};
+
+		// Update channel
+		return this.channelsService.muteUser(user, channel, until.toJSDate());
+	}
+
+	/*
 	 * Invite a user to a channel.
 	 * The client need to be an admin of the channel.
 	 */

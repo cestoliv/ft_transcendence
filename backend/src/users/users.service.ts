@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 import { AuthService } from 'src/auth/auth.service';
-import { FindOneOptions, FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -178,6 +178,22 @@ export class ChannelsService {
 		await this.leave(user, channel);
 
 		return newBannedUser;
+	}
+
+	async muteUser(
+		user: User,
+		channel: Channel,
+		until: Date,
+	): Promise<ChannelMutedUser> {
+		// Create new muted user (or update existing one)
+		const newMutedUser = new ChannelMutedUser();
+		newMutedUser.user = user;
+		newMutedUser.channel = channel;
+		newMutedUser.until = until;
+
+		await this.channelMutedUsersRepository.save(newMutedUser);
+
+		return newMutedUser;
 	}
 
 	async inviteUser(

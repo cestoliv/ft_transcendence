@@ -98,7 +98,7 @@ Every websocket requests can return an Unauthorized error if the user is not log
 socket.emit('channels_create', {
 	name: 'My new Channel',
 	visibility: 'public',
-}, (data: any) => {
+}, (data) => {
 	console.log(data); // The new channel object
 });
 ```
@@ -352,6 +352,8 @@ payload: {
 
 ### **Ban user from channel**
 
+To unban a user, simply ban the user again with a past date.
+
 #### Input
 ```javascript
 message: `channels_banUser`
@@ -364,6 +366,45 @@ payload: {
 
 #### Return
 - A ChannelBannedUser object ([ChannelBannedUser](#channelbanneduser))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not an admin of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+				| ['User not found']
+	}
+	```
+
+### **Mute user from channel**
+
+To unmute a user, simply mute the user again with a past date.
+
+#### Input
+```javascript
+message: `channels_muteUser`
+payload: {
+	id: number, // the channel id
+	user_id: number,
+	until: string, // ISO date of de-ban
+}
+```
+
+#### Return
+- A ChannelMutedUser object ([ChannelMutedUser](#channelmuteduser))
 - ```javascript
 	{
 		code: 400,
