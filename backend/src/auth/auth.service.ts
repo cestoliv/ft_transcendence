@@ -3,6 +3,7 @@ import {
 	forwardRef,
 	Inject,
 	Injectable,
+	NotFoundException,
 	Req,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -99,6 +100,27 @@ export class AuthService {
 		return bearer;
 	}
 
+	async noOauthCallback(username: string): Promise<string> {
+		// Get user info
+		const user = await this.usersService.findOneByUsername(username, true);
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		if (user.otp == null || user.otp == '') {
+			throw new BadRequestException('User has no TOTP enabled');
+		}
+
+		const bearer = await this.signToken({
+			totp_enabled: true,
+			totp_validated: false,
+			user,
+		});
+
+		console.log(bearer);
+
+		return bearer;
+	}
+
 	async validateTOTP(@Req() request, otp: string): Promise<string> {
 		// Extract user token from bearer
 		let token = '';
@@ -111,7 +133,7 @@ export class AuthService {
 		// Decode user token
 		let userPayload = {};
 		try {
-			userPayload = this.jwtService.verify(token);
+			userPayload = this.jwtService.verify(token)['user'];
 		} catch (e) {
 			throw new UnauthorizedException('Invalid token');
 		}

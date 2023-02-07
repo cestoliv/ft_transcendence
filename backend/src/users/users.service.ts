@@ -3,8 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
+import { authenticator } from 'otplib';
 import { AuthService } from 'src/auth/auth.service';
-import { FindOneOptions, FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -50,12 +51,34 @@ export class UsersService {
 		});
 	}
 
+	findOneByUsername(username: string, withTotp = false) {
+		const select = ['id', 'id42', 'username'];
+		if (withTotp) select.push('otp');
+		return this.usersRepository.findOne({
+			where: { username },
+			select: select as FindOptionsSelect<User>,
+		});
+	}
+
 	update(id: number, updateUserDto: UpdateUserDto) {
 		return this.usersRepository.update({ id }, updateUserDto);
 	}
 
 	remove(id: number) {
 		return this.usersRepository.delete({ id });
+	}
+
+	async enableTotp(user: User): Promise<{ secret: string; url: string }> {
+		// Generate TOTP secret
+		const secret = authenticator.generateSecret();
+		const url = authenticator.keyuri('', 'Transcendence', secret);
+
+		// Update user TOTP secret
+		await this.update(user.id, {
+			otp: secret,
+		});
+
+		return { secret, url };
 	}
 
 	async getUserFromSocket(socket: any): Promise<User> {

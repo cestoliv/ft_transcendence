@@ -1,6 +1,3 @@
-# Important things to do
-- Remove the OTP secret return from every api return (user, channels, games, ...)
-
 # Developing
 
 Create an `.env` file at the base of the project (next to the `docker-compose.dev.yml`)
@@ -17,7 +14,9 @@ API42_REDIRECT_URI=http://api.transcendence.local/api/v1/auth/42oauth
 JWT_SECRET=<a random string>
 COOKIE_DOMAIN=.transcendence.local
 
-FRONTEND_REDIRECT_URL=http://transcendence.local
+FRONTEND_URL=http://transcendence.local
+API_URL=http://api.transcendence.local/api/v1
+SOCKET_URL=http://api.transcendence.local
 ```
 
 Edit the `/etc/hosts` file on your system to include:
@@ -34,3 +33,30 @@ docker-compose -f docker-compose.dev.yml up --build
 ```
 
 You will be able to access the webapp by visiting `http://transcendence.local`
+
+# Creating an account without 42
+
+The fonctionnality isn't actually implemented in the interface.
+
+**Create the account**
+```bash
+curl -X POST http://api.transcendence.local/api/v1/auth/register -d '{"username": "ocartier5"}' -H "Content-Type: application/json" | jq
+# return (if there is no problem)
+# {
+#   "user": {
+#     "id42": null,
+#     "username": "im_not_a_42_student",
+#     "otp": null,
+#     "id": 21
+#   },
+#   "secret": "CEPQ4XANMBZQ2QBA",
+#   "url": "otpauth://totp/Transcendence:?secret=CEPQ4XANMBZQ2QBA&period=30&digits=6&algorithm=SHA1&issuer=Transcendence"
+# }
+```
+Store the TOTP `secret` in your password manager or use it in https://totp.app/ (for example).
+
+**Connect to your new account**
+
+Go to `http://api.transcendence.local/api/v1/auth/login?username=im_not_a_42_student`. *replace with you new username*
+
+That should redirect you to a page were you will be able to input your TOTP and enter the app.
