@@ -9,15 +9,27 @@ authorization: Bearer <token>
 ## Login
 
 ```
-GET /login
+GET /api/v1/auth/login
+GET /api/v1/auth/login?username={}
+```
+If a username is provided: Login with this username
+If no username is provided: Redirect user to 42 intra login page
+
+## Register
+
+```
+POST /api/v1/auth/register
+{
+	username: string
+}
 ```
 
-Redirect user to 42 intra login page
+Register a user that doesn't have a 42 account. (to create a user with a 42 account, go to `/api/v1/auth/login`, the account will be creatde if it doesn't exist)
 
 ## 42 Oauth Callback
 
 ```
-GET /42oauth?code={}
+GET /api/v1/auth/42oauth?code={}
 ```
 
 Users are redirect here by 42 intra login with a code.
@@ -28,7 +40,7 @@ If the user has enabled TOTP, the bearer can only be used to validate the TOTP a
 ## Enable TOTP
 
 ```
-POST /totp/enable
+POST /api/v1/auth/totp/enable
 ```
 
 ### Return
@@ -42,7 +54,7 @@ POST /totp/enable
 ## Validate TOTP
 
 ```
-POST /totp/{totp}
+POST /api/v1/auth/totp/{totp}
 ```
 
 If the given TOTP is correct, return a new bearer token that can be used in the whole app.
@@ -65,7 +77,7 @@ If the given TOTP is correct, return a new bearer token that can be used in the 
 ## Get my profile
 
 ```
-GET /me
+GET /api/v1/users/me
 ```
 
 ### Return
@@ -208,6 +220,7 @@ payload: {
 message: `channels_join`
 payload: {
 	code: string,
+	password: string, // Optionnal
 }
 ```
 
@@ -241,7 +254,7 @@ payload: {
 
 #### Input
 ```javascript
-message: `channels_ist`
+message: `channels_list`
 payload: empty
 ```
 
