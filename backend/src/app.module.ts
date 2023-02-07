@@ -11,6 +11,7 @@ import { Channel } from './channels/entities/channel.entity';
 import { ChannelBannedUser } from './channels/entities/channel-banned.entity';
 import { ChannelMutedUser } from './channels/entities/channel-muted.entity';
 import { ChannelInvitedUser } from './channels/entities/channel-invited.entity';
+import { ChannelMessage } from './channels/entities/channel-message.entity';
 
 @Module({
 	imports: [
@@ -33,6 +34,7 @@ import { ChannelInvitedUser } from './channels/entities/channel-invited.entity';
 					ChannelBannedUser,
 					ChannelMutedUser,
 					ChannelInvitedUser,
+					ChannelMessage,
 				],
 				synchronize: true,
 			}),

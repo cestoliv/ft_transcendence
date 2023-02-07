@@ -6,12 +6,14 @@ import { User } from './entities/user.entity';
 import { UsersGateway } from './users.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
+import { ChannelsModule } from 'src/channels/channels.module';
 
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([User]),
 		JwtModule,
 		forwardRef(() => AuthModule),
+		forwardRef(() => ChannelsModule),
 	],
 	controllers: [UsersController],
 	providers: [UsersService, UsersGateway],
