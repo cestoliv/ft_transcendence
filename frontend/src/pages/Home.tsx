@@ -9,13 +9,13 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 
 	const [message, setMessage] = useState('');
 
-	useEffect(() => {
-		console.log('Home useEffect');
-		// socket.emit('message', 'Hello from the client', (data: any) => {
-		// 	console.log('Message from server:', data);
-		// 	setMessage(data);
-		// });
-	}, [socket]);
+	// useEffect(() => {
+	// 	console.log('Home useEffect');
+	// 	// socket.emit('message', 'Hello from the client', (data: any) => {
+	// 	// 	console.log('Message from server:', data);
+	// 	// 	setMessage(data);
+	// 	// });
+	// }, [socket]);
 
 	return (
 		<div className="home">

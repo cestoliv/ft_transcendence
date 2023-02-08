@@ -79,7 +79,6 @@ export const SearchGame = () => {
 		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
 		if (active_elem) active_elem.classList.toggle('active-conv-bg');
 		const element = event.target;
-		console.log(element);
 		element.classList.toggle('active-conv-bg');
 		active_elem = element;
 	};

@@ -8,4 +8,11 @@
     border-radius: 15px;
     border: none;
     padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+}
+
+.e-close:hover{
+    cursor: pointer;
 }

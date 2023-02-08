@@ -1,51 +1,66 @@
-import React from 'react';
+import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
-import { InfosConvProps } from '../interface';
+// import { InfosConvProps } from '../interface';
+import { SocketContext } from '../context/socket';
 
-// interface PROPS {
-//     friends: IConvList;
-// }
+import ChanUser from './ChanUser'
 
-export default function InfosConv({ convList }: InfosConvProps) {
+type InfosConvProps = {
+	activeConvId : number | undefined,
+};
+
+interface Channel {
+	id: number;
+	code: string;
+	owner: User;
+	name: string;
+	visibility: 'public' | 'private' | 'password-protected';
+	admins: User[];
+	members: User[];
+	banned: User[];
+	muted: User[];
+	invited: User[];
+  }
+
+  interface User {
+	id: number,
+	id42: number, // -1 for non-42 users
+	username: string,
+  }
+
+export default function InfosConv(props: InfosConvProps) {
+
+	const socket = useContext(SocketContext);
+
+	const [channel, setChannel] = useState<Channel | null>(null);
+
+	useEffect(() => {
+		try {
+			socket.emit(
+				'channels_findOne',
+				{
+					id: props.activeConvId,
+				},
+				(data: any) => {
+					setChannel(data);
+				},
+			);
+		} catch (error) {
+			alert(error);
+		}
+	}, [channel]);
+
 	return (
 		<div className="i-conv-wrapper">
-			{convList.map(({ name, id }) => (
-				<Popup
-					key={id}
-					trigger={
-						<button className="i-conv-wrapper-button">
-							{' '}
-							{name}
-						</button>
-					}
-				>
-					<div className="i-conv-person-popup">
-						<button className="i-conv-person-popup-button">
-							invite to game
-						</button>
-						<button className="i-conv-person-popup-button">
-							Profile
-						</button>
-						<button className="i-conv-person-popup-button">
-							Block
-						</button>
-						<button className="i-conv-person-popup-button">
-							Mute
-						</button>
-						<button className="i-conv-person-popup-button">
-							Kick
-						</button>
-						<button className="i-conv-person-popup-button">
-							Ban
-						</button>
-						<button className="i-conv-person-popup-button">
-							Setadmin
-						</button>
-					</div>
-				</Popup>
+			{channel && (
+			<div className="chan_user_wrapper">
+			{channel.members.map(member => (
+				<ChanUser username={member.username} user_id={member.id}/>
 			))}
+			</div>
+      	)}
 		</div>
 	);
 }
