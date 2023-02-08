@@ -110,7 +110,7 @@ Every websocket requests can return an Unauthorized error if the user is not log
 socket.emit('channels_create', {
 	name: 'My new Channel',
 	visibility: 'public',
-}, (data: any) => {
+}, (data) => {
 	console.log(data); // The new channel object
 });
 ```
@@ -365,6 +365,8 @@ payload: {
 
 ### **Ban user from channel**
 
+To unban a user, simply ban the user again with a past date.
+
 #### Input
 ```javascript
 message: `channels_banUser`
@@ -377,6 +379,45 @@ payload: {
 
 #### Return
 - A ChannelBannedUser object ([ChannelBannedUser](#channelbanneduser))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not an admin of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+				| ['User not found']
+	}
+	```
+
+### **Mute user from channel**
+
+To unmute a user, simply mute the user again with a past date.
+
+#### Input
+```javascript
+message: `channels_muteUser`
+payload: {
+	id: number, // the channel id
+	user_id: number,
+	until: string, // ISO date of de-ban
+}
+```
+
+#### Return
+- A ChannelMutedUser object ([ChannelMutedUser](#channelmuteduser))
 - ```javascript
 	{
 		code: 400,
@@ -436,9 +477,108 @@ payload: {
 	}
 	```
 
+### **Send message into channel**
+
+#### Input
+```javascript
+message: `channels_sendMessage`
+payload: {
+	id: number, // the channel id
+	message: string,
+}
+```
+
+#### Return
+- A ChannelMessage object ([ChannelMessage](#channelmessage))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not a member of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+				| ['User not found']
+	}
+	```
+
+### **Get channel messages**
+
+Retrieve 50 message before the date passed.
+
+#### Input
+```javascript
+message: `channels_messages`
+payload: {
+	id: number, // the channel id
+	before: string, // ISO date
+}
+```
+
+### Example
+To retrieve the last 50 messages.
+```javascript
+socket.emit('channels_messages', {
+	id: 1,
+	before: new Date().toISOString(),
+},
+	(data) => {
+		console.log(data); // The messages array
+	}
+);
+```
+
+#### Return
+- An array of ChannelMessage object ([ChannelMessage[]](#channelmessage))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not a member of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+	}
+	```
+
 # Websocket Events
 
-Comming soon...
+## Channel
+
+### **New message**
+
+- Event name: `channels_message`
+- Data type: [ChannelMessage](#channelmessage)
+
+#### Example
+
+```javascript
+socket.on('channels_message', (data: any) => {
+	console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
+});
+```
 
 # Objects
 
@@ -508,5 +648,22 @@ Comming soon...
 	channel: Channel,
 
 	invited_at: Date,
+}
+```
+
+## ChannelMessage
+```javascript
+{
+	id: number,
+
+	senderId: number,
+	serder: User,
+
+	channelId: number,
+	channel: Channel,
+
+	message: string,
+
+	sentAt: Date,
 }
 ```

@@ -39,7 +39,7 @@ export class AuthService {
 	async getUserFromToken(token: string): Promise<User> {
 		let payload: User;
 		try {
-			payload = this.jwtService.verify(token);
+			payload = this.jwtService.verify(token)['user'];
 		} catch (error) {
 			throw new Error('Invalid token');
 		}
@@ -115,8 +115,6 @@ export class AuthService {
 			totp_validated: false,
 			user,
 		});
-
-		console.log(bearer);
 
 		return bearer;
 	}

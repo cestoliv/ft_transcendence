@@ -1,6 +1,6 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -12,6 +12,7 @@ import { Visibility } from './enums/visibility.enum';
 import { ChannelMutedUser } from './entities/channel-muted.entity';
 import { ChannelBannedUser } from './entities/channel-banned.entity';
 import { ChannelInvitedUser } from './entities/channel-invited.entity';
+import { ChannelMessage } from './entities/channel-message.entity';
 
 @Injectable()
 export class ChannelsService {
@@ -24,6 +25,9 @@ export class ChannelsService {
 		private readonly channelMutedUsersRepository: Repository<ChannelMutedUser>,
 		@InjectRepository(ChannelInvitedUser)
 		private readonly channelInvitedUsersRepository: Repository<ChannelInvitedUser>,
+		@InjectRepository(ChannelMessage)
+		private readonly channelMessagesRepository: Repository<ChannelMessage>,
+		@Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
 	) {}
 
@@ -77,6 +81,7 @@ export class ChannelsService {
 	async save(channel: Channel) {
 		delete channel.banned;
 		delete channel.muted;
+		delete channel.invited;
 		await this.channelsRepository.save(channel);
 		return this.findOne(channel.id);
 	}
@@ -107,6 +112,12 @@ export class ChannelsService {
 				});
 			} else return bannedUser.until;
 		}
+
+		// Remove user from invited
+		this.channelInvitedUsersRepository.delete({
+			userId: user.id,
+			channelId: channel.id,
+		});
 
 		// Add user to members array
 		channel.members.push(user);
@@ -173,6 +184,22 @@ export class ChannelsService {
 		return newBannedUser;
 	}
 
+	async muteUser(
+		user: User,
+		channel: Channel,
+		until: Date,
+	): Promise<ChannelMutedUser> {
+		// Create new muted user (or update existing one)
+		const newMutedUser = new ChannelMutedUser();
+		newMutedUser.user = user;
+		newMutedUser.channel = channel;
+		newMutedUser.until = until;
+
+		await this.channelMutedUsersRepository.save(newMutedUser);
+
+		return newMutedUser;
+	}
+
 	async inviteUser(
 		inviter: User,
 		user: User,
@@ -183,9 +210,42 @@ export class ChannelsService {
 		newInvitedUser.user = user;
 		newInvitedUser.inviter = inviter;
 		newInvitedUser.channel = channel;
+		newInvitedUser.invited_at = new Date();
 
 		await this.channelInvitedUsersRepository.save(newInvitedUser);
 
 		return newInvitedUser;
+	}
+
+	async sendMessage(
+		sender: User,
+		channel: Channel,
+		message: string,
+	): Promise<ChannelMessage> {
+		// Create new message
+		const newMessage = new ChannelMessage();
+		newMessage.sender = sender;
+		newMessage.channel = channel;
+		newMessage.message = message;
+		newMessage.sentAt = new Date();
+
+		await this.channelMessagesRepository.save(newMessage);
+
+		return newMessage;
+	}
+
+	async getMessages(
+		user: User,
+		channel: Channel,
+		before: Date,
+	): Promise<ChannelMessage[]> {
+		return await this.channelMessagesRepository.find({
+			where: {
+				channel: { id: channel.id },
+				sentAt: LessThan(before),
+			},
+			order: { sentAt: 'DESC' },
+			take: 50,
+		});
 	}
 }

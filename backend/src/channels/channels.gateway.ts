@@ -2,41 +2,21 @@ import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
 import { validateSync } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { DateTime } from 'luxon';
-import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Visibility } from './enums/visibility.enum';
-import { UsersService } from 'src/users/users.service';
-import { Socket } from 'socket.io';
 import { Channel } from './entities/channel.entity';
+import { BaseGateway } from 'src/base.gateway';
+import { Socket } from 'socket.io';
 
-@WebSocketGateway()
-export class ChannelsGateway {
-	constructor(
-		private readonly channelsService: ChannelsService,
-		private readonly usersService: UsersService,
-	) {}
-
-	/*
-	 * This function is called when a client connects to the socket
-	 * We use it to authenticate the user
-	 * If the user is not authenticated, we reject the connection
-	 */
-	async handleConnection(socket: Socket) {
-		try {
-			const user = await this.usersService.getUserFromSocket(socket);
-			socket['user'] = user;
-		} catch (error) {
-			// Reject connection
-			socket.emit('error', {
-				code: 401,
-				message: 'Unauthorized',
-				error: error.message,
-			});
-			socket.disconnect(true);
-		}
-	}
-
+@WebSocketGateway({
+	cors: {
+		// TODO: Should use ConfigService instead of process.env
+		origin: process.env.FRONTEND_URL || '*',
+		credentials: true,
+	},
+})
+export class ChannelsGateway extends BaseGateway {
 	/*
 	 * Create a new channel.
 	 * The client sends a message with the channel data.
@@ -207,11 +187,17 @@ export class ChannelsGateway {
 			};
 		// Check that the channel is not private
 		if (channel.visibility == Visibility.Private) {
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['Channel is private'],
-			};
+			// Check that the client have been invited
+			if (
+				!channel.invited.find(
+					(invitation) => invitation.user.id == client.user.id,
+				)
+			)
+				return {
+					code: 403,
+					message: 'Forbidden',
+					errors: ['Channel is private'],
+				};
 		}
 		// Check that the channel is not password protected or that the password is correct
 		else if (channel.visibility == Visibility.PasswordProtected) {
@@ -466,6 +452,59 @@ export class ChannelsGateway {
 	}
 
 	/*
+	 * Mute a user from a channel for a limited time.
+	 * The client need to be an admin of the channel.
+	 */
+	@SubscribeMessage('channels_muteUser')
+	async mute(client: any, payload: any) {
+		const errors: Array<string> = [];
+
+		// Check that payload is not undefined
+		if (payload === undefined) errors.push('Empty payload');
+		if (payload.id === undefined)
+			errors.push('Channel id is not specified');
+		if (payload.user_id === undefined)
+			errors.push('User id is not specified');
+		if (payload.until === undefined) errors.push('Until is not specified');
+
+		const until = DateTime.fromISO(payload.until);
+		if (!until.isValid) errors.push('Until date: ', until.invalidReason);
+
+		if (errors.length != 0)
+			return {
+				code: 400,
+				message: 'Bad request',
+				errors: errors,
+			};
+
+		// Check that the client is an admin of the channel
+		const channel = await this.channelsService.findOne(payload.id);
+		if (!channel)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['Channel not found'],
+			};
+		else if (!channel.admins.find((u) => u.id == client.user.id))
+			return {
+				code: 403,
+				message: 'Forbidden',
+				errors: ['You are not an admin of the channel'],
+			};
+		// Check that the user to mute exists
+		const user = await this.usersService.findOne(payload.user_id);
+		if (!user)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['User not found'],
+			};
+
+		// Update channel
+		return this.channelsService.muteUser(user, channel, until.toJSDate());
+	}
+
+	/*
 	 * Invite a user to a channel.
 	 * The client need to be an admin of the channel.
 	 */
@@ -501,7 +540,7 @@ export class ChannelsGateway {
 				message: 'Forbidden',
 				errors: ['You are not an admin of the channel'],
 			};
-		// Check that the user to invite exists
+		// Check that the user to invite exists TODO: might always be true if the user is in the admin list
 		const user = await this.usersService.findOne(payload.user_id);
 		if (!user)
 			return {
@@ -511,6 +550,109 @@ export class ChannelsGateway {
 			};
 
 		// Update channel
-		return this.channelsService.inviteUser(client, user, channel);
+		return this.channelsService.inviteUser(client.user, user, channel);
+	}
+
+	/*
+	 * Send a message to a channel.
+	 * The client need to be a member of the channel.
+	 * The client need to not be muted in the channel.
+	 */
+	@SubscribeMessage('channels_sendMessage')
+	async sendMessage(client: any, payload: any) {
+		const errors: Array<string> = [];
+
+		// Check that payload is not undefined
+		if (payload === undefined) errors.push('Empty payload');
+		if (payload.id === undefined)
+			errors.push('Channel id is not specified');
+		if (payload.message === undefined)
+			errors.push('Message is not specified');
+
+		if (errors.length != 0)
+			return {
+				code: 400,
+				message: 'Bad request',
+				errors: errors,
+			};
+
+		// Check that the client is a member of the channel
+		const channel = await this.channelsService.findOne(payload.id);
+		if (!channel)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['Channel not found'],
+			};
+		else if (!channel.members.find((u) => u.id == client.user.id))
+			return {
+				code: 403,
+				message: 'Forbidden',
+				errors: ['You are not a member of the channel'],
+			};
+		// TODO: check that user is not muted
+
+		// Create message
+		const message = await this.channelsService.sendMessage(
+			client.user,
+			channel,
+			payload.message,
+		);
+
+		// Send message to all members of the channel (except the sender)
+		client.to(`channel_${channel.id}`).emit('channels_message', message);
+
+		return message;
+	}
+
+	/*
+	 * Get messages of a channel.
+	 * The client need to be a member of the channel.
+	 * Return the 50 message before the given date.
+	 */
+	@SubscribeMessage('channels_messages')
+	async getMessages(client: Socket, payload: any) {
+		const errors: Array<string> = [];
+
+		// Check that payload is not undefined
+		if (payload === undefined) errors.push('Empty payload');
+		if (payload.id === undefined)
+			errors.push('Channel id is not specified');
+		if (payload.before === undefined)
+			errors.push('Before date is not specified');
+
+		const before = DateTime.fromISO(payload.before);
+		if (!before.isValid) errors.push('Before date: ', before.invalidReason);
+
+		if (errors.length != 0)
+			return {
+				code: 400,
+				message: 'Bad request',
+				errors: errors,
+			};
+
+		// Check that the client is a member of the channel
+		const channel = await this.channelsService.findOne(payload.id);
+		if (!channel)
+			return {
+				code: 404,
+				message: 'Not found',
+				errors: ['Channel not found'],
+			};
+		else if (!channel.members.find((u) => u.id == client['user'].id))
+			return {
+				code: 403,
+				message: 'Forbidden',
+				errors: ['You are not a member of the channel'],
+			};
+
+		// Get channel messages
+		const message = this.channelsService.getMessages(
+			client['user'],
+			channel,
+			before.toJSDate(),
+		);
+
+		return message;
 	}
 }
