@@ -19,12 +19,10 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
 			socket['user'] = user;
-			socket['socket'] = socket;
 			// Make the user join all the channels he is in
 			const channels = await this.channelsService.listJoined(user);
 			for (const channel of channels) {
 				socket.join(`channel_${channel.id}`);
-				console.log(`User ${user.id} joined channel ${channel.id}`);
 			}
 		} catch (error) {
 			// Reject connection

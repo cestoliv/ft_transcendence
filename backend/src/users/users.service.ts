@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
@@ -15,7 +14,6 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
-		private readonly jwtService: JwtService,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
 	) {}

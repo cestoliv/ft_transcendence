@@ -2,7 +2,6 @@ import {
 	Body,
 	Controller,
 	Get,
-	HttpCode,
 	Param,
 	Post,
 	Query,
@@ -45,8 +44,7 @@ export class AuthController {
 			return response
 				.code(303)
 				.redirect(this.configService.get('FRONTEND_URL'));
-		}
-		else {
+		} else {
 			response
 				.code(303)
 				.redirect(
@@ -92,7 +90,7 @@ export class AuthController {
 			user: user,
 			secret: totp_settings.secret,
 			url: totp_settings.url,
-		})
+		});
 	}
 
 	/*

@@ -9,7 +9,13 @@ import { Channel } from './entities/channel.entity';
 import { BaseGateway } from 'src/base.gateway';
 import { Socket } from 'socket.io';
 
-@WebSocketGateway()
+@WebSocketGateway({
+	cors: {
+		// TODO: Should use ConfigService instead of process.env
+		origin: process.env.FRONTEND_URL || '*',
+		credentials: true,
+	},
+})
 export class ChannelsGateway extends BaseGateway {
 	/*
 	 * Create a new channel.
@@ -584,13 +590,19 @@ export class ChannelsGateway extends BaseGateway {
 				message: 'Forbidden',
 				errors: ['You are not a member of the channel'],
 			};
+		// TODO: check that user is not muted
 
-		// Update channel
-		return this.channelsService.sendMessage(
+		// Create message
+		const message = await this.channelsService.sendMessage(
 			client.user,
 			channel,
 			payload.message,
 		);
+
+		// Send message to all members of the channel (except the sender)
+		client.to(`channel_${channel.id}`).emit('channels_message', message);
+
+		return message;
 	}
 
 	/*
@@ -599,7 +611,7 @@ export class ChannelsGateway extends BaseGateway {
 	 * Return the 50 message before the given date.
 	 */
 	@SubscribeMessage('channels_messages')
-	async getMessages(client: any, payload: any) {
+	async getMessages(client: Socket, payload: any) {
 		const errors: Array<string> = [];
 
 		// Check that payload is not undefined
@@ -627,26 +639,20 @@ export class ChannelsGateway extends BaseGateway {
 				message: 'Not found',
 				errors: ['Channel not found'],
 			};
-		else if (!channel.members.find((u) => u.id == client.user.id))
+		else if (!channel.members.find((u) => u.id == client['user'].id))
 			return {
 				code: 403,
 				message: 'Forbidden',
-				errors: ['You are not an admin of the channel'],
+				errors: ['You are not a member of the channel'],
 			};
 
-		// Update channel
+		// Get channel messages
 		const message = this.channelsService.getMessages(
-			client.user,
+			client['user'],
 			channel,
 			before.toJSDate(),
 		);
 
-		// List client rooms
-		console.log(client.rooms);
-		console.log(`sending in channel_${channel.id}`);
-		client.to(client.rooms[0]).emit('channels_message', message);
-		client.to(`channel_${channel.id}`).emit('channels_message', message);
-		client.socket.emit('channels_message', message);
 		return message;
 	}
 }

@@ -477,9 +477,108 @@ payload: {
 	}
 	```
 
+### **Send message into channel**
+
+#### Input
+```javascript
+message: `channels_sendMessage`
+payload: {
+	id: number, // the channel id
+	message: string,
+}
+```
+
+#### Return
+- A ChannelMessage object ([ChannelMessage](#channelmessage))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not a member of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+				| ['User not found']
+	}
+	```
+
+### **Get channel messages**
+
+Retrieve 50 message before the date passed.
+
+#### Input
+```javascript
+message: `channels_messages`
+payload: {
+	id: number, // the channel id
+	before: string, // ISO date
+}
+```
+
+### Example
+To retrieve the last 50 messages.
+```javascript
+socket.emit('channels_messages', {
+	id: 1,
+	before: new Date().toISOString(),
+},
+	(data) => {
+		console.log(data); // The messages array
+	}
+);
+```
+
+#### Return
+- An array of ChannelMessage object ([ChannelMessage[]](#channelmessage))
+- ```javascript
+	{
+		code: 400,
+		message: 'Bad request',
+		errors: string[] // describing malformed payload
+	}
+	```
+- ```javascript
+	{
+		code: 403,
+		message: 'Forbidden',
+		errors: ['You are not a member of the channel'],
+	}
+	```
+- ```javascript
+	{
+		code: 404,
+		message: 'Not found',
+		errors: ['Channel not found']
+	}
+	```
+
 # Websocket Events
 
-Comming soon...
+## Channel
+
+### **New message**
+
+- Event name: `channels_message`
+- Data type: [ChannelMessage](#channelmessage)
+
+#### Example
+
+```javascript
+socket.on('channels_message', (data: any) => {
+	console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
+});
+```
 
 # Objects
 
@@ -549,5 +648,22 @@ Comming soon...
 	channel: Channel,
 
 	invited_at: Date,
+}
+```
+
+## ChannelMessage
+```javascript
+{
+	id: number,
+
+	senderId: number,
+	serder: User,
+
+	channelId: number,
+	channel: Channel,
+
+	message: string,
+
+	sentAt: Date,
 }
 ```

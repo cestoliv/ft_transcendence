@@ -8,7 +8,7 @@ import { BaseGateway } from 'src/base.gateway';
 		credentials: true,
 	},
 })
-export class UsersGateway {
+export class UsersGateway extends BaseGateway {
 	@SubscribeMessage('message')
 	handleMessage(client: any, payload: any): string {
 		return `Hello ${client.user.username}, you said: ${payload}`;

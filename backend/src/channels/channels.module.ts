@@ -21,5 +21,6 @@ import { ChannelMessage } from './entities/channel-message.entity';
 		forwardRef(() => UsersModule),
 	],
 	providers: [ChannelsGateway, ChannelsService],
+	exports: [ChannelsService],
 })
 export class ChannelsModule {}

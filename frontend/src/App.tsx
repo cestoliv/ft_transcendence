@@ -55,6 +55,7 @@ function App() {
 		} else console.error(data);
 	};
 
+	socket.off(); // Unbind all previous events
 	socket.on('connect', () => {
 		console.log('Socket connected');
 	});
