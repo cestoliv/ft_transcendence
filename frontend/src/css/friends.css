@@ -52,7 +52,7 @@
     position: relative;
 } */
 
-.active-conv-bg {
+#active-conv-bg {
     background-color: rgb(60, 70, 69);
 }
 

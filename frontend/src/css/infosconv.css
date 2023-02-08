@@ -6,6 +6,14 @@
     font-family: 'VT323', monospace;
 }
 
+.chan_user_wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .i-conv-wrapper-button {
     width: 100%;
     padding: 10px;

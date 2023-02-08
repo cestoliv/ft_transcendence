@@ -1,0 +1,35 @@
+.ChanUser-wrapper {
+    width: 100%;
+    text-align: center;
+}
+
+.ChanUser-wrapper:hover {
+    cursor: pointer;
+    background-color: aquamarine;
+}
+
+.chan-user-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border: none;
+}
+
+.chan-user-modal button{
+    margin-bottom: 10px;
+    background-color: rgb(27, 34, 33);
+    border-radius: 20px;
+    width: 50%;
+    padding: 5px 0px;
+    color: bisque;
+}

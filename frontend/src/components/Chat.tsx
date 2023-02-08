@@ -1,20 +1,28 @@
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import { Switch } from '@syncfusion/ej2-react-buttons';
+import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import Button from '@mui/material/Button';
-import React from 'react';
-import { useState } from 'react';
 import Checkbox from './Checkbox';
+
+import { SocketContext } from '../context/socket';
 
 const defaultFormData = {
 	mdp: '',
 	body: '',
 };
 
-export default function Chat() {
+type ChatProps = {
+	activeConvId : number | undefined,
+};
+
+export default function Chat(props: ChatProps) {
+
+	const socket = useContext(SocketContext);
+
 	const [isCheckedA, setIsCheckedA] = useState(false);
+	const [visibility, setVisibility] = useState<string>("public");
 	const [formData, SetFormData] = useState(defaultFormData);
-	const { mdp, body } = formData;
+	// const { mdp, body } = formData;
+	const [chan, setChan] = useState<any>([]);
 
 	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		SetFormData((prevState) => ({
@@ -25,13 +33,58 @@ export default function Chat() {
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log(formData);
 
 		SetFormData(defaultFormData);
 	};
 
-	const handleChangeA = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setIsCheckedA(e.target.checked);
+	const changeData = () => {
+		try {
+			socket.emit(
+				'channels_findOne',
+				{
+					id: props.activeConvId,
+				},
+				(data: any) => {
+					// console.log("fdeda");
+					setChan(data);
+				},
+			);
+		} catch (error) {
+			alert(error);
+		}	
+		console.log(chan.visibility);
+	}
+
+	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+		// setIsCheckedA(e.target.checked);
+		if (chan.visibility === "public")
+		{
+			// console.log("buzz2 : " + chan.id);
+			socket.emit(
+				'channels_setVisibility',
+				{
+					id: props.activeConvId,
+					visibility: 'private',
+				},
+				(data: any) => {
+					console.log("pooipo");
+				},
+			);
+		}
+		else {
+			// console.log("buzz3");
+			socket.emit(
+				'channels_setVisibility',
+				{
+					id: props.activeConvId,
+					visibility: 'public',
+				},
+				(data: any) => {
+					
+				},
+			);
+		}
+		changeData();
 	};
 
 	const toggleHidden = (event: any) => {
@@ -40,14 +93,40 @@ export default function Chat() {
 		if (active_elem) active_elem.classList.toggle('hidden');
 	};
 
+	useEffect(() => {
+		socket.emit(
+			'channels_setVisibility',
+			{
+				id: props.activeConvId,
+				visibility: 'private',
+			},
+			(data: any) => {
+				// console.log("pooipo");
+			},
+		);
+		try {
+			socket.emit(
+				'channels_findOne',
+				{
+					id: props.activeConvId,
+				},
+				(data: any) => {
+					setChan(data);
+				},
+			);
+		} catch (error) {
+			alert(error);
+		}
+	}, [chan]);
+
 	return (
 		<div className="chat-nav">
-			<span>nom de la conv</span>
+			<span>{chan.name}</span>
 			<div className="chat-nav-right">
 				<div className="wrapper-settings hidden">
 					<Checkbox
-						handleChange={handleChangeA}
-						isChecked={isCheckedA}
+						handleChange={isChecked}
+						isChecked={chan.visibility === 'public' ? false : true}
 						label="Private"
 					/>
 					<form className="mpd-form" onSubmit={(e) => onSubmit(e)}>
@@ -57,7 +136,7 @@ export default function Chat() {
 						<input
 							type="text"
 							id="mdp"
-							value={mdp}
+							value={chan.password}
 							onChange={(e) => onChange(e)}
 						/>
 						<button type="submit" id="mdp-submit-button">

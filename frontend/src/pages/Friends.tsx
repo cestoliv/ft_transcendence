@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect, useContext } from 'react';
 import Chat from '../components/Chat';
 import InfosConv from '../components/InfosConv';
 import FriendsList from '../components/FriendsList';
@@ -14,11 +14,19 @@ import users from '../mock-data/users';
 import userChans from '../mock-data/userchans';
 import chansList from '../mock-data/chansList';
 
+import { SocketContext } from '../context/socket';
+
+import * as io from 'socket.io-client';
+
+// const socket = io.connect('http://api.transcendence.local');
+
 const Friends: React.FC = ({}) => {
-	// export default function Friends() {
+	const socket = useContext(SocketContext);
 
 	const [firstName, setFirstName] = useState<string>('');
 	let [convList] = useState<IConvList[]>([]);
+
+	let [activeConvId, setActivConvId] = useState<number | undefined>(1);
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -29,44 +37,24 @@ const Friends: React.FC = ({}) => {
 	const OpenJoinChanModal = () => setOpenJModal(true);
 	const CloseJoinChanModal = () => setOpenJModal(false);
 
+	// form create chan
 	const [chanName, setChanName] = useState<string>('');
 	const [chanMdp, setChanMdp] = useState<string>('');
 
+	// form join chan
 	const [joinChanName, setJoinChanName] = useState<string>('');
 	const [joinChanMdp, setJoinChanMdp] = useState<string>('');
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'name') setFirstName(event.target.value);
 
-		if (event.target.name === 'create-chan-name') {
-			const elements = document.getElementById(
-				'create-channel-form-label',
-			);
-			if (elements && elements.style.border === '1px solid red')
-				elements.style.border = '1px solid green';
-			else if (
-				elements &&
-				event.target.value === '' &&
-				elements.style.border === '1px solid green'
-			)
-				elements.style.border = '1px solid red';
+		if (event.target.name === 'create-chan-name')
 			setChanName(event.target.value);
-		}
 		if (event.target.name === 'create-chan-mdp')
 			setChanMdp(event.target.value);
 
-		if (event.target.name === 'join-chan-name') {
-			const elements = document.getElementById('join-channel-form-label');
-			if (elements && elements.style.border === '1px solid red')
-				elements.style.border = '1px solid green';
-			else if (
-				elements &&
-				event.target.value === '' &&
-				elements.style.border === '1px solid green'
-			)
-				elements.style.border = '1px solid red';
+		if (event.target.name === 'join-chan-name')
 			setJoinChanName(event.target.value);
-		}
 		if (event.target.name === 'join-chan-mdp')
 			setJoinChanMdp(event.target.value);
 	};
@@ -74,46 +62,39 @@ const Friends: React.FC = ({}) => {
 	const createChan = (event: any): void => {
 		event?.preventDefault();
 		if (event.target.name === 'button-create-chan') {
-			let x = 0;
-			while (chansList[x]) {
-				if (chansList[x].name === chanName) break;
-				x++;
-			}
-			if (chanName === '' || x != chansList.length) {
-				const elements = document.getElementById(
-					'create-channel-form-label',
+			try {
+				socket.emit(
+					'channels_create',
+					{
+						name: chanName,
+						password: chanMdp,
+						visibility: 'public',
+					},
+					(data: any) => {
+					},
 				);
-				if (elements) elements.style.border = '1px solid red';
-				return;
+			} catch (error) {
+				alert(error);
 			}
-			const newChan = { name: chanName, mdp: chanMdp, id: x };
-			userChans.push(newChan);
 			setChanName('');
 			setChanMdp('');
 			CloseCreateChanModal();
 		}
 		if (event.target.name === 'button-join-chan') {
-			let x = 0;
-			while (chansList[x]) {
-				if (chansList[x].name === joinChanName) break;
-				x++;
-			}
-			if (joinChanName === '' || x === chansList.length) {
-				const elements = document.getElementById(
-					'join-channel-form-label',
+			try {
+				socket.emit(
+					'channels_join',
+					{
+						code: joinChanName,
+						motdepasse: joinChanMdp,
+					},
+					(data: any) => {
+						if (data.message)
+							alert(data.errors);
+					},
 				);
-				if (elements) elements.style.border = '1px solid red';
-				return;
+			} catch (error) {
 			}
-			if (joinChanMdp != chansList[x].mdp) {
-				const elements = document.getElementById(
-					'join-channel-mdp-input',
-				);
-				if (elements) elements.style.border = '1px solid red';
-				return;
-			}
-			const newChan = { name: joinChanName, mdp: joinChanMdp, id: x };
-			userChans.push(newChan);
 			setJoinChanName('');
 			setJoinChanMdp('');
 			CloseJoinChanModal();
@@ -142,39 +123,35 @@ const Friends: React.FC = ({}) => {
 	const [isActive, setIsActive] = useState(false);
 
 	const activeConv = (event: any) => {
+		let newId;
+		let x;
 		if (event.target.classList != 'wrapper-active-conv') return;
-		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
-		if (active_elem) active_elem.classList.toggle('active-conv-bg');
+		//let active_elem = document.getElementsByClassName('active-conv-bg')[0];
+		let active_elem = document.getElementById('active-conv-bg');
+		if (active_elem) active_elem.removeAttribute('id');
 		const element = event.target;
-		element.classList.toggle('active-conv-bg');
+		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
+		//console.log("hello " + document.getElementsByClassName('active-conv-bg')[0]);
+		const newActivConv = document.getElementById('active-conv-bg');
+		if (newActivConv)
+			newId = newActivConv.getAttribute('data-id');
+		if (newId)
+			console.log("data id : " + newId);
+		if (newId)
+			x = +newId;
+		if (x)
+			console.log("data id to int: " + x);
+		if (newId)
+			setActivConvId(x);
+		console.log("hello : " + activeConvId);
 	};
-
-	// const buzz = () => {
-	//     console.log(chansList[0]);
-	// };
-
-	// buzz();
-
-	//modal
 
 	return (
 		<div className="friends-wrapper">
 			<div className="chan-list">
 				<ChanList activeConv={activeConv} />
 				<div className="chan-list-buttons">
-					{/* <form className='add-channel-form'>
-                        <label>
-                            <input type="text" name="name" placeholder='New channel' className='add-channel-form-label'/>
-                        </label>
-                        <input type="submit" value="Add" className='add-channel-form-submit-button'/>
-                    </form>
-                    <form className='join-channel-form'>
-                        <label>
-                            <input type="text" name="name" placeholder='Join channel' className='join-channel-form-label'/>
-                        </label>
-                        <input type="submit" value="Join" className='join-channel-form-submit-button' />
-                    </form> */}
 					<button onClick={OpenCreateChanModal}>Create chan</button>
 					<button onClick={OpenJoinChanModal}>Join chan</button>
 					<Modal
@@ -203,7 +180,6 @@ const Friends: React.FC = ({}) => {
 										onChange={handleChange}
 									/>
 								</label>
-								{/* <input type="submit" value="Add" className='add-channel-form-submit-button'/> */}
 								<button
 									name="button-create-chan"
 									type="submit"
@@ -247,7 +223,7 @@ const Friends: React.FC = ({}) => {
 									className="redirect-button"
 									onClick={createChan}
 								>
-									Create
+									Join
 								</button>
 							</form>
 						</Box>
@@ -278,10 +254,10 @@ const Friends: React.FC = ({}) => {
 				</form>
 			</div>
 			<div className="chat">
-				<Chat />
+				<Chat activeConvId={activeConvId}/>
 			</div>
 			<div className="infos-conv">
-				<InfosConv convList={convList} />
+				<InfosConv activeConvId={activeConvId} />
 			</div>
 		</div>
 	);
