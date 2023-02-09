@@ -584,6 +584,29 @@ socket.emit('channels_messages', {
 	}
 	```
 
+## Users
+
+### **Get user**
+
+#### Input
+```javascript
+message: `users_get`
+payload: {
+	id: number // User id
+}
+```
+
+#### Return
+- The user object object ([User](#user))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+
 # Websocket Events
 
 ## Channel
