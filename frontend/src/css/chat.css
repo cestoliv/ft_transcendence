@@ -1,7 +1,15 @@
+.chat-wrapper {
+    height: 100%;
+    background-color: green;
+    display: flex;
+    flex-direction: column;
+}
+
 .chat-nav{
-    height: 60px;
+    flex-grow: 1;
     background-color: rgb(78, 74, 74);
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding-left: 20px;
@@ -63,12 +71,20 @@
     padding: 5px;
 }
 
-.e-settings {
-    /* background-color: rgb(78, 74, 74); */
-}
-
 .e-settings:hover {
     cursor: pointer;
 }
 
-/* checkbox */
+/* chat messages */
+
+.chat-messages {
+    flex-grow: 10;
+    width: 100%;
+    background-color: blue;
+}
+
+.write-message {
+    flex-grow: 1;
+    background-color: red;
+    width: 100%;
+}

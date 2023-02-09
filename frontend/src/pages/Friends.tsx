@@ -6,6 +6,8 @@ import ChanList from '../components/ChanList';
 import { useState } from 'react';
 import { IConvList } from '../interface';
 
+import { IChannel, IUser } from '../interfaces';
+
 // modal
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -20,7 +22,11 @@ import * as io from 'socket.io-client';
 
 // const socket = io.connect('http://api.transcendence.local');
 
-const Friends: React.FC = ({}) => {
+  type FriendsProps = {
+	user_me : IUser,
+};
+
+export default function Friends(props: FriendsProps) {
 	const socket = useContext(SocketContext);
 
 	const [firstName, setFirstName] = useState<string>('');
@@ -85,7 +91,7 @@ const Friends: React.FC = ({}) => {
 				socket.emit(
 					'channels_join',
 					{
-						code: joinChanName,
+						code: "JKZXJN",
 						motdepasse: joinChanMdp,
 					},
 					(data: any) => {
@@ -136,16 +142,24 @@ const Friends: React.FC = ({}) => {
 		const newActivConv = document.getElementById('active-conv-bg');
 		if (newActivConv)
 			newId = newActivConv.getAttribute('data-id');
-		if (newId)
-			console.log("data id : " + newId);
+		// if (newId)
+		// 	console.log("data id : " + newId);
 		if (newId)
 			x = +newId;
-		if (x)
-			console.log("data id to int: " + x);
+		// if (x)
+		// 	console.log("data id to int: " + x);
 		if (newId)
 			setActivConvId(x);
-		console.log("hello : " + activeConvId);
+		// console.log("hello : " + activeConvId);
 	};
+
+	useEffect(() => {
+		//console.log("buzz");
+		socket.emit('channels_findAll', {}, (data: any) => {
+			console.log("hello15 : ");
+			console.log(data);
+		});
+	},);
 
 	return (
 		<div className="friends-wrapper">
@@ -203,7 +217,7 @@ const Friends: React.FC = ({}) => {
 									<input
 										type="text"
 										name="join-chan-name"
-										placeholder="Name"
+										placeholder="Code"
 										id="join-channel-form-label"
 										onChange={handleChange}
 									/>
@@ -254,13 +268,11 @@ const Friends: React.FC = ({}) => {
 				</form>
 			</div>
 			<div className="chat">
-				<Chat activeConvId={activeConvId}/>
+				<Chat user_me={props.user_me} activeConvId={activeConvId}/>
 			</div>
 			<div className="infos-conv">
-				<InfosConv activeConvId={activeConvId} />
+				<InfosConv user_me={props.user_me} activeConvId={activeConvId} />
 			</div>
 		</div>
 	);
 };
-
-export default Friends;

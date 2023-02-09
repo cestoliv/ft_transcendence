@@ -5,12 +5,15 @@ import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
 
+import { IChannel, IUser } from '../interfaces';
+
 const defaultFormData = {
 	mdp: '',
 	body: '',
 };
 
 type ChatProps = {
+	user_me : IUser,
 	activeConvId : number | undefined,
 };
 
@@ -22,7 +25,7 @@ export default function Chat(props: ChatProps) {
 	const [visibility, setVisibility] = useState<string>("public");
 	const [formData, SetFormData] = useState(defaultFormData);
 	// const { mdp, body } = formData;
-	const [chan, setChan] = useState<any>([]);
+	const [chan, setChan] = useState<IChannel | null>(null);
 
 	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		SetFormData((prevState) => ({
@@ -52,39 +55,49 @@ export default function Chat(props: ChatProps) {
 		} catch (error) {
 			alert(error);
 		}	
-		console.log(chan.visibility);
 	}
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
 		// setIsCheckedA(e.target.checked);
-		if (chan.visibility === "public")
+		if (chan && chan.visibility === "public")
 		{
-			// console.log("buzz2 : " + chan.id);
+			console.log("buzz2 : " + chan.id);
+			// console.log("dezdze : " + props.activeConvId);
 			socket.emit(
 				'channels_setVisibility',
 				{
-					id: props.activeConvId,
+					id: chan.id,
 					visibility: 'private',
 				},
 				(data: any) => {
-					console.log("pooipo");
+					if (data.message)
+							alert(data.errors);
+					else
+					{
+						console.log("set chan dzfdzf : ");
+						setChan(data);
+					}
 				},
 			);
 		}
 		else {
-			// console.log("buzz3");
+			console.log("buzz3");
 			socket.emit(
 				'channels_setVisibility',
 				{
-					id: props.activeConvId,
+					id: chan?.id,
 					visibility: 'public',
 				},
 				(data: any) => {
-					
+					if (data.message)
+							alert(data.errors);
+					else
+						setChan(data);
 				},
 			);
 		}
-		changeData();
+		console.log("bueeeee : " + chan?.visibility);
+		// changeData();
 	};
 
 	const toggleHidden = (event: any) => {
@@ -93,62 +106,74 @@ export default function Chat(props: ChatProps) {
 		if (active_elem) active_elem.classList.toggle('hidden');
 	};
 
+	const isOwner = (): boolean => {
+        if (props.user_me.id === chan?.owner.id)
+			return true;
+		return false;
+    }
+
 	useEffect(() => {
+		// socket.emit(
+		// 	'channels_setVisibility',
+		// 	{
+		// 		id: props.activeConvId,
+		// 		visibility: 'private',
+		// 	},
+		// 	(data: any) => {
+		// 		// console.log("pooipo");
+		// 	},
+		// );
 		socket.emit(
-			'channels_setVisibility',
+			'channels_findOne',
 			{
 				id: props.activeConvId,
-				visibility: 'private',
 			},
 			(data: any) => {
-				// console.log("pooipo");
+				if (data.message)
+					alert(data.errors);
+				else
+					setChan(data);
 			},
 		);
-		try {
-			socket.emit(
-				'channels_findOne',
-				{
-					id: props.activeConvId,
-				},
-				(data: any) => {
-					setChan(data);
-				},
-			);
-		} catch (error) {
-			alert(error);
-		}
+		// console.log("bueeeee : " + chan?.visibility);
 	}, [chan]);
 
 	return (
-		<div className="chat-nav">
-			<span>{chan.name}</span>
-			<div className="chat-nav-right">
-				<div className="wrapper-settings hidden">
-					<Checkbox
-						handleChange={isChecked}
-						isChecked={chan.visibility === 'public' ? false : true}
-						label="Private"
-					/>
-					<form className="mpd-form" onSubmit={(e) => onSubmit(e)}>
-						<label htmlFor="mdp" id="mdp-label">
-							mdp
-						</label>
-						<input
-							type="text"
-							id="mdp"
-							value={chan.password}
-							onChange={(e) => onChange(e)}
-						/>
-						<button type="submit" id="mdp-submit-button">
-							Change
-						</button>
-					</form>
-				</div>
-				<span
-					onClick={toggleHidden}
-					className="e-icons e-large e-settings"
-				></span>
+		<div className="chat-wrapper">
+			<div className="chat-nav">
+				<span>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
+				{isOwner() && (
+					<div className="chat-nav-right">
+						<div className="wrapper-settings hidden">
+							<Checkbox
+								handleChange={isChecked}
+								isChecked={chan ? (chan.visibility === 'public' ? false : true) : false}
+								label="Private"
+							/>
+							<form className="mpd-form" onSubmit={(e) => onSubmit(e)}>
+								<label htmlFor="mdp" id="mdp-label">
+									mdp
+								</label>
+								<input
+									type="text"
+									id="mdp"
+									value={""}
+									onChange={(e) => onChange(e)}
+								/>
+								<button type="submit" id="mdp-submit-button">
+									Change
+								</button>
+							</form>
+						</div>
+						<span
+							onClick={toggleHidden}
+							className="e-icons e-large e-settings"
+						></span>
+					</div>
+				)}
 			</div>
+			<div className="chat-messages"></div>
+			<div className="write-message"></div>
 		</div>
 	);
 }
