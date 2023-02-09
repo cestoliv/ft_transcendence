@@ -8,6 +8,7 @@ import { ChannelMutedUser } from './entities/channel-muted.entity';
 import { ChannelBannedUser } from './entities/channel-banned.entity';
 import { ChannelInvitedUser } from './entities/channel-invited.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
+import { ConnectedClientsService } from 'src/base.gateway';
 
 @Module({
 	imports: [
@@ -20,7 +21,7 @@ import { ChannelMessage } from './entities/channel-message.entity';
 		]),
 		forwardRef(() => UsersModule),
 	],
-	providers: [ChannelsGateway, ChannelsService],
+	providers: [ChannelsGateway, ChannelsService, ConnectedClientsService],
 	exports: [ChannelsService],
 })
 export class ChannelsModule {}

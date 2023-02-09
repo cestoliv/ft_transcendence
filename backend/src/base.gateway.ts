@@ -1,8 +1,26 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { OnGatewayConnection, WebSocketServer } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { ChannelsService } from './channels/channels.service';
+import { SocketWithUser } from './types';
 import { UsersService } from './users/users.service';
+
+@Injectable()
+export class ConnectedClientsService {
+	private clients = new Set<string>();
+
+	add(clientId: string) {
+		this.clients.add(clientId);
+	}
+
+	remove(clientId: string) {
+		this.clients.delete(clientId);
+	}
+
+	get(): string[] {
+		return Array.from(this.clients);
+	}
+}
 
 @Injectable()
 export abstract class BaseGateway implements OnGatewayConnection {
@@ -11,14 +29,19 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		readonly usersService: UsersService,
 		@Inject(forwardRef(() => ChannelsService))
 		readonly channelsService: ChannelsService,
+		readonly connectedClientsService: ConnectedClientsService,
 	) {}
 
-	@WebSocketServer() server;
+	@WebSocketServer() server: Server;
 
-	async handleConnection(socket: Socket) {
+	async handleConnection(socket: SocketWithUser) {
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
-			socket['user'] = user;
+			socket.user = user;
+			this.connectedClientsService.add(socket.id);
+			socket.on('disconnect', () => {
+				this.connectedClientsService.remove(socket.id);
+			});
 			// Make the user join all the channels he is in
 			const channels = await this.channelsService.listJoined(user);
 			for (const channel of channels) {
@@ -27,9 +50,9 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		} catch (error) {
 			// Reject connection
 			socket.emit('error', {
-				code: 401,
+				statusCode: 401,
 				message: 'Unauthorized',
-				error: error.message,
+				errors: [error.message],
 			});
 			socket.disconnect(true);
 		}

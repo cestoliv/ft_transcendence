@@ -1,13 +1,12 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { BaseGateway } from 'src/base.gateway';
 
-@WebSocketGateway({
+@WebSocketGateway(/*{
 	cors: {
-		// TODO: Should use ConfigService instead of process.env
 		origin: process.env.FRONTEND_URL || '*',
-		credentials: true,
+		credentials: false,
 	},
-})
+}*/)
 export class UsersGateway extends BaseGateway {
 	@SubscribeMessage('message')
 	handleMessage(client: any, payload: any): string {

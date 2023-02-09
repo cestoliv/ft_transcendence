@@ -131,19 +131,22 @@ payload: {
 
 #### Return
 - The created channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
 
 ### **List channels**
 
+List every channel the user can see. That includes public channels, private channels in which the user is invited and every channels the user has joined.
+
 #### Input
 ```javascript
-message: `channels_findAll`
+message: `channels_list`
 payload: empty
 ```
 
@@ -154,7 +157,7 @@ payload: empty
 
 #### Input
 ```javascript
-message: `channels_findOne`
+message: `channels_get`
 payload: {
 	id: number, // the id of the channel
 }
@@ -162,56 +165,66 @@ payload: {
 
 #### Return
 - A channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You are not allowed to see this channel']
+		}
+		```
 
-### **Set channel visibility**
+### **Update channel**
 
 #### Input
 ```javascript
-message: `channels_setVisibility`
+message: `channels_update`
 payload: {
 	id: number, // the id of the channel,
-	visibility: 'public' | 'private' | 'password-protected',
+	name: string, // optionnal new name
+	visibility: 'public' | 'private' | 'password-protected', // optionnal new visibility
 	password: string // optionnal, mandatory when choosing password-protected visibility
 }
 ```
 
 #### Return
 - The updated channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not the owner of the channel']
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel owner can update channel']
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+		}
+		```
 
 ### **Join channel**
 
@@ -226,35 +239,37 @@ payload: {
 
 #### Return
 - The joined channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['Channel is private']
-				| ['Wrong password']
-				| ['You are banned from this channel until <ISO date>']
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You are not invited to this channel']
+					| ['Password is required']
+					| ['Wrong password']
+					| ['You are banned from this channel']
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+		}
+		```
 
 ### **List joined channel**
 
 #### Input
 ```javascript
-message: `channels_list`
+message: `channels_listJoined`
 payload: empty
 ```
 
@@ -273,21 +288,21 @@ payload: {
 
 #### Return
 - The leaved channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-				| ['You are not in the channel']
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+		}
+		```
 
 ### **Add channel administrator**
 
@@ -302,29 +317,30 @@ payload: {
 
 #### Return
 - The channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-				| ['User is not in the channel']
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not the owner of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+					| ['User is not a member of this channel']
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel owner can add admins'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+					| ['User not found']
+		}
+		```
 
 ### **Remove channel administrator**
 
@@ -339,29 +355,30 @@ payload: {
 
 #### Return
 - The channel object ([Channel](#channel))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-				| ['User is not an admin of the channel']
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not the owner of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+					| ['User is not an admin of the channel']
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel owner can remove admins'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+					| ['User not found']
+		}
+		```
 
 ### **Ban user from channel**
 
@@ -379,28 +396,29 @@ payload: {
 
 #### Return
 - A ChannelBannedUser object ([ChannelBannedUser](#channelbanneduser))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not an admin of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel admins can ban users'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+					| ['User not found']
+		}
+		```
 
 ### **Mute user from channel**
 
@@ -418,28 +436,29 @@ payload: {
 
 #### Return
 - A ChannelMutedUser object ([ChannelMutedUser](#channelmuteduser))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not an admin of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel admins can mute users'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+					| ['User not found']
+		}
+		```
 
 ### **Invite user in channel**
 
@@ -454,28 +473,29 @@ payload: {
 
 #### Return
 - A ChannelInvitedUser object ([ChannelInvitedUser](#channelinviteduser))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not an admin of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel admins can invite users'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+					| ['User not found']
+		}
+		```
 
 ### **Send message into channel**
 
@@ -490,28 +510,29 @@ payload: {
 
 #### Return
 - A ChannelMessage object ([ChannelMessage](#channelmessage))
-- ```javascript
-	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
-	}
-	```
-- ```javascript
-	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['You are not a member of the channel'],
-	}
-	```
-- ```javascript
-	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
-				| ['User not found']
-	}
-	```
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['Only channel members can send messages'],
+					| ['You are muted in this channel']
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['Channel not found']
+		}
+		```
 
 ### **Get channel messages**
 
@@ -552,7 +573,7 @@ socket.emit('channels_messages', {
 	{
 		code: 403,
 		message: 'Forbidden',
-		errors: ['You are not a member of the channel'],
+		errors: ['Only channel members can read messages'],
 	}
 	```
 - ```javascript
@@ -581,6 +602,16 @@ socket.on('channels_message', (data: any) => {
 ```
 
 # Objects
+
+## WSResponse
+
+```javascript
+{
+	statusCode: number, // HTTP status code
+	error: string, // Relatded HTTP message
+	messages: string[], // array of string describing the problem
+}
+```
 
 ## User
 
