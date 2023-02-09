@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ConflictException,
 	ForbiddenException,
 	HttpException,
 	NotFoundException,
@@ -38,6 +39,12 @@ export function exceptionToObj(exception: HttpException): WSResponse {
 		return {
 			statusCode: 404,
 			error: 'Not found',
+			messages: [exception.message],
+		};
+	} else if (exception instanceof ConflictException) {
+		return {
+			statusCode: 409,
+			error: 'Conflict',
 			messages: [exception.message],
 		};
 	}

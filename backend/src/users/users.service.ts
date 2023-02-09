@@ -1,4 +1,5 @@
 import {
+	ConflictException,
 	ForbiddenException,
 	forwardRef,
 	Inject,
@@ -73,7 +74,13 @@ export class UsersService {
 		user.username = updateUserDto.username;
 		user.otp = updateUserDto.otp;
 
-		return this.save(user);
+		return this.save(user)
+			.then((user) => user)
+			.catch((error) => {
+				if (error.code === '23505') {
+					throw new ConflictException('Username already taken');
+				} else throw error;
+			});
 	}
 
 	async save(user: User) {
