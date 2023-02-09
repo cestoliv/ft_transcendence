@@ -22,19 +22,15 @@ export default function InfosConv(props: InfosConvProps) {
 	const [channel, setChannel] = useState<IChannel | null>(null);
 
 	useEffect(() => {
-		try {
-			socket.emit(
-				'channels_findOne',
-				{
-					id: props.activeConvId,
-				},
-				(data: any) => {
-					setChannel(data);
-				},
-			);
-		} catch (error) {
-			alert(error);
-		}
+		socket.emit(
+			'channels_get',
+			{
+				id: props.activeConvId,
+			},
+			(data: any) => {
+				setChannel(data);
+			},
+		);
 	}, [channel]);
 
 	return (

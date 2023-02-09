@@ -22,7 +22,7 @@ export const ChanList = (props: ChanListProps) => {
 
 	useEffect(() => {
 		//console.log("buzz");
-		socket.emit('channels_list', {}, (data: any) => {
+		socket.emit('channels_listJoined', {}, (data: any) => {
 			// console.log("hello10 : ");
 			// console.log(data);
 			setChanList(data);

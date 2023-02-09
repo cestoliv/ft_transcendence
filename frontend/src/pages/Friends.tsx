@@ -87,20 +87,17 @@ export default function Friends(props: FriendsProps) {
 			CloseCreateChanModal();
 		}
 		if (event.target.name === 'button-join-chan') {
-			try {
-				socket.emit(
-					'channels_join',
-					{
-						code: "JKZXJN",
-						motdepasse: joinChanMdp,
-					},
-					(data: any) => {
-						if (data.message)
-							alert(data.errors);
-					},
-				);
-			} catch (error) {
-			}
+			socket.emit(
+				'channels_join',
+				{
+					code: joinChanName,
+					motdepasse: joinChanMdp,
+				},
+				(data: any) => {
+					if (data.message)
+						alert(data.errors);
+				},
+			);
 			setJoinChanName('');
 			setJoinChanMdp('');
 			CloseJoinChanModal();
@@ -154,8 +151,8 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	useEffect(() => {
-		//console.log("buzz");
-		socket.emit('channels_findAll', {}, (data: any) => {
+		console.log("buzz");
+		socket.emit('channels_list', {}, (data: any) => {
 			console.log("hello15 : ");
 			console.log(data);
 		});
