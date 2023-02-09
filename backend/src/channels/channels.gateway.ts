@@ -11,16 +11,17 @@ import { ChannelMessage } from './entities/channel-message.entity';
 import { ChannelBannedUser } from './entities/channel-banned.entity';
 import { ChannelMutedUser } from './entities/channel-muted.entity';
 import { ChannelInvitedUser } from './entities/channel-invited.entity';
+import { ConfigService } from '@nestjs/config';
 
-@WebSocketGateway(/*{
+@WebSocketGateway({
 	cors: {
-		// origin: async (origin, callback) => {
-		// 	const configService = new ConfigService();
-		// 	callback(null, configService.get<string>('FRONTEND_URL') || '*');
-		// },
-		credentials: false,
+		origin: async (origin, callback) => {
+			const configService = new ConfigService();
+			callback(null, configService.get<string>('FRONTEND_URL') || '*');
+		},
+		credentials: true,
 	},
-}*/)
+})
 export class ChannelsGateway extends BaseGateway {
 	/*
 	 * Create a new channel.

@@ -1,12 +1,16 @@
+import { ConfigService } from '@nestjs/config';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { BaseGateway } from 'src/base.gateway';
 
-@WebSocketGateway(/*{
+@WebSocketGateway({
 	cors: {
-		origin: process.env.FRONTEND_URL || '*',
-		credentials: false,
+		origin: async (origin, callback) => {
+			const configService = new ConfigService();
+			callback(null, configService.get<string>('FRONTEND_URL') || '*');
+		},
+		credentials: true,
 	},
-}*/)
+})
 export class UsersGateway extends BaseGateway {
 	@SubscribeMessage('message')
 	handleMessage(client: any, payload: any): string {
