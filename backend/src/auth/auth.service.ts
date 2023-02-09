@@ -83,6 +83,7 @@ export class AuthService {
 		// Create user if not exists
 		let user = await this.usersService.findOneBy42Id(userData.id, true);
 		if (!user) {
+			// TODO: If username already exists, add a number to it
 			user = await this.usersService.create({
 				id42: userData.id,
 				username: userData.login,

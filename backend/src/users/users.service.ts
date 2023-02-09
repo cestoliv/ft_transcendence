@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+	ForbiddenException,
+	forwardRef,
+	Inject,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
@@ -58,8 +64,21 @@ export class UsersService {
 		});
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto) {
-		return this.usersRepository.update({ id }, updateUserDto);
+	async update(updater: User, id: number, updateUserDto: UpdateUserDto) {
+		const user = await this.findOne(id);
+		if (!user) throw new NotFoundException('User not found');
+		if (user.id !== updater.id)
+			throw new ForbiddenException('You can only update your own user');
+
+		user.username = updateUserDto.username;
+		user.otp = updateUserDto.otp;
+
+		return this.save(user);
+	}
+
+	async save(user: User) {
+		await this.usersRepository.save(user);
+		return this.findOne(user.id);
 	}
 
 	remove(id: number) {
@@ -72,7 +91,7 @@ export class UsersService {
 		const url = authenticator.keyuri('', 'Transcendence', secret);
 
 		// Update user TOTP secret
-		await this.update(user.id, {
+		await this.update(user, user.id, {
 			otp: secret,
 		});
 

@@ -154,7 +154,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Create updateChannelDto (to ensure that only the visibility and password are updated)
 		const updateChannelDto = new UpdateChannelDto();
-		if (payload !== undefined) {
+		if (payload !== undefined && typeof payload == 'object') {
 			updateChannelDto.name = payload.name;
 			updateChannelDto.visibility = payload.visibility;
 			updateChannelDto.password = payload.password;

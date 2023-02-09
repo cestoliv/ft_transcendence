@@ -597,13 +597,49 @@ payload: {
 ```
 
 #### Return
-- The user object object ([User](#user))
+- The user object ([User](#user))
 - A [WSResponse](#wsresponse)
 	+ ```javascript
 		{
 			code: 400,
 			message: 'Bad request',
 			errors: string[] // describing malformed payload
+		}
+		```
+
+### **Update user**
+
+#### Input
+```javascript
+message: `users_update`
+payload: {
+	id: number, // User id
+	username: string, // Optionnal new username
+}
+```
+
+#### Return
+- The updated user object ([User](#user))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You can only update your own user'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
 		}
 		```
 
