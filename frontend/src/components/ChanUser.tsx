@@ -60,13 +60,13 @@ export const ChanUser = (props: ChanUserProps) => {
                 },
             );
 		}
-        console.log("chan admins : ");
-        if (props.chan_admins)
-        {
-            {props.chan_admins.map(user => (
-                console.log(user.username)
-            ))};
-        }
+        // console.log("chan admins : ");
+        // if (props.chan_admins)
+        // {
+        //     {props.chan_admins.map(user => (
+        //         console.log(user.username)
+        //     ))};
+        // }
 	};
 
     const banUser = (event: any): void => {

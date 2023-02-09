@@ -124,7 +124,7 @@ export default function Chat(props: ChatProps) {
 		// 	},
 		// );
 		socket.emit(
-			'channels_findOne',
+			'channels_get',
 			{
 				id: props.activeConvId,
 			},
