@@ -5,36 +5,21 @@ import 'reactjs-popup/dist/index.css';
 // import { InfosConvProps } from '../interface';
 import { SocketContext } from '../context/socket';
 
+import { IChannel, IUser } from '../interfaces';
+
 import ChanUser from './ChanUser'
 
 type InfosConvProps = {
+	user_me : IUser,
 	activeConvId : number | undefined,
 };
 
-interface Channel {
-	id: number;
-	code: string;
-	owner: User;
-	name: string;
-	visibility: 'public' | 'private' | 'password-protected';
-	admins: User[];
-	members: User[];
-	banned: User[];
-	muted: User[];
-	invited: User[];
-  }
-
-  interface User {
-	id: number,
-	id42: number, // -1 for non-42 users
-	username: string,
-  }
 
 export default function InfosConv(props: InfosConvProps) {
 
 	const socket = useContext(SocketContext);
 
-	const [channel, setChannel] = useState<Channel | null>(null);
+	const [channel, setChannel] = useState<IChannel | null>(null);
 
 	useEffect(() => {
 		try {
@@ -57,7 +42,7 @@ export default function InfosConv(props: InfosConvProps) {
 			{channel && (
 			<div className="chan_user_wrapper">
 			{channel.members.map(member => (
-				<ChanUser username={member.username} user_id={member.id}/>
+				<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins}/>
 			))}
 			</div>
       	)}

@@ -104,7 +104,7 @@ function App() {
 			<Menu />
 			<Routes>
 				<Route path="/" element={<Home user={user} auth={auth} />} />
-				<Route path="/friends" element={<Friends />} />
+				<Route path="/friends" element={<Friends user_me={user}/>} />
 				<Route path="/searchGame" element={<SearchGame />} />
 				<Route path="/stats" element={<Stats />} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
