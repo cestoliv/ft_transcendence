@@ -22,7 +22,7 @@ async function bootstrap() {
 		origin: config.get('FRONTEND_URL'),
 	});
 	await app.register(fastifyCookie, {
-		secret: 'TODO: load this from config',
+		secret: config.get('COOKIE_SECRET'),
 	});
 	await app.listen(config.get<number>('PORT') || 3000, '::');
 }

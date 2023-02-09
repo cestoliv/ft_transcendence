@@ -1,4 +1,11 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	forwardRef,
+	Inject,
+	Injectable,
+	NotFoundException,
+	ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -38,6 +45,19 @@ export class ChannelsService {
 		channel.owner = creator;
 		channel.visibility = createChannelDto.visibility || Visibility.Public;
 
+		channel.password_hash = null;
+		if (channel.visibility === Visibility.PasswordProtected) {
+			if (!createChannelDto.password) {
+				throw new BadRequestException(
+					'Password is required for password protected channels',
+				);
+			}
+			channel.password_hash = await bcrypt.hash(
+				createChannelDto.password,
+				10,
+			);
+		}
+
 		return this.channelsRepository.save(channel);
 	}
 
@@ -67,15 +87,42 @@ export class ChannelsService {
 		});
 	}
 
-	async update(id: number, updateChannelDto: UpdateChannelDto) {
-		const channel = new Channel();
+	canSee(user: User, channel: Channel): boolean {
+		if (channel.owner.id === user.id) return true;
+		if (channel.members.find((member) => member.id === user.id))
+			return true;
+		if (channel.invited.find((invited) => invited.user.id === user.id))
+			return true;
+		if (channel.visibility === Visibility.Public) return true;
+	}
+
+	async update(
+		updater: User,
+		id: number,
+		updateChannelDto: UpdateChannelDto,
+	) {
+		const channel = await this.findOne(id);
+		if (!channel) throw new NotFoundException('Channel not found');
+		if (channel.owner.id !== updater.id)
+			throw new ForbiddenException(
+				'Only channel owner can update channel',
+			);
+
 		channel.name = updateChannelDto.name;
 		channel.visibility = updateChannelDto.visibility;
-		channel.password_hash = await bcrypt.hash(
-			updateChannelDto.password,
-			10,
-		);
-		return this.channelsRepository.update({ id }, channel);
+		channel.password_hash = null;
+		if (channel.visibility === Visibility.PasswordProtected) {
+			if (!updateChannelDto.password) {
+				throw new BadRequestException(
+					'Password is required for password protected channels',
+				);
+			}
+			channel.password_hash = await bcrypt.hash(
+				updateChannelDto.password,
+				10,
+			);
+		}
+		return this.save(channel);
 	}
 
 	async save(channel: Channel) {
@@ -90,13 +137,22 @@ export class ChannelsService {
 		return this.channelsRepository.delete({ id });
 	}
 
-	async join(user: User, channel: Channel): Promise<Channel | Date> {
+	async join(
+		user: User,
+		channelCode: string,
+		password: string,
+	): Promise<Channel> {
+		const channel = await this.findOneByCode(channelCode, true);
+		if (!channel) throw new NotFoundException('Channel not found');
+
 		if (!channel.members) channel.members = [];
 		if (!channel.banned) channel.banned = [];
 
 		// Check if user is already a member
-		if (channel.members.find((member) => member.id === user.id))
+		if (channel.members.find((member) => member.id === user.id)) {
+			delete channel.password_hash;
 			return channel;
+		}
 
 		// Check if user is banned
 		const bannedUser = channel.banned.find(
@@ -106,15 +162,44 @@ export class ChannelsService {
 			// Check if ban is expired
 			if (bannedUser.until < new Date()) {
 				// Remove ban
-				this.channelBannedUsersRepository.delete({
+				await this.channelBannedUsersRepository.delete({
 					userId: user.id,
 					channelId: channel.id,
 				});
-			} else return bannedUser.until;
+			} else {
+				throw new ForbiddenException(
+					'You are banned from this channel',
+				);
+			}
+		}
+
+		// If channel is private, check if user is invited or owner
+		if (channel.visibility === Visibility.Private) {
+			if (!channel.invited) channel.invited = [];
+			if (
+				!channel.invited.find(
+					(invited) => invited.user.id === user.id,
+				) &&
+				channel.owner.id !== user.id
+			) {
+				throw new ForbiddenException(
+					'You are not invited to this channel',
+				);
+			}
+		}
+
+		// If channel is password protected, check if password is correct
+		if (channel.visibility === Visibility.PasswordProtected) {
+			if (!password || password.length === 0) {
+				throw new ForbiddenException('Password is required');
+			}
+			if (!(await bcrypt.compare(password, channel.password_hash))) {
+				throw new ForbiddenException('Wrong password');
+			}
 		}
 
 		// Remove user from invited
-		this.channelInvitedUsersRepository.delete({
+		await this.channelInvitedUsersRepository.delete({
 			userId: user.id,
 			channelId: channel.id,
 		});
@@ -133,7 +218,10 @@ export class ChannelsService {
 		return channels;
 	}
 
-	async leave(user: User, channel: Channel): Promise<Channel> {
+	async leave(user: User, channelId: number): Promise<Channel> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+
 		if (!channel.members) channel.members = [];
 		if (!channel.admins) channel.admins = [];
 		// Remove user from members array
@@ -146,69 +234,141 @@ export class ChannelsService {
 		return await this.save(channel);
 	}
 
-	async addAdmin(user: User, channel: Channel): Promise<Channel> {
+	async addAdmin(
+		user: User,
+		adminToAddId: number,
+		channelId: number,
+	): Promise<Channel> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+		const adminToAdd = await this.usersService.findOne(adminToAddId);
+		if (!adminToAdd) throw new NotFoundException('User not found');
+
+		// Check if user is channel owner
+		if (channel.owner.id !== user.id)
+			throw new ForbiddenException('Only channel owner can add admins');
+
+		// Check if adminToAdd is a member
+		if (!channel.members) channel.members = [];
+		if (!channel.members.find((member) => member.id === adminToAdd.id))
+			throw new BadRequestException(
+				'User is not a member of this channel',
+			);
+
+		// Check if adminToAdd is already an admin
 		if (!channel.admins) channel.admins = [];
-		// Check if user is already an admin
-		if (channel.admins.find((admin) => admin.id === user.id))
+		if (channel.admins.find((admin) => admin.id === adminToAdd.id))
 			return channel;
-		// Add user to admins array
-		channel.admins.push(user);
+		// Add adminToAdd to admins array
+		channel.admins.push(adminToAdd);
 
 		// Save channel
 		return await this.save(channel);
 	}
 
-	async removeAdmin(user: User, channel: Channel): Promise<Channel> {
+	async removeAdmin(
+		user: User,
+		adminToRemoveId: number,
+		channelId: number,
+	): Promise<Channel> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+		const adminToRemove = await this.usersService.findOne(adminToRemoveId);
+		if (!adminToRemove) throw new NotFoundException('User not found');
+
+		// Check if user is channel owner
+		if (channel.owner.id !== user.id)
+			throw new ForbiddenException(
+				'Only channel owner can remove admins',
+			);
+
+		// Check if adminToRemove is not an admin
 		if (!channel.admins) channel.admins = [];
+		if (!channel.admins.find((admin) => admin.id === adminToRemove.id))
+			return channel;
+
 		// Remove user from admins array
-		channel.admins = channel.admins.filter((admin) => admin.id !== user.id);
+		channel.admins = channel.admins.filter(
+			(admin) => admin.id !== adminToRemove.id,
+		);
 		// Save channel
 		return await this.save(channel);
 	}
 
 	async banUser(
 		user: User,
-		channel: Channel,
+		userToBanId: number,
+		channelId: number,
 		until: Date,
 	): Promise<ChannelBannedUser> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+		const userToBan = await this.usersService.findOne(userToBanId);
+		if (!userToBan) throw new NotFoundException('User not found');
+
+		// Check that user is channel admin
+		if (!channel.admins) channel.admins = [];
+		if (!channel.admins.find((admin) => admin.id === user.id))
+			throw new ForbiddenException('Only channel admins can ban users');
+
 		// Create new banned user (or update existing one)
 		const newBannedUser = new ChannelBannedUser();
-		newBannedUser.user = user;
+		newBannedUser.user = userToBan;
 		newBannedUser.channel = channel;
 		newBannedUser.until = until;
 
 		await this.channelBannedUsersRepository.save(newBannedUser);
-
-		await this.leave(user, channel);
-
+		await this.leave(userToBan, channel.id);
 		return newBannedUser;
 	}
 
 	async muteUser(
 		user: User,
-		channel: Channel,
+		userToMuteId: number,
+		channelId: number,
 		until: Date,
 	): Promise<ChannelMutedUser> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+		const userToMute = await this.usersService.findOne(userToMuteId);
+		if (!userToMute) throw new NotFoundException('User not found');
+
+		// Check that user is channel admin
+		if (!channel.admins) channel.admins = [];
+		if (!channel.admins.find((admin) => admin.id === user.id))
+			throw new ForbiddenException('Only channel admins can mute users');
+
 		// Create new muted user (or update existing one)
 		const newMutedUser = new ChannelMutedUser();
-		newMutedUser.user = user;
+		newMutedUser.user = userToMute;
 		newMutedUser.channel = channel;
 		newMutedUser.until = until;
 
 		await this.channelMutedUsersRepository.save(newMutedUser);
-
 		return newMutedUser;
 	}
 
 	async inviteUser(
-		inviter: User,
 		user: User,
-		channel: Channel,
+		userToInviteId: number,
+		channelId: number,
 	): Promise<ChannelInvitedUser> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+		const userToInvite = await this.usersService.findOne(userToInviteId);
+		if (!userToInvite) throw new NotFoundException('User not found');
+
+		// Check that user is channel admin
+		if (!channel.admins) channel.admins = [];
+		if (!channel.admins.find((admin) => admin.id === user.id))
+			throw new ForbiddenException(
+				'Only channel admins can invite users',
+			);
+
 		// Create new invited user
 		const newInvitedUser = new ChannelInvitedUser();
-		newInvitedUser.user = user;
-		newInvitedUser.inviter = inviter;
+		newInvitedUser.user = userToInvite;
+		newInvitedUser.inviter = userToInvite;
 		newInvitedUser.channel = channel;
 		newInvitedUser.invited_at = new Date();
 
@@ -219,9 +379,36 @@ export class ChannelsService {
 
 	async sendMessage(
 		sender: User,
-		channel: Channel,
+		channelId: number,
 		message: string,
 	): Promise<ChannelMessage> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+
+		// Check if user is a member of the channel
+		if (!channel.members) channel.members = [];
+		if (!channel.members.find((member) => member.id === sender.id))
+			throw new ForbiddenException(
+				'Only channel members can send messages',
+			);
+
+		// Check if user is muted
+		if (!channel.muted) channel.muted = [];
+		const mutedUser = channel.muted.find(
+			(mutedUser) => mutedUser.user.id === sender.id,
+		);
+		if (mutedUser) {
+			if (mutedUser.until > new Date()) {
+				throw new ForbiddenException('You are muted in this channel');
+			} else {
+				// Remove user from muted array
+				await this.channelMutedUsersRepository.delete({
+					userId: sender.id,
+					channelId: channel.id,
+				});
+			}
+		}
+
 		// Create new message
 		const newMessage = new ChannelMessage();
 		newMessage.sender = sender;
@@ -236,9 +423,19 @@ export class ChannelsService {
 
 	async getMessages(
 		user: User,
-		channel: Channel,
+		channelId: number,
 		before: Date,
 	): Promise<ChannelMessage[]> {
+		const channel = await this.findOne(channelId);
+		if (!channel) throw new NotFoundException('Channel not found');
+
+		// Check if user is a member of the channel
+		if (!channel.members) channel.members = [];
+		if (!channel.members.find((member) => member.id === user.id))
+			throw new ForbiddenException(
+				'Only channel members can read messages',
+			);
+
 		return await this.channelMessagesRepository.find({
 			where: {
 				channel: { id: channel.id },

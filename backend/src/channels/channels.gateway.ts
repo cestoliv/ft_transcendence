@@ -1,21 +1,26 @@
 import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
 import { validateSync } from 'class-validator';
-import * as bcrypt from 'bcrypt';
 import { DateTime } from 'luxon';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
-import { Visibility } from './enums/visibility.enum';
 import { Channel } from './entities/channel.entity';
 import { BaseGateway } from 'src/base.gateway';
-import { Socket } from 'socket.io';
+import { SocketWithUser, WSResponse } from 'src/types';
+import { exceptionToObj } from 'src/utils';
+import { ChannelMessage } from './entities/channel-message.entity';
+import { ChannelBannedUser } from './entities/channel-banned.entity';
+import { ChannelMutedUser } from './entities/channel-muted.entity';
+import { ChannelInvitedUser } from './entities/channel-invited.entity';
 
-@WebSocketGateway({
+@WebSocketGateway(/*{
 	cors: {
-		// TODO: Should use ConfigService instead of process.env
-		origin: process.env.FRONTEND_URL || '*',
-		credentials: true,
+		// origin: async (origin, callback) => {
+		// 	const configService = new ConfigService();
+		// 	callback(null, configService.get<string>('FRONTEND_URL') || '*');
+		// },
+		credentials: false,
 	},
-})
+}*/)
 export class ChannelsGateway extends BaseGateway {
 	/*
 	 * Create a new channel.
@@ -23,72 +28,106 @@ export class ChannelsGateway extends BaseGateway {
 	 * The client is added to the channel as owner and admin.
 	 */
 	@SubscribeMessage('channels_create')
-	async create(client: any, payload: CreateChannelDto) {
+	async create(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
 		// Validate payload
-		if (payload === undefined || typeof payload != 'object')
-			payload = new CreateChannelDto();
-		const val = validateSync(payload);
+		const createChannelDto = new CreateChannelDto();
+		createChannelDto.name = payload.name;
+		createChannelDto.visibility = payload.visibility;
+		createChannelDto.password = payload.password;
+
+		const val = validateSync(createChannelDto);
 		if (val.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: val.map((e) => Object.values(e.constraints)).flat(1),
+				statusCode: 400,
+				error: 'Bad request',
+				messages: val.map((e) => Object.values(e.constraints)).flat(1),
 			};
+
 		// Create channel
-		let channel = await this.channelsService.create(client.user, payload);
+		let channel = await this.channelsService
+			.create(client.user, payload)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
+		if (!(channel instanceof Channel)) return channel;
+
 		// Join channel
-		channel = (await this.channelsService.join(
+		channel = await this.channelsService.join(
 			client.user,
-			channel,
-		)) as Channel; // Join will never return a Date (owner is not banned)
+			channel.code,
+			createChannelDto.password,
+		);
+		client.join(`channel_${channel.id}`);
+
 		// Add to admins
-		channel = await this.channelsService.addAdmin(client.user, channel);
+		channel = await this.channelsService.addAdmin(
+			client.user,
+			client.user.id,
+			channel.id,
+		);
 		return channel;
 	}
 
 	/*
-	 * Find all channels.
-	 * TODO: Needs for permissions, only public channels ?
+	 * List every channels for the current user.
+	 * Show joined channels, public channels, and channels the user is invited in.
 	 */
-	@SubscribeMessage('channels_findAll')
-	findAll() {
-		// Find channels
-		return this.channelsService.findAll();
+	@SubscribeMessage('channels_list')
+	async list(client: SocketWithUser): Promise<Channel[]> {
+		const channels = await this.channelsService.findAll();
+
+		return channels.filter((channel) => {
+			return this.channelsService.canSee(client.user, channel);
+		});
 	}
 
 	/*
-	 * Find one channel.
-	 * TODO: Needs for permissions ? (like to be in the channel, if it's not public)
+	 * Get a channel.
+	 * The channel need to be public or the client need to be a member
+	 * or an invited user in the channel.
 	 */
-	@SubscribeMessage('channels_findOne')
-	findOne(client: any, payload: any) {
+	@SubscribeMessage('channels_get')
+	async get(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
-		if (payload === undefined) errors.push('Empty payload');
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
+
 		// Find channel
-		const channel = this.channelsService.findOne(payload.id);
+		const channel = await this.channelsService.findOne(payload.id);
 		if (channel === undefined)
 			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
+				statusCode: 404,
+				error: 'Not found',
+				messages: ['Channel not found'],
 			};
-		return channel;
+
+		// Check if the user is allowed to see the channel
+		if (this.channelsService.canSee(client.user, channel)) return channel;
+		return {
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You are not allowed to see this channel'],
+		};
 	}
 
 	/*
 	 * Remove a channel.
-	 * TODO: The client need to be the owner of the channel.
+	 * The client must be the owner of the channel.
 	 */
 	// @SubscribeMessage('channels_remove')
 	// remove(@MessageBody() id: number) {
@@ -96,32 +135,30 @@ export class ChannelsGateway extends BaseGateway {
 	// }
 
 	/*
-	 * Set the channel visibility.
-	 * The client need to be the owner of the channel.
+	 * Update the channel.
+	 * The client must be the owner of the channel.
 	 */
-	@SubscribeMessage('channels_setVisibility')
-	async setVisibility(client: any, payload: any) {
+	// @UseInterceptors(NotFoundInterceptor)
+	@SubscribeMessage('channels_update')
+	async update(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		let errors: Array<string> = [];
-
-		// Check that payload is not undefined
-		if (payload === undefined) errors.push('Empty payload');
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
-		if (
-			payload.visibility === Visibility.PasswordProtected &&
-			payload.password === undefined
-		) {
-			errors.push('Password is not specified');
-		}
 
 		// Create updateChannelDto (to ensure that only the visibility and password are updated)
 		const updateChannelDto = new UpdateChannelDto();
 		if (payload !== undefined) {
+			updateChannelDto.name = payload.name;
 			updateChannelDto.visibility = payload.visibility;
 			updateChannelDto.password = payload.password;
 		}
 
-		// Validate payload
 		const val = validateSync(updateChannelDto);
 		if (val.length != 0)
 			errors = errors.concat(
@@ -130,28 +167,16 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is the owner of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (channel.owner.id != client.user.id)
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not the owner of the channel'],
-			};
-
-		// Update channel
-		return this.channelsService.update(payload.id, payload);
+		// Try to update channel
+		return this.channelsService
+			.update(client.user, payload.id, payload)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -160,85 +185,40 @@ export class ChannelsGateway extends BaseGateway {
 	 * Will be rejected if the channel is password protected and the password is wrong.
 	 */
 	@SubscribeMessage('channels_join')
-	async join(client: any, payload: any) {
+	async join(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.code === undefined)
 			errors.push('Channel code is not specified');
+		if (payload.password === undefined) payload.password = null;
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		const channel = await this.channelsService.findOneByCode(
-			payload.code,
-			true,
-		);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		// Check that the channel is not private
-		if (channel.visibility == Visibility.Private) {
-			// Check that the client have been invited
-			if (
-				!channel.invited.find(
-					(invitation) => invitation.user.id == client.user.id,
-				)
-			)
-				return {
-					code: 403,
-					message: 'Forbidden',
-					errors: ['Channel is private'],
-				};
-		}
-		// Check that the channel is not password protected or that the password is correct
-		else if (channel.visibility == Visibility.PasswordProtected) {
-			if (payload.password === undefined)
-				return {
-					code: 400,
-					message: 'Bad request',
-					errors: ['Password is not specified'],
-				};
-			else if (
-				!(await bcrypt.compare(payload.password, channel.password_hash))
-			)
-				return {
-					code: 403,
-					message: 'Forbidden',
-					errors: ['Wrong password'],
-				};
-		}
+		// Try to join channel
+		const channel = await this.channelsService
+			.join(client.user, payload.code, payload.password)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
+		if (!(channel instanceof Channel)) return channel;
 
-		// Join channel
-		const joinReturn = await this.channelsService.join(
-			client.user,
-			channel,
-		);
-		if (joinReturn instanceof Date) {
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: [
-					'You are banned from this channel until ' +
-						joinReturn.toISOString(),
-				],
-			};
-		} else return joinReturn;
+		client.join(`channel_${channel.id}`);
+		return channel;
 	}
 
 	/*
 	 * List channels joined by the client.
 	 */
-	@SubscribeMessage('channels_list')
-	async list(client: any) {
+	@SubscribeMessage('channels_listJoined')
+	async listJoined(client: SocketWithUser): Promise<Channel[]> {
 		return this.channelsService.listJoined(client.user);
 	}
 
@@ -246,42 +226,32 @@ export class ChannelsGateway extends BaseGateway {
 	 * Leave a channel.
 	 */
 	@SubscribeMessage('channels_leave')
-	async leave(client: any, payload: any) {
+	async leave(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
+		// Try to leave channel
+		const channel = await this.channelsService
+			.leave(client.user, payload.id)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
+		if (!(channel instanceof Channel)) return channel;
 
-		// Check that the client is in the channel
-		if (!channel.members.find((u) => u.id == client.user.id))
-			return {
-				code: 400,
-				message: 'Bad request',
-				errors: ['You are not in the channel'],
-			};
-
-		// TODO: remove from muted, banned and invited
-		this.channelsService.removeAdmin(client.user, channel);
-
-		// Leave channel
-		return this.channelsService.leave(client.user, channel);
+		client.leave(`channel_${channel.id}`);
+		return channel;
 	}
 
 	/*
@@ -290,10 +260,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The user to add as admin need to be in the channel.
 	 */
 	@SubscribeMessage('channels_addAdmin')
-	async addAdmin(client: any, payload: any) {
+	async addAdmin(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -302,43 +274,16 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is the owner of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (channel.owner.id != client.user.id)
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not the owner of the channel'],
-			};
-		// Check that the user to add as admin exists
-		const user = await this.usersService.findOne(payload.user_id);
-		if (!user)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['User not found'],
-			};
-		// Check that the user to add as admin is in the channel
-		if (!channel.members.find((u) => u.id == user.id))
-			return {
-				code: 400,
-				message: 'Bad request',
-				errors: ['User is not in the channel'],
-			};
-
-		// Update channel
-		return this.channelsService.addAdmin(user, channel);
+		// Try to add admin
+		return this.channelsService
+			.addAdmin(client.user, payload.user_id, payload.id)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -347,10 +292,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The user to add as admin need to be in the channel.
 	 */
 	@SubscribeMessage('channels_removeAdmin')
-	async removeAdmin(client: any, payload: any) {
+	async removeAdmin(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | Channel> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -359,43 +306,16 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is the owner of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (channel.owner.id != client.user.id)
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not the owner of the channel'],
-			};
-		// Check that the user to add as admin exists
-		const user = await this.usersService.findOne(payload.user_id);
-		if (!user)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['User not found'],
-			};
-		// Check that the user is an admin of the channel
-		if (!channel.admins.find((u) => u.id == user.id))
-			return {
-				code: 400,
-				message: 'Bad request',
-				errors: ['User is not an admin of the channel'],
-			};
-
-		// Update channel
-		return this.channelsService.removeAdmin(user, channel);
+		// Try to remove admin
+		return this.channelsService
+			.removeAdmin(client.user, payload.user_id, payload.id)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -403,10 +323,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The client need to be an admin of the channel.
 	 */
 	@SubscribeMessage('channels_banUser')
-	async ban(client: any, payload: any) {
+	async ban(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | ChannelBannedUser> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -419,36 +341,31 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is an admin of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (!channel.admins.find((u) => u.id == client.user.id))
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not an admin of the channel'],
-			};
-		// Check that the user to ban exists
-		const user = await this.usersService.findOne(payload.user_id);
-		if (!user)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['User not found'],
-			};
+		// Try to ban user
+		const channelBannedUser = await this.channelsService
+			.banUser(client.user, payload.user_id, payload.id, until.toJSDate())
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
+		if (!(channelBannedUser instanceof ChannelBannedUser))
+			return channelBannedUser;
 
-		// Update channel
-		return this.channelsService.banUser(user, channel, until.toJSDate());
+		// Loop through all connected clients and make user leave the channel
+		this.connectedClientsService.get().forEach((cClientId) => {
+			const cClient = this.server.sockets.sockets.get(
+				cClientId,
+			) as SocketWithUser;
+			if (cClient.user.id == payload.user_id) {
+				cClient.leave(`channel_${payload.id}`);
+				return;
+			}
+		});
+
+		return channelBannedUser;
 	}
 
 	/*
@@ -456,10 +373,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The client need to be an admin of the channel.
 	 */
 	@SubscribeMessage('channels_muteUser')
-	async mute(client: any, payload: any) {
+	async mute(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | ChannelMutedUser> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -472,36 +391,21 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is an admin of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (!channel.admins.find((u) => u.id == client.user.id))
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not an admin of the channel'],
-			};
-		// Check that the user to mute exists
-		const user = await this.usersService.findOne(payload.user_id);
-		if (!user)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['User not found'],
-			};
-
-		// Update channel
-		return this.channelsService.muteUser(user, channel, until.toJSDate());
+		// Try to mute user
+		return this.channelsService
+			.muteUser(
+				client.user,
+				payload.user_id,
+				payload.id,
+				until.toJSDate(),
+			)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -509,10 +413,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The client need to be an admin of the channel.
 	 */
 	@SubscribeMessage('channels_inviteUser')
-	async inviteUser(client: any, payload: any) {
+	async inviteUser(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | ChannelInvitedUser> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -521,36 +427,16 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is an admin of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (!channel.admins.find((u) => u.id == client.user.id))
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not an admin of the channel'],
-			};
-		// Check that the user to invite exists TODO: might always be true if the user is in the admin list
-		const user = await this.usersService.findOne(payload.user_id);
-		if (!user)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['User not found'],
-			};
-
-		// Update channel
-		return this.channelsService.inviteUser(client.user, user, channel);
+		// Try to invite user
+		return this.channelsService
+			.inviteUser(client.user, payload.user_id, payload.id)
+			.then((channel) => channel)
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -559,10 +445,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * The client need to not be muted in the channel.
 	 */
 	@SubscribeMessage('channels_sendMessage')
-	async sendMessage(client: any, payload: any) {
+	async sendMessage(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | ChannelMessage> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -571,36 +459,22 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is a member of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (!channel.members.find((u) => u.id == client.user.id))
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not a member of the channel'],
-			};
-		// TODO: check that user is not muted
-
-		// Create message
-		const message = await this.channelsService.sendMessage(
-			client.user,
-			channel,
-			payload.message,
-		);
+		// Try to send message
+		const message = await this.channelsService
+			.sendMessage(client.user, payload.id, payload.message)
+			.then((message) => message)
+			.catch((error) => exceptionToObj(error));
+		if (!(message instanceof ChannelMessage)) return message;
 
 		// Send message to all members of the channel (except the sender)
-		client.to(`channel_${channel.id}`).emit('channels_message', message);
+		client
+			.to(`channel_${message.channelId}`)
+			.emit('channels_message', message);
 
 		return message;
 	}
@@ -611,10 +485,12 @@ export class ChannelsGateway extends BaseGateway {
 	 * Return the 50 message before the given date.
 	 */
 	@SubscribeMessage('channels_messages')
-	async getMessages(client: Socket, payload: any) {
+	async getMessages(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<WSResponse | ChannelMessage[]> {
+		// Validate payload
 		const errors: Array<string> = [];
-
-		// Check that payload is not undefined
 		if (payload === undefined) errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Channel id is not specified');
@@ -626,33 +502,15 @@ export class ChannelsGateway extends BaseGateway {
 
 		if (errors.length != 0)
 			return {
-				code: 400,
-				message: 'Bad request',
-				errors: errors,
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
 			};
 
-		// Check that the client is a member of the channel
-		const channel = await this.channelsService.findOne(payload.id);
-		if (!channel)
-			return {
-				code: 404,
-				message: 'Not found',
-				errors: ['Channel not found'],
-			};
-		else if (!channel.members.find((u) => u.id == client['user'].id))
-			return {
-				code: 403,
-				message: 'Forbidden',
-				errors: ['You are not a member of the channel'],
-			};
-
-		// Get channel messages
-		const message = this.channelsService.getMessages(
-			client['user'],
-			channel,
-			before.toJSDate(),
-		);
-
-		return message;
+		// Try to get messages
+		return this.channelsService
+			.getMessages(client.user, payload.id, before.toJSDate())
+			.then((messages) => messages)
+			.catch((error) => exceptionToObj(error));
 	}
 }

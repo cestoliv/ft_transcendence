@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { UsersGateway } from './users.gateway';
 import { AuthModule } from 'src/auth/auth.module';
 import { ChannelsModule } from 'src/channels/channels.module';
+import { ConnectedClientsService } from 'src/base.gateway';
 
 @Module({
 	imports: [
@@ -14,7 +15,7 @@ import { ChannelsModule } from 'src/channels/channels.module';
 		forwardRef(() => ChannelsModule),
 	],
 	controllers: [UsersController],
-	providers: [UsersService, UsersGateway],
+	providers: [UsersService, UsersGateway, ConnectedClientsService],
 	exports: [UsersService],
 })
 export class UsersModule {}
