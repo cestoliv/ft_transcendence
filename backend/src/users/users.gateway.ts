@@ -1,6 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { BaseGateway } from 'src/base.gateway';
+import { SocketWithUser, WSResponse } from 'src/types';
+import { exceptionToObj } from 'src/utils';
+import { User } from './entities/user.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -12,8 +15,31 @@ import { BaseGateway } from 'src/base.gateway';
 	},
 })
 export class UsersGateway extends BaseGateway {
-	@SubscribeMessage('message')
-	handleMessage(client: any, payload: any): string {
-		return `Hello ${client.user.username}, you said: ${payload}`;
+	/*
+	 * Get user
+	 */
+	@SubscribeMessage('users_get')
+	async getUser(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<User | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get user
+		return await this.usersService
+			.findOne(payload.id)
+			.then((user) => user)
+			.catch((error) => exceptionToObj(error));
 	}
 }
