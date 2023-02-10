@@ -239,3 +239,79 @@
     cursor: pointer;
     background-color: rgb(46, 43, 43)
 }
+
+
+/* list-chan-modal */
+
+.list-chan-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+}
+
+.AllChan-wrapper {
+    background-color: rgb(46, 43, 43);
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 20px;
+}
+
+.display-chan-title {
+    width: 100%;
+    border-radius: 20px;
+    padding: 5px;
+    text-align: center;
+}
+
+.ChansOther-wrapper {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: scroll;
+    padding-top: 5px;
+}
+
+.ChansOther-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+
+.ChansOther-item-wrapper {
+    width: 100%;
+
+}
+
+.ChansBan-item-wrapper {
+    width: 100%;
+}
+
+.chan-list-item {
+    background-color: rgb(36, 33, 33);
+    border-radius: 15px;
+    padding: 10px;
+    margin-bottom: 3px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.e-plus:hover {
+    cursor: pointer;
+}
+
+.password-chan-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+}
