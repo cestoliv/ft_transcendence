@@ -7,11 +7,6 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser } from '../interfaces';
 
-const defaultFormData = {
-	mdp: '',
-	body: '',
-};
-
 type ChatProps = {
 	user_me : IUser,
 	activeConvId : number | undefined,
@@ -21,50 +16,67 @@ export default function Chat(props: ChatProps) {
 
 	const socket = useContext(SocketContext);
 
-	const [isCheckedA, setIsCheckedA] = useState(false);
-	const [visibility, setVisibility] = useState<string>("public");
-	const [formData, SetFormData] = useState(defaultFormData);
-	// const { mdp, body } = formData;
+	const [passWord, setPassWord] = useState<string>('');
 	const [chan, setChan] = useState<IChannel | null>(null);
 
-	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		SetFormData((prevState) => ({
-			...prevState,
-			[e.target.id]: e.target.value,
-		}));
+	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'password-input')
+			setPassWord(event.target.value);
 	};
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-
-		SetFormData(defaultFormData);
-	};
-
-	const changeData = () => {
-		try {
+		console.log("hello 43");
+		if (chan)
+		{
+			console.log('channel update');
 			socket.emit(
-				'channels_findOne',
+				'channels_update',
 				{
-					id: props.activeConvId,
+					id: chan.id,
+					visibility: 'password-protected',
+					password: passWord,
 				},
 				(data: any) => {
-					// console.log("fdeda");
-					setChan(data);
+					if (data.message)
+							alert(data.errors);
+					else
+					{
+						setChan(data);
+					}
 				},
 			);
-		} catch (error) {
-			alert(error);
-		}	
+		}
+	};
+
+	const addPassWord = (event: any): void => {
+		event?.preventDefault();
+		console.log("hello 43");
+		socket.emit(
+			'channels_update',
+			{
+				id: chan?.id,
+				visibility: 'password-protected',
+				password: passWord,
+			},
+			(data: any) => {
+				if (data.message)
+						alert(data.errors);
+				else
+				{
+					setChan(data);
+					setPassWord("");
+				}
+			},
+		);
 	}
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
 		// setIsCheckedA(e.target.checked);
-		if (chan && chan.visibility === "public")
+		if (chan && chan.visibility === "public" || chan?.visibility === 'password-protected')
 		{
-			console.log("buzz2 : " + chan.id);
-			// console.log("dezdze : " + props.activeConvId);
 			socket.emit(
-				'channels_setVisibility',
+				'channels_update',
 				{
 					id: chan.id,
 					visibility: 'private',
@@ -74,16 +86,14 @@ export default function Chat(props: ChatProps) {
 							alert(data.errors);
 					else
 					{
-						console.log("set chan dzfdzf : ");
 						setChan(data);
 					}
 				},
 			);
 		}
 		else {
-			console.log("buzz3");
 			socket.emit(
-				'channels_setVisibility',
+				'channels_update',
 				{
 					id: chan?.id,
 					visibility: 'public',
@@ -96,8 +106,6 @@ export default function Chat(props: ChatProps) {
 				},
 			);
 		}
-		console.log("bueeeee : " + chan?.visibility);
-		// changeData();
 	};
 
 	const toggleHidden = (event: any) => {
@@ -113,16 +121,6 @@ export default function Chat(props: ChatProps) {
     }
 
 	useEffect(() => {
-		// socket.emit(
-		// 	'channels_setVisibility',
-		// 	{
-		// 		id: props.activeConvId,
-		// 		visibility: 'private',
-		// 	},
-		// 	(data: any) => {
-		// 		// console.log("pooipo");
-		// 	},
-		// );
 		socket.emit(
 			'channels_get',
 			{
@@ -135,7 +133,6 @@ export default function Chat(props: ChatProps) {
 					setChan(data);
 			},
 		);
-		// console.log("bueeeee : " + chan?.visibility);
 	}, [chan]);
 
 	return (
@@ -147,20 +144,21 @@ export default function Chat(props: ChatProps) {
 						<div className="wrapper-settings hidden">
 							<Checkbox
 								handleChange={isChecked}
-								isChecked={chan ? (chan.visibility === 'public' ? false : true) : false}
+								isChecked={chan?.visibility === 'public' || chan?.visibility === 'password-protected' ? false : true}
 								label="Private"
 							/>
-							<form className="mpd-form" onSubmit={(e) => onSubmit(e)}>
+							<form className="mpd-form">
 								<label htmlFor="mdp" id="mdp-label">
 									mdp
 								</label>
 								<input
+									name='password-input'
 									type="text"
 									id="mdp"
-									value={""}
-									onChange={(e) => onChange(e)}
+									value={passWord}
+									onChange={handleChange}
 								/>
-								<button type="submit" id="mdp-submit-button">
+								<button type="submit" id="mdp-submit-button" onClick={addPassWord}>
 									Change
 								</button>
 							</form>
