@@ -1,3 +1,10 @@
+# Table of content
+
+- [Rest Api](#rest-api)
+- [Websocket Api](#websocket-api)
+- [Websocker Events](#websocket-events)
+- [Objects](#objects)
+
 # REST API
 
 Every routes, except `/login` and `/42oauth` requires to user to be logged in. You need to provide an Bearer token in the request headers.

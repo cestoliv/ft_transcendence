@@ -5,6 +5,7 @@ import { BaseGateway } from 'src/base.gateway';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj } from 'src/utils';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserFriend } from './entities/user-friend.entity';
 import { User } from './entities/user.entity';
 
 @WebSocketGateway({
@@ -83,6 +84,34 @@ export class UsersGateway extends BaseGateway {
 		return await this.usersService
 			.update(client.user, payload.id, updateUserDto)
 			.then((user) => user)
+			.catch((error) => exceptionToObj(error));
+	}
+
+	/*
+	 * Invite friend
+	 */
+	@SubscribeMessage('users_inviteFriend')
+	async inviteFriend(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<UserFriend | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Try to invite friend
+		return await this.usersService
+			.inviteFriend(client.user, payload.id)
+			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
 }
