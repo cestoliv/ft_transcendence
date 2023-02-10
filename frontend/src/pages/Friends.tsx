@@ -3,6 +3,7 @@ import Chat from '../components/Chat';
 import InfosConv from '../components/InfosConv';
 import FriendsList from '../components/FriendsList';
 import ChanList from '../components/ChanList';
+import AllChan from '../components/AllChan';
 import { useState } from 'react';
 import { IConvList } from '../interface';
 
@@ -43,6 +44,10 @@ export default function Friends(props: FriendsProps) {
 	const OpenJoinChanModal = () => setOpenJModal(true);
 	const CloseJoinChanModal = () => setOpenJModal(false);
 
+	const [openLChanModal, setOpenListChanModal] = React.useState(true);
+	const OpenListChanModal = () => setOpenListChanModal(true);
+	const CloseListChanModal = () => setOpenListChanModal(false);
+
 	// form create chan
 	const [chanName, setChanName] = useState<string>('');
 	const [chanMdp, setChanMdp] = useState<string>('');
@@ -74,7 +79,7 @@ export default function Friends(props: FriendsProps) {
 					{
 						name: chanName,
 						password: chanMdp,
-						visibility: 'public',
+						visibility: chanMdp === '' ? 'public' : 'password-protected',
 					},
 					(data: any) => {
 					},
@@ -151,7 +156,7 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	useEffect(() => {
-		console.log("buzz");
+		// console.log("buzz");
 		socket.emit('channels_list', {}, (data: any) => {
 			console.log("hello15 : ");
 			console.log(data);
@@ -165,6 +170,17 @@ export default function Friends(props: FriendsProps) {
 				<div className="chan-list-buttons">
 					<button onClick={OpenCreateChanModal}>Create chan</button>
 					<button onClick={OpenJoinChanModal}>Join chan</button>
+					<button onClick={OpenListChanModal}>List chan</button>
+					<Modal
+						open={openLChanModal}
+						onClose={CloseListChanModal}
+						aria-labelledby="modal-modal-title"
+						aria-describedby="modal-modal-description"
+					>
+						<Box className="list-chan-modal">
+							<AllChan user_me={props.user_me}/>
+						</Box>
+					</Modal>
 					<Modal
 						open={openCModal}
 						onClose={CloseCreateChanModal}

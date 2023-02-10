@@ -36,12 +36,12 @@ export default function InfosConv(props: InfosConvProps) {
 	return (
 		<div className="i-conv-wrapper">
 			{channel && (
-			<div className="chan_user_wrapper">
-			{channel.members.map(member => (
-				<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins}/>
-			))}
-			</div>
-      	)}
+				<div className="chan_user_wrapper">
+					{channel.members.map(member => (
+						<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins}/>
+					))}
+				</div>
+      		)}
 		</div>
 	);
 }

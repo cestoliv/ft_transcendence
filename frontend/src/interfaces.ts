@@ -17,7 +17,30 @@ export interface IChannel {
 	visibility: 'public' | 'private' | 'password-protected';
 	admins: IUser[];
 	members: IUser[];
-	banned: IUser[];
+	banned: IChannelBannedUser[];
 	muted: IUser[];
-	invited: IUser[];
+	invited: IChannelInvitedUser[];
   }
+
+  export interface IChannelBannedUser {
+	userId: number,
+	user: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	until: Date,
+}
+
+export interface IChannelInvitedUser{
+	userId: number,
+	user: IUser,
+
+	inviterId: number,
+	inviter: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	invited_at: Date,
+}

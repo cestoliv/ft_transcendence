@@ -75,7 +75,7 @@ export const ChanUser = (props: ChanUserProps) => {
             {
                 id: props.chan_id,
                 user_id: props.member_id,
-                until : "2023-02-09T01:00:00-01:00",
+                until : "2023-02-10T01:00:00-01:00",
             },
             (data: any) => {
                 if (data.message)
@@ -86,7 +86,7 @@ export const ChanUser = (props: ChanUserProps) => {
         );
     }
 
-    const isAdmin = (event: any): boolean => {
+    const isAdmin = (): boolean => {
         if (props.chan_admins)
         {
             let x = 0;
