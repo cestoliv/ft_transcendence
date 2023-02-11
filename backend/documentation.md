@@ -720,6 +720,40 @@ payload: {
 		}
 		```
 
+### **Remove friend (or decline friendship request)**
+
+#### Input
+```javascript
+message: `users_removeFriend`
+payload: {
+	id: number, // Id of the user how invited the client
+}
+```
+
+#### Return
+- The deleted friendship object ([User](#user))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['Friendship not found'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
 
 # Websocket Events
 

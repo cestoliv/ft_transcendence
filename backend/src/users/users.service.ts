@@ -173,4 +173,23 @@ export class UsersService {
 
 		return this.userFriendsRepository.save(friendship);
 	}
+
+	async removeFriendship(user: User, friendId: number) {
+		const friend = await this.findOne(friendId);
+		if (!friend) throw new NotFoundException('User not found');
+
+		const friendship = await this.userFriendsRepository.findOne({
+			where: [
+				{ inviterId: user.id, inviteeId: friend.id },
+				{ inviterId: friend.id, inviteeId: user.id },
+			],
+		});
+		if (!friendship) throw new NotFoundException('Friendship not found');
+
+		this.userFriendsRepository.delete({
+			inviterId: friendship.inviterId,
+			inviteeId: friendship.inviteeId,
+		});
+		return friendship;
+	}
 }

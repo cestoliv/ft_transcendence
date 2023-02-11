@@ -142,4 +142,32 @@ export class UsersGateway extends BaseGateway {
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
+
+	/*
+	 * Remove friend
+	 */
+	@SubscribeMessage('users_removeFriend')
+	async removeFriend(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<UserFriend | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Try to remove friend
+		return await this.usersService
+			.removeFriendship(client.user, payload.id)
+			.then((userFriend) => userFriend)
+			.catch((error) => exceptionToObj(error));
+	}
 }
