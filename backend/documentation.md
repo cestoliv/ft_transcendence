@@ -661,7 +661,7 @@ payload: {
 ```
 
 #### Return
-- The new friendship object ([User](#user))
+- The new friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
 	+ ```javascript
 		{
@@ -696,7 +696,7 @@ payload: {
 ```
 
 #### Return
-- The updated friendship object ([User](#user))
+- The updated friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
 	+ ```javascript
 		{
@@ -731,7 +731,7 @@ payload: {
 ```
 
 #### Return
-- The deleted friendship object ([User](#user))
+- The deleted friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
 	+ ```javascript
 		{
