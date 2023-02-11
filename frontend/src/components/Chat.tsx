@@ -7,9 +7,11 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser } from '../interfaces';
 
+import ChatMessages from './ChatMessages'
+
 type ChatProps = {
 	user_me : IUser,
-	activeConvId : number | undefined,
+	activeConvId : number,
 };
 
 export default function Chat(props: ChatProps) {
@@ -17,41 +19,35 @@ export default function Chat(props: ChatProps) {
 	const socket = useContext(SocketContext);
 
 	const [passWord, setPassWord] = useState<string>('');
+	const [message, setMessage] = useState<string>('');
 	const [chan, setChan] = useState<IChannel | null>(null);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'password-input')
 			setPassWord(event.target.value);
+		if (event.target.name === 'message-input')
+			setMessage(event.target.value);
 	};
-
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		console.log("hello 43");
-		if (chan)
+	  
+	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+		if (message != '')
 		{
-			console.log('channel update');
 			socket.emit(
-				'channels_update',
+				'channels_sendMessage',
 				{
-					id: chan.id,
-					visibility: 'password-protected',
-					password: passWord,
+					id : chan?.id,
+					message : message,
 				},
 				(data: any) => {
-					if (data.message)
-							alert(data.errors);
-					else
-					{
-						setChan(data);
-					}
+					setMessage('');	
 				},
 			);
 		}
-	};
+    };
 
 	const addPassWord = (event: any): void => {
 		event?.preventDefault();
-		console.log("hello 43");
 		socket.emit(
 			'channels_update',
 			{
@@ -72,7 +68,6 @@ export default function Chat(props: ChatProps) {
 	}
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-		// setIsCheckedA(e.target.checked);
 		if (chan && chan.visibility === "public" || chan?.visibility === 'password-protected')
 		{
 			socket.emit(
@@ -121,6 +116,11 @@ export default function Chat(props: ChatProps) {
     }
 
 	useEffect(() => {
+
+		// let windowHeight = window.innerHeight;
+		// let chatnav = document.getElementById('chat-nav');
+		// if (chatnav)
+		// 	chatnav.style.height = '50px';
 		socket.emit(
 			'channels_get',
 			{
@@ -137,7 +137,7 @@ export default function Chat(props: ChatProps) {
 
 	return (
 		<div className="chat-wrapper">
-			<div className="chat-nav">
+			<div className="chat-nav" id='chat-nav'>
 				<span>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
 				{isOwner() && (
 					<div className="chat-nav-right">
@@ -170,8 +170,18 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<div className="chat-messages"></div>
-			<div className="write-message"></div>
+			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId}/>
+			<form className="write-message" onSubmit={submitMessage}>
+					<input
+						value={message}
+						name='message-input'
+						id='message-input'
+						type='message'
+						placeholder='Message'
+						onChange={handleChange}
+						required
+						/>
+			</form>
 		</div>
 	);
 }

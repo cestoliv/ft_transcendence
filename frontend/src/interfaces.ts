@@ -44,3 +44,17 @@ export interface IChannelInvitedUser{
 
 	invited_at: Date,
 }
+
+export interface IChannelMessage{
+	id: number,
+
+	senderId: number,
+	sender: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	message: string,
+
+	sentAt: Date,
+}
