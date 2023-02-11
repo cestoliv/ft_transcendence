@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	AfterLoad,
+	Column,
+	Entity,
+	OneToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserFriend } from './user-friend.entity';
 
 @Entity()
@@ -22,9 +28,13 @@ export class User {
 	friendOf: UserFriend[];
 
 	// List of friends where this user is the inviter or the invitee
-	// And where the friendship has been accepted
-	get friends(): User[] {
-		return this.invitedFriends
+	friends: User[];
+	@AfterLoad()
+	updateFriends() {
+		if (!this.invitedFriends) this.invitedFriends = [];
+		if (!this.friendOf) this.friendOf = [];
+
+		this.friends = this.invitedFriends
 			.filter((friend) => friend.accepted)
 			.map((friend) => friend.invitee)
 			.concat(

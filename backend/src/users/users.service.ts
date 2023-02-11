@@ -156,4 +156,21 @@ export class UsersService {
 
 		return this.userFriendsRepository.save(newFriendship);
 	}
+
+	async acceptFriendship(invitee: User, inviterId: number) {
+		const inviter = await this.findOne(inviterId);
+		if (!inviter) throw new NotFoundException('User not found');
+
+		const friendship = await this.userFriendsRepository.findOne({
+			where: { inviterId, inviteeId: invitee.id },
+		});
+		if (!friendship)
+			throw new NotFoundException('Friendship request not found');
+		if (friendship.accepted)
+			throw new ConflictException('Friendship already accepted');
+
+		friendship.accepted = true;
+
+		return this.userFriendsRepository.save(friendship);
+	}
 }

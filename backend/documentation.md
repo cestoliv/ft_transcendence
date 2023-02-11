@@ -650,6 +650,77 @@ payload: {
 		}
 		```
 
+### **Invite as friend**
+
+#### Input
+```javascript
+message: `users_inviteFriend`
+payload: {
+	id: number, // User id
+}
+```
+
+#### Return
+- The new friendship object ([User](#user))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['User already invited or already friend'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Accept friendship request**
+
+#### Input
+```javascript
+message: `users_acceptFriend`
+payload: {
+	id: number, // Id of the user how invited the client
+}
+```
+
+#### Return
+- The updated friendship object ([User](#user))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['Friendship already accepted'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+
 # Websocket Events
 
 ## Channel
@@ -686,6 +757,23 @@ socket.on('channels_message', (data: any) => {
 	id: number,
 	id42: number, // -1 for non-42 users
 	username: string,
+	invitedFriends: UserFriends[],
+	friendOf: UserFriend[],
+	friends: User[],
+}
+```
+
+## UserFriend
+
+```javascript
+{
+	inviterId: number,
+	inviter: User,
+
+	inviteeId: number,
+	invitee: User,
+
+	accepted: boolean
 }
 ```
 

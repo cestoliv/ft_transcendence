@@ -114,4 +114,32 @@ export class UsersGateway extends BaseGateway {
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
+
+	/*
+	 * Accept friend
+	 */
+	@SubscribeMessage('users_acceptFriend')
+	async acceptFriend(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<UserFriend | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Try to accept friend
+		return await this.usersService
+			.acceptFriendship(client.user, payload.id)
+			.then((userFriend) => userFriend)
+			.catch((error) => exceptionToObj(error));
+	}
 }
