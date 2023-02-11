@@ -7,10 +7,11 @@ import { UsersGateway } from './users.gateway';
 import { AuthModule } from 'src/auth/auth.module';
 import { ChannelsModule } from 'src/channels/channels.module';
 import { ConnectedClientsService } from 'src/base.gateway';
+import { UserFriend } from './entities/user-friend.entity';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User]),
+		TypeOrmModule.forFeature([User, UserFriend]),
 		forwardRef(() => AuthModule),
 		forwardRef(() => ChannelsModule),
 	],

@@ -14,6 +14,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { FindOptionsSelect, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserFriend } from './entities/user-friend.entity';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -21,6 +22,8 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly usersRepository: Repository<User>,
+		@InjectRepository(UserFriend)
+		private readonly userFriendsRepository: Repository<UserFriend>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
 	) {}
@@ -35,7 +38,9 @@ export class UsersService {
 	}
 
 	findAll() {
-		return this.usersRepository.find();
+		return this.usersRepository.find({
+			relations: ['invitedFriends', 'friendOf'],
+		});
 	}
 
 	findOne(id: number, withTotp = false) {
@@ -44,6 +49,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id },
 			select: select as FindOptionsSelect<User>,
+			relations: ['invitedFriends', 'friendOf'],
 		});
 	}
 
@@ -53,6 +59,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id42 },
 			select: select as FindOptionsSelect<User>,
+			relations: ['invitedFriends', 'friendOf'],
 		});
 	}
 
@@ -62,6 +69,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { username },
 			select: select as FindOptionsSelect<User>,
+			relations: ['invitedFriends', 'friendOf'],
 		});
 	}
 
@@ -129,5 +137,59 @@ export class UsersService {
 				'Invalid bearer token found in socket handshake headers',
 			);
 		}
+	}
+
+	async inviteFriend(inviter: User, newFriendId: number) {
+		const newFriend = await this.findOne(newFriendId);
+		if (!newFriend) throw new NotFoundException('User not found');
+
+		if (newFriend.friends.includes(inviter)) {
+			throw new ConflictException(
+				'User already invited or already friend',
+			);
+		}
+
+		const newFriendship = new UserFriend();
+		newFriendship.inviter = inviter;
+		newFriendship.invitee = newFriend;
+		newFriendship.accepted = false;
+
+		return this.userFriendsRepository.save(newFriendship);
+	}
+
+	async acceptFriendship(invitee: User, inviterId: number) {
+		const inviter = await this.findOne(inviterId);
+		if (!inviter) throw new NotFoundException('User not found');
+
+		const friendship = await this.userFriendsRepository.findOne({
+			where: { inviterId, inviteeId: invitee.id },
+		});
+		if (!friendship)
+			throw new NotFoundException('Friendship request not found');
+		if (friendship.accepted)
+			throw new ConflictException('Friendship already accepted');
+
+		friendship.accepted = true;
+
+		return this.userFriendsRepository.save(friendship);
+	}
+
+	async removeFriendship(user: User, friendId: number) {
+		const friend = await this.findOne(friendId);
+		if (!friend) throw new NotFoundException('User not found');
+
+		const friendship = await this.userFriendsRepository.findOne({
+			where: [
+				{ inviterId: user.id, inviteeId: friend.id },
+				{ inviterId: friend.id, inviteeId: user.id },
+			],
+		});
+		if (!friendship) throw new NotFoundException('Friendship not found');
+
+		this.userFriendsRepository.delete({
+			inviterId: friendship.inviterId,
+			inviteeId: friendship.inviteeId,
+		});
+		return friendship;
 	}
 }

@@ -12,6 +12,7 @@ import { ChannelBannedUser } from './channels/entities/channel-banned.entity';
 import { ChannelMutedUser } from './channels/entities/channel-muted.entity';
 import { ChannelInvitedUser } from './channels/entities/channel-invited.entity';
 import { ChannelMessage } from './channels/entities/channel-message.entity';
+import { UserFriend } from './users/entities/user-friend.entity';
 
 @Module({
 	imports: [
@@ -30,6 +31,7 @@ import { ChannelMessage } from './channels/entities/channel-message.entity';
 				database: configService.get('DB_NAME'),
 				entities: [
 					User,
+					UserFriend,
 					Channel,
 					ChannelBannedUser,
 					ChannelMutedUser,
