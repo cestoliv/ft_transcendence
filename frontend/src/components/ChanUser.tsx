@@ -19,9 +19,9 @@ type ChanUserProps = {
 export const ChanUser = (props: ChanUserProps) => {
     const socket = useContext(SocketContext);
 
-    const [openCModal, setOpenCModal] = React.useState(false);
-	const OpenCreateChanModal = () => setOpenCModal(true);
-	const CloseCreateChanModal = () => setOpenCModal(false);
+    const [openChanUserModal, setOpenChanUserModal] = React.useState(false);
+	const OpenChanUserModal = () => setOpenChanUserModal(true);
+	const CloseChanUserModal = () => setOpenChanUserModal(false);
 
 
     // add amin or remove admin
@@ -39,7 +39,7 @@ export const ChanUser = (props: ChanUserProps) => {
                     if (data.message)
 							alert(data.errors);
                     else
-                        CloseCreateChanModal();
+                        CloseChanUserModal();
                 },
             );
 		}
@@ -56,7 +56,7 @@ export const ChanUser = (props: ChanUserProps) => {
                     if (data.message)
 							alert(data.errors);
                     else
-                        CloseCreateChanModal();
+                        CloseChanUserModal();
                 },
             );
 		}
@@ -81,7 +81,24 @@ export const ChanUser = (props: ChanUserProps) => {
                 if (data.message)
                         alert(data.errors);
                 else
-                    CloseCreateChanModal();
+                    CloseChanUserModal();
+            },
+        );
+    }
+
+    const muteUser = (event: any): void => {
+        socket.emit(
+            'channels_muteUser',
+            {
+                id: props.chan_id,
+                user_id: props.member_id,
+                until : "2023-02-11T03:00:00-01:00",
+            },
+            (data: any) => {
+                if (data.message)
+                        alert(data.errors);
+                else
+                    CloseChanUserModal();
             },
         );
     }
@@ -114,10 +131,10 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper">
-			<h3 onClick={OpenCreateChanModal}>{props.username}</h3>
+			<h3 onClick={OpenChanUserModal}>{props.username}</h3>
             <Modal
-                open={openCModal}
-                onClose={CloseCreateChanModal}
+                open={openChanUserModal}
+                onClose={CloseChanUserModal}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
@@ -130,7 +147,7 @@ export const ChanUser = (props: ChanUserProps) => {
                     )}
                     <button name='button-ban_user' onClick={banUser}>Ban</button>
                     <button>Kick</button>
-                    <button>Mute</button>
+                    <button name='button-mute_user' onClick={muteUser}>Mute</button>
                 </Box>
             </Modal>
 		</div>

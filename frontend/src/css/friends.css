@@ -1,5 +1,6 @@
 .friends-wrapper {
-    flex-grow: 1;
+    height: 90vh;
+    max-height: 90vh;
     display: flex;
     flex-direction: row;
     font-family: 'VT323', monospace;
@@ -8,7 +9,8 @@
 
 .chan-list {
     width: 15%;
-    height: 100%;
+    height: 90vh;
+    max-height: 90vh;
     background-color: rgb(52, 63, 62);
     display: flex;
     flex-direction: column;
@@ -17,18 +19,21 @@
 
 .priv-conv-list {
     width: 15%;
-    height: 100%;
+    height: 90vh;
+    max-height: 90vh;
     background-color: rgb(80, 90, 91);
 }
 
 .chat {
     width: 55%;
-    height: 100%;
+    height: 90vh;
+    max-height: 90vh;
 }
 
 .infos-conv {
     width: 15%;
-    height: 100%;
+    height: 90vh;
+    max-height: 90vh;
     background-color: rgb(143, 145, 162);
 }
 
@@ -265,14 +270,14 @@
 }
 
 .display-chan-title {
-    width: 100%;
+    width: 90vh;
     border-radius: 20px;
     padding: 5px;
     text-align: center;
 }
 
 .ChansOther-wrapper {
-    width: 100%;
+    width: 90vh;
     max-height: 200px;
     overflow-y: scroll;
     padding-top: 5px;
@@ -284,12 +289,12 @@
 
 
 .ChansOther-item-wrapper {
-    width: 100%;
+    width: 90vh;
 
 }
 
 .ChansBan-item-wrapper {
-    width: 100%;
+    width: 90vh;
 }
 
 .chan-list-item {

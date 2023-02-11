@@ -33,7 +33,7 @@ export default function Friends(props: FriendsProps) {
 	const [firstName, setFirstName] = useState<string>('');
 	let [convList] = useState<IConvList[]>([]);
 
-	let [activeConvId, setActivConvId] = useState<number | undefined>(1);
+	let [activeConvId, setActivConvId] = useState<number>(25);
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -44,7 +44,7 @@ export default function Friends(props: FriendsProps) {
 	const OpenJoinChanModal = () => setOpenJModal(true);
 	const CloseJoinChanModal = () => setOpenJModal(false);
 
-	const [openLChanModal, setOpenListChanModal] = React.useState(true);
+	const [openLChanModal, setOpenListChanModal] = React.useState(false);
 	const OpenListChanModal = () => setOpenListChanModal(true);
 	const CloseListChanModal = () => setOpenListChanModal(false);
 
@@ -132,31 +132,21 @@ export default function Friends(props: FriendsProps) {
 
 	const activeConv = (event: any) => {
 		let newId;
-		let x;
+		
 		if (event.target.classList != 'wrapper-active-conv') return;
-		//let active_elem = document.getElementsByClassName('active-conv-bg')[0];
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
 		const element = event.target;
 		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
-		//console.log("hello " + document.getElementsByClassName('active-conv-bg')[0]);
 		const newActivConv = document.getElementById('active-conv-bg');
 		if (newActivConv)
 			newId = newActivConv.getAttribute('data-id');
-		// if (newId)
-		// 	console.log("data id : " + newId);
 		if (newId)
-			x = +newId;
-		// if (x)
-		// 	console.log("data id to int: " + x);
-		if (newId)
-			setActivConvId(x);
-		// console.log("hello : " + activeConvId);
+			setActivConvId(parseInt(newId));
 	};
 
 	useEffect(() => {
-		// console.log("buzz");
 		socket.emit('channels_list', {}, (data: any) => {
 			console.log("hello15 : ");
 			console.log(data);
