@@ -33,7 +33,7 @@ export default function Friends(props: FriendsProps) {
 	const [firstName, setFirstName] = useState<string>('');
 	let [convList] = useState<IConvList[]>([]);
 
-	let [activeConvId, setActivConvId] = useState<number>(25);
+	let [activeConvId, setActivConvId] = useState<number>(-1);
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -82,6 +82,8 @@ export default function Friends(props: FriendsProps) {
 						visibility: chanMdp === '' ? 'public' : 'password-protected',
 					},
 					(data: any) => {
+						if (data.messages)
+							alert(data.messages);
 					},
 				);
 			} catch (error) {
@@ -96,11 +98,11 @@ export default function Friends(props: FriendsProps) {
 				'channels_join',
 				{
 					code: joinChanName,
-					motdepasse: joinChanMdp,
+					password: joinChanMdp,
 				},
 				(data: any) => {
-					if (data.message)
-						alert(data.errors);
+					if (data.messages)
+						alert(data.messages);
 				},
 			);
 			setJoinChanName('');
@@ -146,12 +148,12 @@ export default function Friends(props: FriendsProps) {
 			setActivConvId(parseInt(newId));
 	};
 
-	useEffect(() => {
-		socket.emit('channels_list', {}, (data: any) => {
-			console.log("hello15 : ");
-			console.log(data);
-		});
-	},);
+	// useEffect(() => {
+	// 	socket.emit('channels_list', {}, (data: any) => {
+	// 		console.log("hello15 : ");
+	// 		console.log(data);
+	// 	});
+	// },);
 
 	return (
 		<div className="friends-wrapper">
@@ -271,10 +273,15 @@ export default function Friends(props: FriendsProps) {
 				</form>
 			</div>
 			<div className="chat">
-				<Chat user_me={props.user_me} activeConvId={activeConvId}/>
+				{activeConvId != -1 ? (
+					<Chat user_me={props.user_me} activeConvId={activeConvId} />
+				) : null}
+				{/* <Chat user_me={props.user_me} activeConvId={activeConvId}/> */}
 			</div>
 			<div className="infos-conv">
-				<InfosConv user_me={props.user_me} activeConvId={activeConvId} />
+				{activeConvId != -1 ? (
+						<InfosConv user_me={props.user_me} activeConvId={activeConvId} />
+					) : null}
 			</div>
 		</div>
 	);

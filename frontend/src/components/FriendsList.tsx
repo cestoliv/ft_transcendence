@@ -1,37 +1,53 @@
-import React from 'react';
+import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import Friend from './Friend';
+
+import { SocketContext } from '../context/socket';
+
+import { IChannel, IUser } from '../interfaces';
 
 import users from '../mock-data/users';
 
 type PersonListProps = {
-	// names : {
-	//     first :string,
-	//     last : string,
-	//     status : string,
-	// }[],
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export const FriendsList = (props: PersonListProps) => {
-	// let [firstName, setFirstName] = useState<string>("");
-	// let [nameList, setFriendsList] = useState<INameList[]>([]);
+	const socket = useContext(SocketContext);
 
-	// const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-	//     if (event.target.name === 'name')
-	//         setFirstName(event.target.value)
-	// };
+	let [user1, setUser1] = useState<IUser>();
+	let [user2, setUser2] = useState<IUser>();
 
-	// const addFriend = (event: any) : void => {
-	//     event?.preventDefault();
-	//     const newFriend = {first: firstName, last: "wayne", status: "connected"}
-	//     setFriendsList([...nameList, newFriend]);
-	//     setFirstName("");
-	// }
+	useEffect(() => {
+        socket.emit(
+            'users_get',
+            {
+                id: 12,
+            },
+            (data: any) => {
+                if (data.messages)
+						alert(data.messages);
+                else
+                    setUser1(data);
+            },
+        );
+		socket.emit(
+            'users_get',
+            {
+                id: 13,
+            },
+            (data: any) => {
+                if (data.messages)
+						alert(data.messages);
+                else
+                    setUser2(data);
+            },
+        );
+	},[user1, user2]);
 
 	return (
 		<div className="friendsList-wrapper">
-			{users.map((user) => (
+			{/* {users.map((user) => (
 				<Friend
 					key={user.idd}
 					name={user.pseudo}
@@ -39,13 +55,15 @@ export const FriendsList = (props: PersonListProps) => {
 					idd={user.idd}
 					activeConv={props.activeConv}
 				/>
-			))}
-			{/* <form className='add-friend-form'>
-                <label>
-                    <input type="text" name="name" placeholder='Add Friend' value={firstName} className='add-friend-form-label' onChange={handleChange}/>
-                </label>
-                <input type="submit" value="Add" className='add-friend-form-submit-button' onClick={addFriend}/>
-            </form> */}
+			))} */}
+			{user1 ? (
+					<Friend key={user1.id} user={user1} activeConv={props.activeConv}
+				/>
+				) : null}
+			{user2 ? (
+					<Friend key={user2.id} user={user2} activeConv={props.activeConv}
+				/>
+				) : null}
 		</div>
 	);
 };

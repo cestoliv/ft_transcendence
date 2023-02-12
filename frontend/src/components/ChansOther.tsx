@@ -35,7 +35,7 @@ export const ChansOther = (props: ChansOtherProps) => {
                 },
                 (data: any) => {
                     if (data.messages)
-                        alert(data.messages);
+						alert(data.messages);
                 },
             );
         }

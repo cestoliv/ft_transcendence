@@ -36,8 +36,8 @@ export const ChanUser = (props: ChanUserProps) => {
                     user_id: props.member_id,
                 },
                 (data: any) => {
-                    if (data.message)
-							alert(data.errors);
+                    if (data.messages)
+						alert(data.messages);
                     else
                         CloseChanUserModal();
                 },
@@ -53,8 +53,8 @@ export const ChanUser = (props: ChanUserProps) => {
                     user_id: props.member_id,
                 },
                 (data: any) => {
-                    if (data.message)
-							alert(data.errors);
+                    if (data.messages)
+						alert(data.messages);
                     else
                         CloseChanUserModal();
                 },
@@ -78,8 +78,8 @@ export const ChanUser = (props: ChanUserProps) => {
                 until : "2023-02-10T01:00:00-01:00",
             },
             (data: any) => {
-                if (data.message)
-                        alert(data.errors);
+                if (data.messages)
+						alert(data.messages);
                 else
                     CloseChanUserModal();
             },
@@ -95,8 +95,8 @@ export const ChanUser = (props: ChanUserProps) => {
                 until : "2023-02-11T03:00:00-01:00",
             },
             (data: any) => {
-                if (data.message)
-                        alert(data.errors);
+                if (data.messages)
+						alert(data.messages);
                 else
                     CloseChanUserModal();
             },
@@ -118,16 +118,16 @@ export const ChanUser = (props: ChanUserProps) => {
         return false;
     }
 
-    useEffect(() => {
-        // console.log("hello 26 : ");
-        // console.log(props.chan_id);
-        // if (props.chan_admins)
-        // {
-        //     {props.chan_admins.map(user => (
-        //         console.log(user.username)
-        //     ))};
-        // }
-	},);
+    // useEffect(() => {
+    //     console.log("hello 26 : ");
+    //     console.log(props.chan_id);
+    //     if (props.chan_admins)
+    //     {
+    //         {props.chan_admins.map(user => (
+    //             console.log(user.username)
+    //         ))};
+    //     }
+	// },);
 
 	return (
 		<div className="ChanUser-wrapper">
