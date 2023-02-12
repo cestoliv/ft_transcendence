@@ -139,8 +139,8 @@ export class UsersService {
 		}
 	}
 
-	async inviteFriend(inviter: User, newFriendId: number) {
-		const newFriend = await this.findOne(newFriendId);
+	async inviteFriend(inviter: User, newFriendName: string) {
+		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
 		if (newFriend.friends.includes(inviter)) {

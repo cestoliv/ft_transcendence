@@ -99,7 +99,8 @@ export class UsersGateway extends BaseGateway {
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
-		if (payload.id === undefined) errors.push('User id is not specified');
+		if (payload.username === undefined)
+			errors.push('Username is not specified');
 
 		if (errors.length != 0)
 			return {
@@ -110,7 +111,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to invite friend
 		return await this.usersService
-			.inviteFriend(client.user, payload.id)
+			.inviteFriend(client.user, payload.username)
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}

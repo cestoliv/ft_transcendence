@@ -656,7 +656,7 @@ payload: {
 ```javascript
 message: `users_inviteFriend`
 payload: {
-	id: number, // User id
+	username: string, // Username of the friend to invite
 }
 ```
 
