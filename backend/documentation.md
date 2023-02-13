@@ -672,9 +672,9 @@ payload: {
 		```
 	+ ```javascript
 		{
-			code: 409,
-			message: 'Conflict',
-			errors: ['User already invited or already friend'],
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You have been banned'],
 		}
 		```
 	+ ```javascript
@@ -682,6 +682,13 @@ payload: {
 			code: 404,
 			message: 'Not found',
 			errors: ['User not found'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['User already invited or already friend'],
 		}
 		```
 
@@ -755,6 +762,137 @@ payload: {
 		}
 		```
 
+### **Ban user**
+
+#### Input
+```javascript
+message: `users_ban`
+payload: {
+	id: number, // Id of the user to ban
+	until: string, // ISO Date of the un-ban
+}
+```
+
+#### Return
+- The new user banned object ([BannedUser](#banneduser))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Mute user**
+
+#### Input
+```javascript
+message: `users_mute`
+payload: {
+	id: number, // Id of the user to ban
+	until: string, // ISO Date of the un-ban
+}
+```
+
+#### Return
+- The new user muted object ([MutedUser](#muteduser))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Send a message**
+
+#### Input
+```javascript
+message: `users_sendMessage`
+payload: {
+	id: number, // Id of a friend
+	until: string, // Message to send
+}
+```
+
+#### Return
+- The new message object ([UserMessage](#usermessage))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You can only send messages to friends'],
+					| ['You are muted by this user']
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Get messages**
+
+#### Input
+```javascript
+message: `users_getMessages`
+payload: {
+	id: number, // Id of a friend
+	before: string, // ISO date
+}
+```
+
+#### Return
+- An array of messages object ([UserMessage[]](#usermessage))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You can only get messages from friends'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
 # Websocket Events
 
 ## Channel
@@ -808,6 +946,52 @@ socket.on('channels_message', (data: any) => {
 	invitee: User,
 
 	accepted: boolean
+}
+```
+
+## BannedUser
+
+```javascript
+{
+	userId: number,
+	user: User,
+
+	bannedId: number,
+	banned: User,
+
+	until: Date
+}
+```
+
+## MutedUser
+
+```javascript
+{
+	userId: number,
+	user: User,
+
+	mutedId: number,
+	muted: User,
+
+	until: Date
+}
+```
+
+## UserMessage
+
+```javascript
+{
+	id: number,
+
+	senderId: number,
+	sender: User,
+
+	receiverId: number,
+	receiver: User,
+
+	message: string,
+
+	sentAt: Date
 }
 ```
 

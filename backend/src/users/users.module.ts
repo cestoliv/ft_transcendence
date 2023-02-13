@@ -8,10 +8,19 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ChannelsModule } from 'src/channels/channels.module';
 import { ConnectedClientsService } from 'src/base.gateway';
 import { UserFriend } from './entities/user-friend.entity';
+import { BannedUser } from './entities/user-banned.entity';
+import { MutedUser } from './entities/user-muted.entity';
+import { UserMessage } from './entities/user.message.entity';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User, UserFriend]),
+		TypeOrmModule.forFeature([
+			User,
+			UserFriend,
+			BannedUser,
+			MutedUser,
+			UserMessage,
+		]),
 		forwardRef(() => AuthModule),
 		forwardRef(() => ChannelsModule),
 	],

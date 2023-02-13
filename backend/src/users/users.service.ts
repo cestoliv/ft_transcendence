@@ -48,7 +48,7 @@ export class UsersService {
 
 	findAll() {
 		return this.usersRepository.find({
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -58,7 +58,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -68,7 +68,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id42 },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -78,7 +78,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { username },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -152,10 +152,25 @@ export class UsersService {
 		const newFriend = await this.findOne(newFriendId);
 		if (!newFriend) throw new NotFoundException('User not found');
 
+		// Check if already invited or already friend
 		if (newFriend.friends.includes(inviter)) {
 			throw new ConflictException(
 				'User already invited or already friend',
 			);
+		}
+
+		// Check if newFriend banned inviter
+		const banned = await this.bannedUsersRepository.findOne({
+			where: { userId: newFriend.id, bannedId: inviter.id },
+		});
+		if (banned) {
+			if (banned.until > new Date())
+				throw new ForbiddenException('You have been banned');
+			else
+				await this.bannedUsersRepository.delete({
+					userId: newFriend.id,
+					bannedId: inviter.id,
+				});
 		}
 
 		const newFriendship = new UserFriend();
@@ -212,8 +227,10 @@ export class UsersService {
 		banned.banned = userToBan;
 		banned.until = until;
 
-		// Remove friendship (and ignore exceptions)
-		await this.removeFriendship(userToBan, banner.id).catch();
+		// Remove friendship
+		await this.removeFriendship(userToBan, banner.id).catch(() => {
+			// Ignore exceptions
+		});
 
 		return this.bannedUsersRepository.save(banned);
 	}

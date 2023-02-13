@@ -93,7 +93,6 @@ export class UsersGateway extends BaseGateway {
 
 	/*
 	 * Invite friend
-	 * // TODO: refuse if the user to invite banned the inviter
 	 */
 	@SubscribeMessage('users_inviteFriend')
 	async inviteFriend(
@@ -268,8 +267,12 @@ export class UsersGateway extends BaseGateway {
 			.sendMessage(client.user, payload.id, payload.message)
 			.then((message) => message)
 			.catch((error) => exceptionToObj(error));
+		if (!(message instanceof UserMessage)) return message;
 
-		// TODO: send message to the user (socket)
+		// Send message to the user
+		client
+			.to(`user_${payload.id}`)
+			.emit('users_message', { message: message });
 
 		return message;
 	}

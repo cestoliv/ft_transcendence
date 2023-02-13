@@ -13,6 +13,9 @@ import { ChannelMutedUser } from './channels/entities/channel-muted.entity';
 import { ChannelInvitedUser } from './channels/entities/channel-invited.entity';
 import { ChannelMessage } from './channels/entities/channel-message.entity';
 import { UserFriend } from './users/entities/user-friend.entity';
+import { BannedUser } from './users/entities/user-banned.entity';
+import { MutedUser } from './users/entities/user-muted.entity';
+import { UserMessage } from './users/entities/user.message.entity';
 
 @Module({
 	imports: [
@@ -32,6 +35,9 @@ import { UserFriend } from './users/entities/user-friend.entity';
 				entities: [
 					User,
 					UserFriend,
+					BannedUser,
+					MutedUser,
+					UserMessage,
 					Channel,
 					ChannelBannedUser,
 					ChannelMutedUser,
