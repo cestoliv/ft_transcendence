@@ -36,6 +36,7 @@ export default function FriendConv(props: FriendConvProps) {
         event.preventDefault();
 		if (message != '')
 		{
+            console.log("hello789");
 			socket.emit(
 				'users_sendMessage',
 				{
