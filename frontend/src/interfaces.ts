@@ -2,6 +2,19 @@ export interface IUser {
 	id: number;
 	id42: number;
 	username: string;
+	invitedFriends: IUserFriend[],
+	friendOf: IUserFriend[],
+	friends: IUser[],
+}
+
+export interface IUserFriend{
+	inviterId: number,
+	inviter: IUser,
+
+	inviteeId: number,
+	invitee: IUser,
+
+	accepted: boolean
 }
 
 export interface IAuth {

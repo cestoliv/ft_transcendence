@@ -15,11 +15,82 @@
     justify-content: space-between;
 }
 
-.friendsList-wrapper div {
-    border-radius: 15px;
-    border: none;
-    padding: 10px 20px;
+.add-accept-friend {
     display: flex;
+    flex-direction: column;
+    padding: 10px 40px;
+}
+
+.en-attente-button{
+    background-color: rgb(60, 70, 69);
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    font-family: 'VT323', monospace;
+    padding: 5px 20px;
+    margin-bottom: 10px;
+}
+
+.friend-request-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height:400px ;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+}
+
+/* add friend form */
+
+.add-friend-form {
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+}
+
+.add-friend-form-input {
+    background-color: rgb(60, 70, 69);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-family: 'VT323', monospace;
+}
+
+.friendsList-settings span{
+    margin-right: 5px;
+}
+
+
+/* friend-action-modal */
+
+.friend-action-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    background-color: rgb(52, 63, 62);
+    border-radius: 20px;
+    box-Shadow: 24;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
+}
+
+.friend-action-modal button {
+    margin-bottom: 5px;
+    border-radius: 20px;
+    background-color: rgb(72, 87, 85);
+    width: 70%;
+    padding: 5px;
+    border: none;
+}
+
+.friend-action-modal button:hover {
+    cursor: pointer;
+    background-color: rgb(91, 105, 103);
 }

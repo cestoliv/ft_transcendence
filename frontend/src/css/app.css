@@ -11,5 +11,7 @@
 @import './settings.css';
 @import './pong.css';
 @import './chanuser.css';
+@import './friendrequests.css';
+@import './privatechanjoined.css';
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');

@@ -14,7 +14,7 @@ import Pong from './pages/Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
-import { IAuth, IUser } from './interfaces';
+import { IAuth, IUser, IUserFriend, IChannel } from './interfaces';
 import NoUserFound from './pages/404';
 
 function App() {
@@ -105,7 +105,7 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Home user={user} auth={auth} />} />
 				<Route path="/friends" element={<Friends user_me={user}/>} />
-				<Route path="/searchGame" element={<SearchGame />} />
+				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/stats" element={<Stats />} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />

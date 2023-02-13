@@ -7,21 +7,13 @@ import AllChan from '../components/AllChan';
 import { useState } from 'react';
 import { IConvList } from '../interface';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IUser, IUserFriend } from '../interfaces';
 
 // modal
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
-import users from '../mock-data/users';
-import userChans from '../mock-data/userchans';
-import chansList from '../mock-data/chansList';
-
 import { SocketContext } from '../context/socket';
-
-import * as io from 'socket.io-client';
-
-// const socket = io.connect('http://api.transcendence.local');
 
   type FriendsProps = {
 	user_me : IUser,
@@ -30,8 +22,7 @@ import * as io from 'socket.io-client';
 export default function Friends(props: FriendsProps) {
 	const socket = useContext(SocketContext);
 
-	const [firstName, setFirstName] = useState<string>('');
-	let [convList] = useState<IConvList[]>([]);
+	const [user, setUser] = useState<IUser>();
 
 	let [activeConvId, setActivConvId] = useState<number>(-1);
 
@@ -57,8 +48,6 @@ export default function Friends(props: FriendsProps) {
 	const [joinChanMdp, setJoinChanMdp] = useState<string>('');
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'name') setFirstName(event.target.value);
-
 		if (event.target.name === 'create-chan-name')
 			setChanName(event.target.value);
 		if (event.target.name === 'create-chan-mdp')
@@ -73,22 +62,18 @@ export default function Friends(props: FriendsProps) {
 	const createChan = (event: any): void => {
 		event?.preventDefault();
 		if (event.target.name === 'button-create-chan') {
-			try {
-				socket.emit(
-					'channels_create',
-					{
-						name: chanName,
-						password: chanMdp,
-						visibility: chanMdp === '' ? 'public' : 'password-protected',
-					},
-					(data: any) => {
-						if (data.messages)
-							alert(data.messages);
-					},
-				);
-			} catch (error) {
-				alert(error);
-			}
+			socket.emit(
+				'channels_create',
+				{
+					name: chanName,
+					password: chanMdp,
+					visibility: chanMdp === '' ? 'public' : 'password-protected',
+				},
+				(data: any) => {
+					if (data.messages)
+						alert(data.messages);
+				},
+			);
 			setChanName('');
 			setChanMdp('');
 			CloseCreateChanModal();
@@ -111,27 +96,6 @@ export default function Friends(props: FriendsProps) {
 		}
 	};
 
-	const addFriend = (event: any): void => {
-		event?.preventDefault();
-		const newFriend = {
-			pseudo: firstName,
-			avatar: 'wayne',
-			idd: 4,
-			states: 'connected',
-		};
-		users.push(newFriend);
-		setFirstName('');
-	};
-
-	// const newTask = {taskName: 'buzz', deadline: 3};
-	// setTodolist([...friends, newTask]);
-	convList = [
-		{ name: 'had', id: 1 },
-		{ name: 'don', id: 2 },
-	];
-
-	const [isActive, setIsActive] = useState(false);
-
 	const activeConv = (event: any) => {
 		let newId;
 		
@@ -148,12 +112,23 @@ export default function Friends(props: FriendsProps) {
 			setActivConvId(parseInt(newId));
 	};
 
-	// useEffect(() => {
-	// 	socket.emit('channels_list', {}, (data: any) => {
-	// 		console.log("hello15 : ");
-	// 		console.log(data);
-	// 	});
-	// },);
+	useEffect(() => {
+		// socket.emit('channels_list', {}, (data: any) => {
+		// 	console.log("hello15 : ");
+		// 	console.log(data);
+		// });
+		socket.emit('users_get',
+		{
+			id : props.user_me.id,
+		},
+		(data: any) => {
+			// console.log("hello15 : ");
+			// console.log(data);
+			setUser(data);
+		});
+		// console.log("hello 78");
+		// console.log(user);
+	},);
 
 	return (
 		<div className="friends-wrapper">
@@ -170,7 +145,7 @@ export default function Friends(props: FriendsProps) {
 						aria-describedby="modal-modal-description"
 					>
 						<Box className="list-chan-modal">
-							<AllChan user_me={props.user_me}/>
+							{ user && <AllChan user_me={user}/> }
 						</Box>
 					</Modal>
 					<Modal
@@ -249,38 +224,16 @@ export default function Friends(props: FriendsProps) {
 					</Modal>
 				</div>
 			</div>
-			<div className="priv-conv-list">
-				<FriendsList activeConv={activeConv} />
-				<form className="add-friend-form">
-					<label>
-						<input
-							type="text"
-							name="name"
-							placeholder="Add Friend"
-							value={firstName}
-							className="add-friend-form-label"
-							onChange={handleChange}
-						/>
-					</label>
-					<button
-						type="submit"
-						value="Add"
-						className="add-friend-form-submit-button"
-						onClick={addFriend}
-					>
-						Add
-					</button>
-				</form>
-			</div>
+			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="chat">
-				{activeConvId != -1 ? (
-					<Chat user_me={props.user_me} activeConvId={activeConvId} />
+				{activeConvId != -1 && user ? (
+					<Chat user_me={user} activeConvId={activeConvId} />
 				) : null}
-				{/* <Chat user_me={props.user_me} activeConvId={activeConvId}/> */}
+				{/* <Chat user_me={user} activeConvId={activeConvId}/> */}
 			</div>
 			<div className="infos-conv">
-				{activeConvId != -1 ? (
-						<InfosConv user_me={props.user_me} activeConvId={activeConvId} />
+				{activeConvId != -1 && user ? (
+						<InfosConv user_me={user} activeConvId={activeConvId} />
 					) : null}
 			</div>
 		</div>
