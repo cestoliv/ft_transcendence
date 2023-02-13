@@ -47,6 +47,8 @@ export abstract class BaseGateway implements OnGatewayConnection {
 			for (const channel of channels) {
 				socket.join(`channel_${channel.id}`);
 			}
+			// Make the join his own channel
+			socket.join(`user_${user.id}`);
 		} catch (error) {
 			// Reject connection
 			socket.emit('error', {
