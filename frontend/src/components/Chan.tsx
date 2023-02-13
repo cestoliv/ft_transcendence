@@ -16,7 +16,6 @@ export const Chan = (props: ChanProps) => {
 
     const leaveChan = (event: any): void => {
         console.log(chanId);
-        try {
             socket.emit(
                 'channels_leave',
                 {
@@ -25,9 +24,6 @@ export const Chan = (props: ChanProps) => {
                 (data: any) => {
                 },
             );
-        } catch (error) {
-            alert(error);
-        }
     };
 
     useEffect(() => {
@@ -36,11 +32,11 @@ export const Chan = (props: ChanProps) => {
         let idchan = props.chan_id;
         x = +idchan;
         setchanId(x);
-	}, [chanId]);
+	}, []);
 
 	return (
         <div id={props.chan_id} data-id={props.chan_id} className="wrapper-active-conv" onClick={props.activeConv}>
-            <span>{props.chan_name}{props.chan_id}</span>
+            <span className="wrapper-active-conv-span" onClick={props.activeConv}>{props.chan_name}{props.chan_id}</span>
             <span className="e-icons e-medium e-close" onClick={leaveChan}></span>
         </div>
 	);

@@ -98,11 +98,16 @@ export default function Friends(props: FriendsProps) {
 
 	const activeConv = (event: any) => {
 		let newId;
+		let element;
 		
-		if (event.target.classList != 'wrapper-active-conv') return;
+		if (event.target.classList != 'wrapper-active-conv' && event.target.classList != 'wrapper-active-conv-span')
+			return;
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
-		const element = event.target;
+		if (event.target.classList == 'wrapper-active-conv-span')
+			element = event.target.parentElement;
+		else
+			element = event.target;
 		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
 		const newActivConv = document.getElementById('active-conv-bg');
