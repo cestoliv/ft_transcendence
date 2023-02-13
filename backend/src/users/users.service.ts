@@ -11,11 +11,14 @@ import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 import { authenticator } from 'otplib';
 import { AuthService } from 'src/auth/auth.service';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { BannedUser } from './entities/user-banned.entity';
 import { UserFriend } from './entities/user-friend.entity';
+import { MutedUser } from './entities/user-muted.entity';
 import { User } from './entities/user.entity';
+import { UserMessage } from './entities/user.message.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +27,12 @@ export class UsersService {
 		private readonly usersRepository: Repository<User>,
 		@InjectRepository(UserFriend)
 		private readonly userFriendsRepository: Repository<UserFriend>,
+		@InjectRepository(BannedUser)
+		private readonly bannedUsersRepository: Repository<BannedUser>,
+		@InjectRepository(MutedUser)
+		private readonly mutedUsersRepository: Repository<MutedUser>,
+		@InjectRepository(UserMessage)
+		private readonly userMessagesRepository: Repository<UserMessage>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
 	) {}
@@ -39,7 +48,7 @@ export class UsersService {
 
 	findAll() {
 		return this.usersRepository.find({
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -49,7 +58,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -59,7 +68,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { id42 },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -69,7 +78,7 @@ export class UsersService {
 		return this.usersRepository.findOne({
 			where: { username },
 			select: select as FindOptionsSelect<User>,
-			relations: ['invitedFriends', 'friendOf'],
+			relations: ['invitedFriends', 'friendOf', 'banned', 'muted'],
 		});
 	}
 
@@ -143,10 +152,25 @@ export class UsersService {
 		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
+		// Check if already invited or already friend
 		if (newFriend.friends.includes(inviter)) {
 			throw new ConflictException(
 				'User already invited or already friend',
 			);
+		}
+
+		// Check if newFriend banned inviter
+		const banned = await this.bannedUsersRepository.findOne({
+			where: { userId: newFriend.id, bannedId: inviter.id },
+		});
+		if (banned) {
+			if (banned.until > new Date())
+				throw new ForbiddenException('You have been banned');
+			else
+				await this.bannedUsersRepository.delete({
+					userId: newFriend.id,
+					bannedId: inviter.id,
+				});
 		}
 
 		const newFriendship = new UserFriend();
@@ -191,5 +215,99 @@ export class UsersService {
 			inviteeId: friendship.inviteeId,
 		});
 		return friendship;
+	}
+
+	async ban(banner: User, userToBanId: number, until: Date) {
+		const userToBan = await this.findOne(userToBanId);
+		if (!userToBan) throw new NotFoundException('User not found');
+
+		// Create new banned user (or update existing one)
+		const banned = new BannedUser();
+		banned.user = banner;
+		banned.banned = userToBan;
+		banned.until = until;
+
+		// Remove friendship
+		await this.removeFriendship(userToBan, banner.id).catch(() => {
+			// Ignore exceptions
+		});
+
+		return this.bannedUsersRepository.save(banned);
+	}
+
+	async mute(muter: User, userToMuteId: number, until: Date) {
+		const userToMute = await this.findOne(userToMuteId);
+		if (!userToMute) throw new NotFoundException('User not found');
+
+		// Create new muted user (or update existing one)
+		const muted = new MutedUser();
+		muted.user = muter;
+		muted.muted = userToMute;
+		muted.until = until;
+
+		return this.mutedUsersRepository.save(muted);
+	}
+
+	async sendMessage(sender: User, receiverId: number, message: string) {
+		const receiver = await this.findOne(receiverId);
+		if (!receiver) throw new NotFoundException('User not found');
+
+		// Check if users are friends
+		if (!receiver.friends.find((friend) => friend.id === sender.id))
+			throw new ForbiddenException(
+				'You can only send messages to friends',
+			);
+
+		// Check if receiver muted sender
+		const muted = receiver.muted.find(
+			(mutedUser) => mutedUser.muted.id === sender.id,
+		);
+		if (muted) {
+			if (muted.until > new Date())
+				throw new ForbiddenException('You are muted by this user');
+			else
+				await this.mutedUsersRepository.delete({
+					userId: receiver.id,
+					mutedId: sender.id,
+				});
+		}
+
+		// Create new chat message
+		const newMessage = new UserMessage();
+		newMessage.sender = sender;
+		newMessage.receiver = receiver;
+		newMessage.message = message;
+		newMessage.sentAt = new Date();
+
+		return this.userMessagesRepository.save(newMessage);
+	}
+
+	async getMessages(user: User, contactId: number, before: Date) {
+		const contact = await this.findOne(contactId);
+		if (!contact) throw new NotFoundException('User not found');
+
+		// Check if users are friends
+		if (!contact.friends.find((friend) => friend.id === user.id))
+			throw new ForbiddenException(
+				'You can only get messages from friends',
+			);
+
+		// Get messages
+		return this.userMessagesRepository.find({
+			where: [
+				{
+					senderId: user.id,
+					receiverId: contact.id,
+					sentAt: LessThan(before),
+				},
+				{
+					senderId: contact.id,
+					receiverId: user.id,
+					sentAt: LessThan(before),
+				},
+			],
+			order: { sentAt: 'DESC' },
+			take: 50,
+		});
 	}
 }

@@ -5,7 +5,9 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
+import { BannedUser } from './user-banned.entity';
 import { UserFriend } from './user-friend.entity';
+import { MutedUser } from './user-muted.entity';
 
 @Entity()
 export class User {
@@ -43,4 +45,12 @@ export class User {
 					.map((friend) => friend.inviter),
 			);
 	}
+
+	// Banned users array, One-to-many relationship with BannedUser
+	@OneToMany(() => BannedUser, (banned) => banned.user)
+	banned: BannedUser[];
+
+	// Muted users array, One-to-many relationship with MutedUser
+	@OneToMany(() => MutedUser, (muted) => muted.user)
+	muted: MutedUser[];
 }
