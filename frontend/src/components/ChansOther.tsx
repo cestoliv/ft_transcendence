@@ -18,11 +18,17 @@ type ChansOtherProps = {
 
 export const ChansOther = (props: ChansOtherProps) => {
     const socket = useContext(SocketContext);
+
+    const [passwordValue, setPasswordValue] = useState<string>('');
     const [chanJoined, setChanJoined] = useState<IChannel[]>([]);
 
     const [openPassWordModal, setOpenPassWordModal] = React.useState(false);
 	const openPassWordProtectedModal = () => setOpenPassWordModal(true);
 	const closePassWordProtectedModal = () => setOpenPassWordModal(false);
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'chan-password-input') setPasswordValue(event.target.value);
+	};
 
     const joinChan = (event: any): void => {
         if (props.chan?.visibility != "password-protected")
@@ -31,7 +37,6 @@ export const ChansOther = (props: ChansOtherProps) => {
                 'channels_join',
                 {
                     code: props.chan?.code,
-                    motdepasse: "",
                 },
                 (data: any) => {
                     if (data.messages)
@@ -41,6 +46,26 @@ export const ChansOther = (props: ChansOtherProps) => {
         }
         else if (props.chan?.visibility === "password-protected")
             openPassWordProtectedModal();
+    }
+
+    const submitChanPassword = (event: any): void => {
+        event.preventDefault();
+        socket.emit(
+            'channels_join',
+            {
+                code: props.chan?.code,
+                password: passwordValue,
+            },
+            (data: any) => {
+                if (data.messages)
+                    alert(data.messages);
+                else
+                {
+                    closePassWordProtectedModal();
+                    setPasswordValue('');   
+                }
+            },
+        );
     }
 
 	const display = (): boolean => {
@@ -92,8 +117,8 @@ export const ChansOther = (props: ChansOtherProps) => {
                 aria-describedby="modal-modal-description"
             >
                 <Box className="password-chan-modal">
-                    <form >
-                        <input type="submit" id="name" name="name">edzedez</input>
+                    <form className="chan-password-form" onSubmit={submitChanPassword}>
+                        <input value={passwordValue} name='chan-password-input' type='message' placeholder='password' onChange={handleChange} required className="chan-password-input"/>
                     </form>
                 </Box>
             </Modal>		
