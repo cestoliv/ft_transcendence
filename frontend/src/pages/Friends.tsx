@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, useContext } from 'react';
 import Chat from '../components/Chat';
+import FriendConv from '../components/FriendConv';
 import InfosConv from '../components/InfosConv';
 import FriendsList from '../components/FriendsList';
 import ChanList from '../components/ChanList';
@@ -25,6 +26,7 @@ export default function Friends(props: FriendsProps) {
 	const [user, setUser] = useState<IUser>();
 
 	let [activeConvId, setActivConvId] = useState<number>(-1);
+	let [chanConv, setChanConv] = useState<number>(-1)
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -115,6 +117,10 @@ export default function Friends(props: FriendsProps) {
 			newId = newActivConv.getAttribute('data-id');
 		if (newId)
 			setActivConvId(parseInt(newId));
+		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv')
+			setChanConv(1);
+		else
+			setChanConv(2);
 	};
 
 	useEffect(() => {
@@ -231,10 +237,12 @@ export default function Friends(props: FriendsProps) {
 			</div>
 			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="chat">
-				{activeConvId != -1 && user ? (
+				{activeConvId != -1 && user && chanConv == 1 ? (
 					<Chat user_me={user} activeConvId={activeConvId} />
 				) : null}
-				{/* <Chat user_me={user} activeConvId={activeConvId}/> */}
+				{activeConvId != -1 && user && chanConv == 2 ? (
+					<FriendConv user_me={user} activeConvId={activeConvId} />
+				) : null}
 			</div>
 			<div className="infos-conv">
 				{activeConvId != -1 && user ? (

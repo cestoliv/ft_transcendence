@@ -49,7 +49,7 @@ export const Friend = (props: FriendProps) => {
 	}, []);
 
 	return (
-		<div className="wrapper-active-conv" onClick={props.activeConv}>
+		<div data-id={props.user.id} data-conv-type='friend-conv' className="wrapper-active-conv" onClick={props.activeConv}>
 			<Link to={`/profile/${props.user.id}`}>
 				{props.user.username}
 			</Link>
