@@ -7,6 +7,20 @@ export interface IUser {
 	friends: IUser[],
 }
 
+export interface IUserMessage{
+	id: number,
+
+	senderId: number,
+	sender: IUser,
+
+	receiverId: number,
+	receiver: IUser,
+
+	message: string,
+
+	sentAt: Date
+}
+
 export interface IUserFriend{
 	inviterId: number,
 	inviter: IUser,
