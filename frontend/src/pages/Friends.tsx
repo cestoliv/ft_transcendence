@@ -155,7 +155,7 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="list-chan-modal">
+						<Box className="list-chan-modal background-modal pixel-font">
 							{ user && <AllChan user_me={user}/> }
 						</Box>
 					</Modal>
@@ -165,10 +165,11 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="create-chan-modal">
+						<Box className="create-chan-modal background-modal">
 							<form className="create-channel-form">
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="create-chan-name"
 										placeholder="Name"
@@ -181,14 +182,14 @@ export default function Friends(props: FriendsProps) {
 										type="text"
 										name="create-chan-mdp"
 										placeholder="Mot de passe"
-										className="mdp-channel-form-label"
+										className="mdp-channel-form-label pixel-font"
 										onChange={handleChange}
 									/>
 								</label>
 								<button
 									name="button-create-chan"
 									type="submit"
-									className="redirect-button"
+									className="pixel-font"
 									onClick={createChan}
 								>
 									Create
@@ -202,10 +203,11 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="join-chan-modal">
+						<Box className="join-chan-modal background-modal">
 							<form className="join-channel-form">
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="join-chan-name"
 										placeholder="Code"
@@ -215,6 +217,7 @@ export default function Friends(props: FriendsProps) {
 								</label>
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="join-chan-mdp"
 										placeholder="Mot de passe"
@@ -225,7 +228,7 @@ export default function Friends(props: FriendsProps) {
 								<button
 									name="button-join-chan"
 									type="submit"
-									className="redirect-button"
+									className="pixe-font"
 									onClick={createChan}
 								>
 									Join
@@ -245,7 +248,7 @@ export default function Friends(props: FriendsProps) {
 				) : null}
 			</div>
 			<div className="infos-conv">
-				{activeConvId != -1 && user ? (
+				{activeConvId != -1 && user && chanConv == 1 ? (
 						<InfosConv user_me={user} activeConvId={activeConvId} />
 					) : null}
 			</div>

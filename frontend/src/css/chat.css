@@ -8,7 +8,7 @@
 .chat-nav{
     height: 10vh;
     max-height: 10vh;
-    background-color: rgb(78, 74, 74);
+    background-color: #89C7D2;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -30,8 +30,23 @@
 }
 
 .wrapper-settings {
-    background-color: rgb(78, 74, 74);
+    background-color: #89C7D2;
     display: flex;
+}
+
+.change-password-input {
+    background-color: #5CB2C1 !important;
+    color: black !important;
+}
+
+.change-password-input::placeholder {
+    color: black !important;
+    font-family: 'VT323', monospace;
+}
+
+.change-password-input:focus {
+    outline: none;
+    font-family: 'VT323', monospace;
 }
 
 .hidden {
@@ -83,7 +98,7 @@
     max-height: 80%;
     width: 100%;
     overflow-y: scroll;
-    background-color: #7D8CC4;
+    background-color: #A0D2DB;
     display: flex;
     flex-direction: column-reverse;
 }
@@ -96,19 +111,31 @@
     height: 10vh;
     max-height: 10vh;
     width: 100%;
+    background-color: #4EABBC;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
 .write-message input {
-    height: 80%;
-    width: 99%;
+    height: 98%;
+    width: 100%;
     border: none;
     font-family: 'VT323', monospace;
     font-size: 20px;
-    padding-left: 20px;
+    background-color: #327985;
+    color: black;
+}
+
+.write-message input::placeholder {
+    padding-left: 5px;
+    color: black;
 }
 
 .write-message input:focus {
     outline: none;
+    color: black;
+    font-family: 'VT323', monospace;
 }
 
 .display-message {
@@ -133,5 +160,5 @@
 
 .message-date {
     font-size: 15px;
-    color: lightgrey;
+    color: rgb(145, 142, 142);
 }

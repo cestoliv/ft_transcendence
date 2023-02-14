@@ -52,7 +52,7 @@ export const FriendRequests = (props: FriendRequestsProps) => {
     }
 
 	return (
-		<div className="FriendRequests-wrapper">
+		<div className="FriendRequests-wrapper pixel-font">
 			<span>{props.friend_request.inviter.username}</span>
             <div className="accept-refuse-friend-request">
                 <span className="e-icons e-medium e-plus" onClick={accept_friend_request}></span>

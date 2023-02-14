@@ -1,6 +1,15 @@
 .FriendRequests-wrapper {
-    background-color: red;
+    background-color: #8FCB9B;
     display: flex;
     justify-content: space-between;
     padding: 10px;
+    border-radius: 20px;
+}
+
+.FriendRequests-wrapper span {
+    font-size: 20px;
+}
+
+.accept-refuse-friend-request span {
+    margin-right: 3px;
 }

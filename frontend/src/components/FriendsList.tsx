@@ -79,7 +79,7 @@ export const FriendsList = (props: PersonListProps) => {
 			<div className="add-accept-friend">
 				<button className="en-attente-button" onClick={OpenListFriendRequest}>En attente</button>
 				<Modal open={OpenLFriendRequest} onClose={CloseListFriendRequest} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-					<Box className="friend-request-modal">
+					<Box className="friend-request-modal background-modal">
 						{friendOf && friendOf.map((friend_request) => (
 							<FriendRequests friend_request={friend_request}/>
 						))}

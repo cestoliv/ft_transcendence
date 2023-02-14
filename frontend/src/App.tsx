@@ -109,7 +109,7 @@ function App() {
 				<Route path="/stats" element={<Stats />} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />
-				<Route path="/settings" element={<Settings />} />
+				<Route path="/settings" element={<Settings user_me={user}/>} />
 				<Route path="/pong" element={<Pong />} />
 			</Routes>
 		</SocketContext.Provider>
