@@ -10,6 +10,7 @@ import { SocketContext } from '../context/socket';
 import { IChannel, IUser } from '../interfaces';
 
 type ChanUserProps = {
+    user_me_id : number,
 	username : string,
     member_id : number,
     chan_id : number,
@@ -23,6 +24,20 @@ export const ChanUser = (props: ChanUserProps) => {
 	const OpenChanUserModal = () => setOpenChanUserModal(true);
 	const CloseChanUserModal = () => setOpenChanUserModal(false);
 
+    const amIAdmin = (): boolean => {
+        if (props.chan_admins)
+        {
+            let x = 0;
+            while (x < props.chan_admins.length)
+            {
+                if (props.chan_admins[x].id === props.user_me_id)
+                    return true;
+                x++;
+            }
+            return false;
+        }
+        return false;
+    }
 
     // add amin or remove admin
     const setAdmin = (event: any): void => {
@@ -60,13 +75,6 @@ export const ChanUser = (props: ChanUserProps) => {
                 },
             );
 		}
-        // console.log("chan admins : ");
-        // if (props.chan_admins)
-        // {
-        //     {props.chan_admins.map(user => (
-        //         console.log(user.username)
-        //     ))};
-        // }
 	};
 
     const banUser = (event: any): void => {
@@ -131,23 +139,28 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper">
-			<h3 onClick={OpenChanUserModal}>{props.username}</h3>
+            {amIAdmin() && (
+                <h3 onClick={OpenChanUserModal}>{props.username}</h3>
+            )}
+            {!amIAdmin() && (
+                <h3>{props.username}</h3>
+            )}
             <Modal
                 open={openChanUserModal}
                 onClose={CloseChanUserModal}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box className="chan-user-modal">
+                <Box className="chan-user-modal background-modal">
                     {!isAdmin() && (
-                        <button name='button-add-admin' onClick={setAdmin}>Set Admin</button>
+                        <button name='button-add-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Set Admin</button>
                     )}
                     {isAdmin() && (
-                        <button name='button-remove-admin' onClick={setAdmin}>Remove Admin</button>
+                        <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Remove Admin</button>
                     )}
-                    <button name='button-ban_user' onClick={banUser}>Ban</button>
+                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font' onClick={banUser}>Ban</button>
                     <button>Kick</button>
-                    <button name='button-mute_user' onClick={muteUser}>Mute</button>
+                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font' onClick={muteUser}>Mute</button>
                 </Box>
             </Modal>
 		</div>

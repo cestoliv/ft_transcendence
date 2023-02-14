@@ -20,7 +20,7 @@ export default function FriendConv(props: FriendConvProps) {
 
 	const [passWord, setPassWord] = useState<string>('');
 	const [message, setMessage] = useState<string>('');
-	const [chan, setChan] = useState<IChannel | null>(null);
+	const [talkTo, setTalkto] = useState<IUser>();
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'password-input')
@@ -68,16 +68,16 @@ export default function FriendConv(props: FriendConvProps) {
                 if (data.messages)
                     alert(data.messages);
                 else
-                {
-                    console.log('hello 555');
-                    console.log(data);
-                }	
+					setTalkto(data);
             },
         );
 	}, []);
 
 	return (
 		<div className="chat-wrapper">
+			<div className="chat-nav" id='chat-nav'>
+				<span>{talkTo?.username}</span>
+			</div>
 			<FriendConvMessages user_me={props.user_me} chan_id={props.activeConvId}/>
 			<form className="write-message" onSubmit={submitMessage}>
 					<input

@@ -38,7 +38,7 @@ export default function InfosConv(props: InfosConvProps) {
 			{channel && (
 				<div className="chan_user_wrapper">
 					{channel.members.map(member => (
-						<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins}/>
+						<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins} user_me_id={props.user_me.id}/>
 					))}
 				</div>
       		)}

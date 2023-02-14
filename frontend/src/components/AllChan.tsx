@@ -33,7 +33,7 @@ export const AllChan = (props: AllChanProps) => {
 
 	return (
 		<div className="AllChan-wrapper">
-            <h3 className='display-chan-title'>All Chan</h3>
+            <h3 className='display-chan-title pixel-font'>All Chan</h3>
             <div className='ChansOther-wrapper'>
               {chans?.filter(chan => {
                   if (chan.visibility === 'public' ||chan.visibility == 'password-protected')
@@ -45,11 +45,11 @@ export const AllChan = (props: AllChanProps) => {
                 ))
               }
             </div>
-            <h3 className='display-chan-title'>ban Chan</h3>
+            <h3 className='display-chan-title pixel-font'>ban Chan</h3>
             {chans?.map(chan => (
 						  <ChansBan chan={chan} user_me={props.user_me}/>
 					  ))}
-            <h3 className='display-chan-title'>invit chan</h3>
+            <h3 className='display-chan-title pixel-font'>invit chan</h3>
             {chans?.map(chan => (
 						  <ChansInv chan={chan} user_me={props.user_me}/>
 					  ))}

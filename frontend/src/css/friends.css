@@ -5,13 +5,14 @@
     flex-direction: row;
     font-family: 'VT323', monospace;
     font-size: 20px;
+    background-color: black;
 }
 
 .chan-list {
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(52, 63, 62);
+    background-color: #726DA8;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -21,7 +22,7 @@
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(80, 90, 91);
+    background-color: #7D8CC4;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -37,7 +38,7 @@
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(143, 145, 162);
+    background-color: #7D8CC4;
 }
 
 .chan-list ul{
@@ -60,7 +61,7 @@
 } */
 
 #active-conv-bg {
-    background-color: rgb(60, 70, 69);
+    opacity: 0.7;
 }
 
 .priv-conv-list ul{
@@ -87,7 +88,7 @@
 }
 
 .chan-list-buttons button {
-    background-color: rgb(60, 70, 69);
+    background-color: #615C99;
     border: none;
     border-radius: 5px;
     font-family: 'VT323', monospace;
@@ -96,9 +97,9 @@
 }
 
 .chan-list-buttons button:hover {
-    background-color: black;
+    background-color: #514D80;
     cursor: pointer;
-    color: rgb(60, 70, 69);
+    color: black;
 }
 
 /* .status {
@@ -147,26 +148,33 @@
     margin-bottom: 10px;
 }
 .create-channel-form label input {
-    background-color: rgb(60, 70, 69);
+    background-color: #8FCB9B;
     border-radius: 15px;
     border: 0px solid black;
     padding: 5px;
 }
 
+.create-channel-form label input::placeholder {
+    outline: none;
+    color: black;
+}
+
 .create-channel-form label input:focus {
     outline: none;
+    background-color: #8FCB9B;
 }
 
 .create-channel-form button {
     border-radius: 15px;
-    background-color: black;
+    background-color: #47715E;
     padding: 10px 0px;
-    color: white;
+    border: none;
+    color: black;
 }
 
 .create-channel-form button:hover {
     cursor: pointer;
-    background-color: rgb(46, 43, 43)
+    background-color: #375849;
 }
 
 /* join chan modal */
@@ -193,7 +201,7 @@
     margin-bottom: 10px;
 }
 .join-channel-form label input {
-    background-color: rgb(60, 70, 69);
+    background-color: #8FCB9B;
     border-radius: 15px;
     border: 0px solid black;
     padding: 5px;
@@ -205,14 +213,15 @@
 
 .join-channel-form button {
     border-radius: 15px;
-    background-color: black;
+    background-color: #47715E;
+    border: none;
     padding: 10px 0px;
-    color: white;
+    color: black;
 }
 
 .join-channel-form button:hover {
     cursor: pointer;
-    background-color: rgb(46, 43, 43)
+    background-color: #375849;
 }
 
 .e-menu:hover {
@@ -262,8 +271,7 @@
 
 
 .ChansOther-item-wrapper {
-    width: 90%;
-
+    width: 100%;
 }
 
 .ChansBan-item-wrapper {
@@ -290,7 +298,7 @@
 
 
 .chan-list-item {
-    background-color: rgb(75, 88, 87);
+    background-color: #8fcb9b;
     border-radius: 15px;
     padding: 10px;
     margin-bottom: 3px;
@@ -308,7 +316,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 300px;
-    background-color: rgb(52, 63, 62);
+    background-color: #5B9279;
     border-radius: 20px;
     box-Shadow: 24;
     padding: 10px;
@@ -320,11 +328,16 @@
 }
 
 .chan-password-input {
-    background-color: rgb(76, 88, 87);
+    background-color: #5B9279;
     border-radius: 20px;
     padding: 5px;
     border: none;
-    margin: 0 auto
+    margin: 0 auto;
+    color: black;
+}
+
+.chan-password-input::placeholder {
+    color: black;
 }
 
 .chan-password-input:focus {

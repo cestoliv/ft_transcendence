@@ -1,7 +1,13 @@
 .ChanList-wrapper {
+    flex-grow: 1;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
     margin: 10px;
+}
+
+.ChanList-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 .ChanList-wrapper div {

@@ -116,7 +116,7 @@ export const ChansOther = (props: ChansOtherProps) => {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box className="password-chan-modal">
+                <Box className="password-chan-modal background-modal">
                     <form className="chan-password-form" onSubmit={submitChanPassword}>
                         <input value={passwordValue} name='chan-password-input' type='message' placeholder='password' onChange={handleChange} required className="chan-password-input"/>
                     </form>
