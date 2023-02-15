@@ -93,7 +93,7 @@ export class ChannelsService {
 			return true;
 		if (channel.invited.find((invited) => invited.user.id === user.id))
 			return true;
-		if (channel.visibility === Visibility.Public) return true;
+		if (channel.visibility !== Visibility.Private) return true;
 	}
 
 	async update(

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { ChangeEvent, useEffect, useContext } from 'react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -11,9 +11,13 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
+import { IChannel, IUser, IUserFriend } from '../interfaces';
+
 import Modal from '@mui/material/Modal';
 
 import FriendsList from '../components/FriendsList';
+
+import { SocketContext } from '../context/socket';
 
 const style = {
 	position: 'absolute' as const,
@@ -27,12 +31,17 @@ const style = {
 	p: 4,
 };
 
-export const SearchGame = () => {
-	// export default function SearchGame({ SearchGame }: SearchGameProps) {
+type FriendsProps = {
+	user_me : IUser,
+};
+
+export const SearchGame = (props: FriendsProps) => {
+	const socket = useContext(SocketContext);
 
 	const [redirect, setRedirect] = useState<boolean>(false);
 
-	// const [age, setAge] = React.useState('');
+	const [user, setUser] = useState<IUser>();
+
 	const [mode, setMode] = React.useState('');
 	const [time, setTime] = React.useState('');
 	const [points, setPoints] = React.useState('');
@@ -40,10 +49,6 @@ export const SearchGame = () => {
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
-
-	// const handleChange = (event: SelectChangeEvent) => {
-	//     setAge(event.target.value as string);
-	// };
 
 	const handleChangeMode = (event: SelectChangeEvent) => {
 		setMode(event.target.value as string);
@@ -56,24 +61,6 @@ export const SearchGame = () => {
 	const handleChangePoints = (event: SelectChangeEvent) => {
 		setPoints(event.target.value as string);
 	};
-
-	const nameList = [
-		{
-			first: 'Bruce',
-			last: 'wayne',
-			status: 'connected',
-		},
-		{
-			first: 'Bruce',
-			last: 'wayne',
-			status: 'disconnected',
-		},
-		{
-			first: 'Bruce',
-			last: 'wayne',
-			status: 'ingame',
-		},
-	];
 
 	const activeConv = (event: any) => {
 		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
@@ -93,11 +80,19 @@ export const SearchGame = () => {
 		}
 	};
 
+	useEffect(() => {
+		socket.emit('users_get',
+		{
+			id : props.user_me.id,
+		},
+		(data: any) => {
+			setUser(data);
+		});
+	},);
+
 	return (
 		<div className="searchGame-wrapper">
-			<div className="searchGame-friendsList">
-				<FriendsList activeConv={activeConv} />
-			</div>
+			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="searchRandomPlayer">
 				<button
 					className="searchRandomPlayer-button"

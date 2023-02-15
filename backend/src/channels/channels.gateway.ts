@@ -412,6 +412,7 @@ export class ChannelsGateway extends BaseGateway {
 	/*
 	 * Invite a user to a channel.
 	 * The client need to be an admin of the channel.
+	 * TODO: prevent inviting himself
 	 */
 	@SubscribeMessage('channels_inviteUser')
 	async inviteUser(

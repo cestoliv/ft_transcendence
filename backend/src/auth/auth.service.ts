@@ -32,8 +32,20 @@ export class AuthService {
 	// 	return user;
 	// }
 
-	async signToken(data: any): Promise<string> {
-		return this.jwtService.sign(data);
+	async signToken(data: {
+		totp_enabled: boolean;
+		totp_validated: boolean;
+		user: User;
+	}): Promise<string> {
+		return this.jwtService.sign({
+			totp_enabled: data.totp_enabled,
+			totp_validated: data.totp_validated,
+			user: {
+				id: data.user.id,
+				id42: data.user.id42,
+				username: data.user.username,
+			},
+		});
 	}
 
 	async getUserFromToken(token: string): Promise<User> {

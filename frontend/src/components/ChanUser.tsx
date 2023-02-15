@@ -10,6 +10,7 @@ import { SocketContext } from '../context/socket';
 import { IChannel, IUser } from '../interfaces';
 
 type ChanUserProps = {
+    user_me_id : number,
 	username : string,
     member_id : number,
     chan_id : number,
@@ -19,10 +20,24 @@ type ChanUserProps = {
 export const ChanUser = (props: ChanUserProps) => {
     const socket = useContext(SocketContext);
 
-    const [openCModal, setOpenCModal] = React.useState(false);
-	const OpenCreateChanModal = () => setOpenCModal(true);
-	const CloseCreateChanModal = () => setOpenCModal(false);
+    const [openChanUserModal, setOpenChanUserModal] = React.useState(false);
+	const OpenChanUserModal = () => setOpenChanUserModal(true);
+	const CloseChanUserModal = () => setOpenChanUserModal(false);
 
+    const amIAdmin = (): boolean => {
+        if (props.chan_admins)
+        {
+            let x = 0;
+            while (x < props.chan_admins.length)
+            {
+                if (props.chan_admins[x].id === props.user_me_id)
+                    return true;
+                x++;
+            }
+            return false;
+        }
+        return false;
+    }
 
     // add amin or remove admin
     const setAdmin = (event: any): void => {
@@ -36,10 +51,10 @@ export const ChanUser = (props: ChanUserProps) => {
                     user_id: props.member_id,
                 },
                 (data: any) => {
-                    if (data.message)
-							alert(data.errors);
+                    if (data.messages)
+						alert(data.messages);
                     else
-                        CloseCreateChanModal();
+                        CloseChanUserModal();
                 },
             );
 		}
@@ -53,20 +68,13 @@ export const ChanUser = (props: ChanUserProps) => {
                     user_id: props.member_id,
                 },
                 (data: any) => {
-                    if (data.message)
-							alert(data.errors);
+                    if (data.messages)
+						alert(data.messages);
                     else
-                        CloseCreateChanModal();
+                        CloseChanUserModal();
                 },
             );
 		}
-        // console.log("chan admins : ");
-        // if (props.chan_admins)
-        // {
-        //     {props.chan_admins.map(user => (
-        //         console.log(user.username)
-        //     ))};
-        // }
 	};
 
     const banUser = (event: any): void => {
@@ -75,18 +83,35 @@ export const ChanUser = (props: ChanUserProps) => {
             {
                 id: props.chan_id,
                 user_id: props.member_id,
-                until : "2023-02-09T01:00:00-01:00",
+                until : "2023-02-10T01:00:00-01:00",
             },
             (data: any) => {
-                if (data.message)
-                        alert(data.errors);
+                if (data.messages)
+						alert(data.messages);
                 else
-                    CloseCreateChanModal();
+                    CloseChanUserModal();
             },
         );
     }
 
-    const isAdmin = (event: any): boolean => {
+    const muteUser = (event: any): void => {
+        socket.emit(
+            'channels_muteUser',
+            {
+                id: props.chan_id,
+                user_id: props.member_id,
+                until : "2023-02-11T03:00:00-01:00",
+            },
+            (data: any) => {
+                if (data.messages)
+						alert(data.messages);
+                else
+                    CloseChanUserModal();
+            },
+        );
+    }
+
+    const isAdmin = (): boolean => {
         if (props.chan_admins)
         {
             let x = 0;
@@ -101,36 +126,41 @@ export const ChanUser = (props: ChanUserProps) => {
         return false;
     }
 
-    useEffect(() => {
-        // console.log("hello 26 : ");
-        // console.log(props.chan_id);
-        // if (props.chan_admins)
-        // {
-        //     {props.chan_admins.map(user => (
-        //         console.log(user.username)
-        //     ))};
-        // }
-	},);
+    // useEffect(() => {
+    //     console.log("hello 26 : ");
+    //     console.log(props.chan_id);
+    //     if (props.chan_admins)
+    //     {
+    //         {props.chan_admins.map(user => (
+    //             console.log(user.username)
+    //         ))};
+    //     }
+	// },);
 
 	return (
 		<div className="ChanUser-wrapper">
-			<h3 onClick={OpenCreateChanModal}>{props.username}</h3>
+            {amIAdmin() && (
+                <h3 onClick={OpenChanUserModal}>{props.username}</h3>
+            )}
+            {!amIAdmin() && (
+                <h3>{props.username}</h3>
+            )}
             <Modal
-                open={openCModal}
-                onClose={CloseCreateChanModal}
+                open={openChanUserModal}
+                onClose={CloseChanUserModal}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box className="chan-user-modal">
+                <Box className="chan-user-modal background-modal">
                     {!isAdmin() && (
-                        <button name='button-add-admin' onClick={setAdmin}>Set Admin</button>
+                        <button name='button-add-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Set Admin</button>
                     )}
                     {isAdmin() && (
-                        <button name='button-remove-admin' onClick={setAdmin}>Remove Admin</button>
+                        <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Remove Admin</button>
                     )}
-                    <button name='button-ban_user' onClick={banUser}>Ban</button>
+                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font' onClick={banUser}>Ban</button>
                     <button>Kick</button>
-                    <button>Mute</button>
+                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font' onClick={muteUser}>Mute</button>
                 </Box>
             </Modal>
 		</div>

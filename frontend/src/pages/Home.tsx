@@ -23,6 +23,12 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 		//console.log(data);
 	});
 
+	socket.off('users_message'); // Unbind previous event
+	socket.on('users_message', (data: any) => {
+		console.log('Socket users_message:');
+		console.log(data);
+	});
+
 	return (
 		<div className="home">
 			<h1>My progression</h1>
