@@ -15,7 +15,7 @@ export const Chan = (props: ChanProps) => {
     let [chanId, setchanId] = useState<number | undefined>(1);
 
     const leaveChan = (event: any): void => {
-        console.log(chanId);
+        //console.log(chanId);
         try {
             socket.emit(
                 'channels_leave',

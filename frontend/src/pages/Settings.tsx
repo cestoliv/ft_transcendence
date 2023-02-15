@@ -33,7 +33,7 @@ export const Settings = () => {
 			googleAuth: isChecked,
 		};
 		setUser([newSettings]);
-		console.log(user);
+		//console.log(user);
 	};
 
 	return (

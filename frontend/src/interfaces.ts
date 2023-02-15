@@ -2,6 +2,17 @@ export interface IUser {
 	id: number;
 	id42: number;
 	username: string;
+	elo: number;
+	wins: number;
+	loses: number;
+	scores: IScore[];
+}
+
+export interface IScore 
+{
+	me: number;
+	op: number;
+	op_name: string;
 }
 
 export interface IAuth {

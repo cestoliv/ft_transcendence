@@ -61,7 +61,7 @@ export default function Chat(props: ChatProps) {
 		// setIsCheckedA(e.target.checked);
 		if (chan && chan.visibility === "public")
 		{
-			console.log("buzz2 : " + chan.id);
+			//console.log("buzz2 : " + chan.id);
 			// console.log("dezdze : " + props.activeConvId);
 			socket.emit(
 				'channels_setVisibility',
@@ -74,14 +74,14 @@ export default function Chat(props: ChatProps) {
 							alert(data.errors);
 					else
 					{
-						console.log("set chan dzfdzf : ");
+						//console.log("set chan dzfdzf : ");
 						setChan(data);
 					}
 				},
 			);
 		}
 		else {
-			console.log("buzz3");
+			//console.log("buzz3");
 			socket.emit(
 				'channels_setVisibility',
 				{
@@ -96,7 +96,7 @@ export default function Chat(props: ChatProps) {
 				},
 			);
 		}
-		console.log("bueeeee : " + chan?.visibility);
+		//console.log("bueeeee : " + chan?.visibility);
 		// changeData();
 	};
 
@@ -120,7 +120,7 @@ export default function Chat(props: ChatProps) {
 		// 		visibility: 'private',
 		// 	},
 		// 	(data: any) => {
-		// 		// console.log("pooipo");
+		//	 console.log("pooipo");
 		// 	},
 		// );
 		socket.emit(

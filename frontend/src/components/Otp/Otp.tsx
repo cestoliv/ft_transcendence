@@ -28,7 +28,7 @@ const submitTOTP = async (
 	);
 
 	const data = await response.json();
-	console.log(data);
+	//console.log(data);
 	if (response.ok) {
 		// User is logged
 		setCookie('bearer', data.bearer, {

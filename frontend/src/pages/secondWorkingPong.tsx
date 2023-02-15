@@ -45,8 +45,8 @@ const Pong: React.FC = () => {
 			const ctx = canvasRef.current.getContext('2d');
 			if (ctx) {
 				// const canvasHeight = window.innerHeight - 110; // 929 - 100
-				console.log('canvas h ' + canvasHeight);
-				console.log('canvas w ' + canvasWidth);
+				//console.log('canvas h ' + canvasHeight);
+				//console.log('canvas w ' + canvasWidth);
 				// Dessiner le fond en noir
 				ctx.canvas.width = canvasWidth;
 				ctx.canvas.height = canvasHeight;

@@ -24,7 +24,7 @@ import * as io from 'socket.io-client';
 
   type FriendsProps = {
 	user_me : IUser,
-};
+}; 
 
 export default function Friends(props: FriendsProps) {
 	const socket = useContext(SocketContext);
@@ -151,10 +151,10 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	useEffect(() => {
-		console.log("buzz");
+		//console.log("buzz");
 		socket.emit('channels_list', {}, (data: any) => {
-			console.log("hello15 : ");
-			console.log(data);
+			//console.log("hello15 : ");
+			//console.log(data);
 		});
 	},);
 

@@ -111,7 +111,7 @@ socket.emit('channels_create', {
 	name: 'My new Channel',
 	visibility: 'public',
 }, (data) => {
-	console.log(data); // The new channel object
+	//console.log(data); // The new channel object
 });
 ```
 
@@ -555,7 +555,7 @@ socket.emit('channels_messages', {
 	before: new Date().toISOString(),
 },
 	(data) => {
-		console.log(data); // The messages array
+	//	console.log(data); // The messages array
 	}
 );
 ```
@@ -656,7 +656,7 @@ payload: {
 
 ```javascript
 socket.on('channels_message', (data: any) => {
-	console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
+	//console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
 });
 ```
 
