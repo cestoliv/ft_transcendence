@@ -7,64 +7,71 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser } from '../interfaces';
 
-const defaultFormData = {
-	mdp: '',
-	body: '',
-};
+import ChatMessages from './ChatMessages'
 
 type ChatProps = {
 	user_me : IUser,
-	activeConvId : number | undefined,
+	activeConvId : number,
 };
 
 export default function Chat(props: ChatProps) {
 
 	const socket = useContext(SocketContext);
 
-	const [isCheckedA, setIsCheckedA] = useState(false);
-	const [visibility, setVisibility] = useState<string>("public");
-	const [formData, SetFormData] = useState(defaultFormData);
-	// const { mdp, body } = formData;
+	const [passWord, setPassWord] = useState<string>('');
+	const [message, setMessage] = useState<string>('');
 	const [chan, setChan] = useState<IChannel | null>(null);
 
-	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		SetFormData((prevState) => ({
-			...prevState,
-			[e.target.id]: e.target.value,
-		}));
+	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'password-input')
+			setPassWord(event.target.value);
+		if (event.target.name === 'message-input')
+			setMessage(event.target.value);
 	};
-
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		SetFormData(defaultFormData);
-	};
-
-	const changeData = () => {
-		try {
+	  
+	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+		if (message != '')
+		{
 			socket.emit(
-				'channels_findOne',
+				'channels_sendMessage',
 				{
-					id: props.activeConvId,
+					id : chan?.id,
+					message : message,
 				},
 				(data: any) => {
-					// console.log("fdeda");
-					setChan(data);
+					setMessage('');	
 				},
 			);
-		} catch (error) {
-			alert(error);
-		}	
+		}
+    };
+
+	const addPassWord = (event: any): void => {
+		event?.preventDefault();
+		socket.emit(
+			'channels_update',
+			{
+				id: chan?.id,
+				visibility: 'password-protected',
+				password: passWord,
+			},
+			(data: any) => {
+				if (data.message)
+						alert(data.errors);
+				else
+				{
+					setChan(data);
+					setPassWord("");
+				}
+			},
+		);
 	}
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-		// setIsCheckedA(e.target.checked);
-		if (chan && chan.visibility === "public")
+		if (chan && chan.visibility === "public" || chan?.visibility === 'password-protected')
 		{
-			//console.log("buzz2 : " + chan.id);
-			// console.log("dezdze : " + props.activeConvId);
 			socket.emit(
-				'channels_setVisibility',
+				'channels_update',
 				{
 					id: chan.id,
 					visibility: 'private',
@@ -74,16 +81,14 @@ export default function Chat(props: ChatProps) {
 							alert(data.errors);
 					else
 					{
-						//console.log("set chan dzfdzf : ");
 						setChan(data);
 					}
 				},
 			);
 		}
 		else {
-			//console.log("buzz3");
 			socket.emit(
-				'channels_setVisibility',
+				'channels_update',
 				{
 					id: chan?.id,
 					visibility: 'public',
@@ -96,8 +101,6 @@ export default function Chat(props: ChatProps) {
 				},
 			);
 		}
-		//console.log("bueeeee : " + chan?.visibility);
-		// changeData();
 	};
 
 	const toggleHidden = (event: any) => {
@@ -113,16 +116,7 @@ export default function Chat(props: ChatProps) {
     }
 
 	useEffect(() => {
-		// socket.emit(
-		// 	'channels_setVisibility',
-		// 	{
-		// 		id: props.activeConvId,
-		// 		visibility: 'private',
-		// 	},
-		// 	(data: any) => {
-		//	 console.log("pooipo");
-		// 	},
-		// );
+
 		socket.emit(
 			'channels_get',
 			{
@@ -135,34 +129,32 @@ export default function Chat(props: ChatProps) {
 					setChan(data);
 			},
 		);
-		// console.log("bueeeee : " + chan?.visibility);
 	}, [chan]);
 
 	return (
 		<div className="chat-wrapper">
-			<div className="chat-nav">
+			<div className="chat-nav" id='chat-nav'>
 				<span>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
 				{isOwner() && (
 					<div className="chat-nav-right">
 						<div className="wrapper-settings hidden">
 							<Checkbox
 								handleChange={isChecked}
-								isChecked={chan ? (chan.visibility === 'public' ? false : true) : false}
+								isChecked={chan?.visibility === 'public' || chan?.visibility === 'password-protected' ? false : true}
 								label="Private"
 							/>
-							<form className="mpd-form" onSubmit={(e) => onSubmit(e)}>
+							<form className="mpd-form" onSubmit={addPassWord}>
 								<label htmlFor="mdp" id="mdp-label">
-									mdp
+									mdp : 
 								</label>
 								<input
+									className='change-password-input'
+									name='password-input'
 									type="text"
 									id="mdp"
-									value={""}
-									onChange={(e) => onChange(e)}
+									value={passWord}
+									onChange={handleChange}
 								/>
-								<button type="submit" id="mdp-submit-button">
-									Change
-								</button>
 							</form>
 						</div>
 						<span
@@ -172,8 +164,18 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<div className="chat-messages"></div>
-			<div className="write-message"></div>
+			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId}/>
+			<form className="write-message" onSubmit={submitMessage}>
+					<input
+						value={message}
+						name='message-input'
+						id='message-input'
+						type='message'
+						placeholder='Message'
+						onChange={handleChange}
+						required
+						/>
+			</form>
 		</div>
 	);
 }

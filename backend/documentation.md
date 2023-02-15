@@ -1,3 +1,10 @@
+# Table of content
+
+- [Rest Api](#rest-api)
+- [Websocket Api](#websocket-api)
+- [Websocker Events](#websocket-events)
+- [Objects](#objects)
+
 # REST API
 
 Every routes, except `/login` and `/42oauth` requires to user to be logged in. You need to provide an Bearer token in the request headers.
@@ -643,6 +650,249 @@ payload: {
 		}
 		```
 
+### **Invite as friend**
+
+#### Input
+```javascript
+message: `users_inviteFriend`
+payload: {
+	username: string, // Username of the friend to invite
+}
+```
+
+#### Return
+- The new friendship object ([UserFriend](#userfriend))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You have been banned'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['User already invited or already friend'],
+		}
+		```
+
+### **Accept friendship request**
+
+#### Input
+```javascript
+message: `users_acceptFriend`
+payload: {
+	id: number, // Id of the user how invited the client
+}
+```
+
+#### Return
+- The updated friendship object ([UserFriend](#userfriend))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['Friendship already accepted'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Remove friend (or decline friendship request)**
+
+#### Input
+```javascript
+message: `users_removeFriend`
+payload: {
+	id: number, // Id of the user how invited the client
+}
+```
+
+#### Return
+- The deleted friendship object ([UserFriend](#userfriend))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 409,
+			message: 'Conflict',
+			errors: ['Friendship not found'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Ban user**
+
+#### Input
+```javascript
+message: `users_ban`
+payload: {
+	id: number, // Id of the user to ban
+	until: string, // ISO Date of the un-ban
+}
+```
+
+#### Return
+- The new user banned object ([BannedUser](#banneduser))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Mute user**
+
+#### Input
+```javascript
+message: `users_mute`
+payload: {
+	id: number, // Id of the user to ban
+	until: string, // ISO Date of the un-ban
+}
+```
+
+#### Return
+- The new user muted object ([MutedUser](#muteduser))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Send a message**
+
+#### Input
+```javascript
+message: `users_sendMessage`
+payload: {
+	id: number, // Id of a friend
+	until: string, // Message to send
+}
+```
+
+#### Return
+- The new message object ([UserMessage](#usermessage))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You can only send messages to friends'],
+					| ['You are muted by this user']
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
+### **Get messages**
+
+#### Input
+```javascript
+message: `users_getMessages`
+payload: {
+	id: number, // Id of a friend
+	before: string, // ISO date
+}
+```
+
+#### Return
+- An array of messages object ([UserMessage[]](#usermessage))
+- A [WSResponse](#wsresponse)
+	+ ```javascript
+		{
+			code: 400,
+			message: 'Bad request',
+			errors: string[] // describing malformed payload
+		}
+		```
+	+ ```javascript
+		{
+			code: 403,
+			message: 'Forbidden',
+			errors: ['You can only get messages from friends'],
+		}
+		```
+	+ ```javascript
+		{
+			code: 404,
+			message: 'Not found',
+			errors: ['User not found'],
+		}
+		```
+
 # Websocket Events
 
 ## Channel
@@ -679,6 +929,69 @@ socket.on('channels_message', (data: any) => {
 	id: number,
 	id42: number, // -1 for non-42 users
 	username: string,
+	invitedFriends: UserFriends[],
+	friendOf: UserFriend[],
+	friends: User[],
+}
+```
+
+## UserFriend
+
+```javascript
+{
+	inviterId: number,
+	inviter: User,
+
+	inviteeId: number,
+	invitee: User,
+
+	accepted: boolean
+}
+```
+
+## BannedUser
+
+```javascript
+{
+	userId: number,
+	user: User,
+
+	bannedId: number,
+	banned: User,
+
+	until: Date
+}
+```
+
+## MutedUser
+
+```javascript
+{
+	userId: number,
+	user: User,
+
+	mutedId: number,
+	muted: User,
+
+	until: Date
+}
+```
+
+## UserMessage
+
+```javascript
+{
+	id: number,
+
+	senderId: number,
+	sender: User,
+
+	receiverId: number,
+	receiver: User,
+
+	message: string,
+
+	sentAt: Date
 }
 ```
 

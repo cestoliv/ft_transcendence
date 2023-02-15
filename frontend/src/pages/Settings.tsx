@@ -1,22 +1,28 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useEffect, useContext } from 'react';
 import { useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import { IUser } from '../interface';
+import { IChannel, IUser, IUserFriend } from '../interfaces';
+
+import { SocketContext } from '../context/socket';
 
 import Checkbox from '@mui/material/Checkbox';
 
-export const Settings = () => {
-	// export default function Settings({ Settings }: SettingsProps) {
+type SettingsProps = {
+	user_me : IUser,
+};
 
-	const [firstName, setFirstName] = useState<string>('');
+export const Settings = (props: SettingsProps) => {
+
+	const socket = useContext(SocketContext);
+
+	const [username, setUsername] = useState<string>('');
 	const [lastName, setLastName] = useState<string>('');
 	const [isChecked, setisChecked] = useState<boolean>(true);
-	const [user, setUser] = useState<IUser[]>([]);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'name') setFirstName(event.target.value);
+		if (event.target.name === 'name') setUsername(event.target.value);
 		if (event.target.name === 'lastname') setLastName(event.target.value);
 	};
 
@@ -25,15 +31,20 @@ export const Settings = () => {
 	};
 
 	const changeSettings = (event: any): void => {
+		console.log("buzz");
+		console.log(username);
 		event?.preventDefault();
-		const newSettings = {
-			first: firstName,
-			last: lastName,
-			status: 'connected',
-			googleAuth: isChecked,
-		};
-		setUser([newSettings]);
-		//console.log(user);
+		socket.emit(
+			'users_update',
+			{
+				id: props.user_me.id,
+				username: username,
+			},
+			(data: any) => {
+				if (data.messages)
+					alert(data.messages);
+			},
+		);
 	};
 
 	return (
@@ -46,7 +57,7 @@ export const Settings = () => {
 							type="text"
 							name="name"
 							placeholder="changeName"
-							value={firstName}
+							value={username}
 							className="add-friend-form-label"
 							onChange={handleChange}
 						/>

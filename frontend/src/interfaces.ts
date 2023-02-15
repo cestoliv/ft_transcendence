@@ -6,6 +6,9 @@ export interface IUser {
 	wins: number;
 	loses: number;
 	scores: IScore[];
+	invitedFriends: IUserFriend[],
+	friendOf: IUserFriend[],
+	friends: IUser[],
 }
 
 export interface IScore 
@@ -13,6 +16,30 @@ export interface IScore
 	me: number;
 	op: number;
 	op_name: string;
+}
+
+export interface IUserMessage{
+	id: number,
+
+	senderId: number,
+	sender: IUser,
+
+	receiverId: number,
+	receiver: IUser,
+
+	message: string,
+
+	sentAt: Date
+}
+
+export interface IUserFriend{
+	inviterId: number,
+	inviter: IUser,
+
+	inviteeId: number,
+	invitee: IUser,
+
+	accepted: boolean
 }
 
 export interface IAuth {
@@ -28,7 +55,44 @@ export interface IChannel {
 	visibility: 'public' | 'private' | 'password-protected';
 	admins: IUser[];
 	members: IUser[];
-	banned: IUser[];
+	banned: IChannelBannedUser[];
 	muted: IUser[];
-	invited: IUser[];
+	invited: IChannelInvitedUser[];
   }
+
+  export interface IChannelBannedUser {
+	userId: number,
+	user: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	until: Date,
+}
+
+export interface IChannelInvitedUser{
+	userId: number,
+	user: IUser,
+
+	inviterId: number,
+	inviter: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	invited_at: Date,
+}
+
+export interface IChannelMessage{
+	id: number,
+
+	senderId: number,
+	sender: IUser,
+
+	channelId: number,
+	channel: IChannel,
+
+	message: string,
+
+	sentAt: Date,
+}

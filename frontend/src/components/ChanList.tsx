@@ -33,14 +33,6 @@ export const ChanList = (props: ChanListProps) => {
 		<div className="ChanList-wrapper">
 			{chanList.map((chan: any) => (
 				<Chan chan_id={chan.id} activeConv={props.activeConv} chan_name={chan.name}/>
-				// <div
-				// 	id={chan.id}
-				// 	data-id={chan.id}
-				// 	className="wrapper-active-conv"
-				// 	onClick={props.activeConv}
-				// >
-				// 	{chan.name}
-				// </div>
 			))}
 		</div>
 	);
