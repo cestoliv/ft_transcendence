@@ -123,27 +123,39 @@ export default function Friends(props: FriendsProps) {
 			setChanConv(2);
 	};
 
+	const OpenConvs = (event: any): void => {
+		if (event.target.name === 'open-chan-joined-button') {
+			var sidenav = document.getElementById("chan-list");
+			sidenav?.classList.add("active-chan-list");
+		}
+		if (event.target.name === 'open-friend-list-button') {
+			var sidenav = document.getElementById("priv-conv-list");
+			sidenav?.classList.add("active-friend-list");
+		}
+		var button1 = document.getElementById("open-chan-joined-button");
+		var button2 = document.getElementById("open-friend-list-button");
+
+		button1?.classList.add("hidden-button");
+		button2?.classList.add("hidden-button");
+	};
+
 	useEffect(() => {
-		// socket.emit('channels_list', {}, (data: any) => {
-		// 	console.log("hello15 : ");
-		// 	console.log(data);
-		// });
 		socket.emit('users_get',
 		{
 			id : props.user_me.id,
 		},
 		(data: any) => {
-			// console.log("hello15 : ");
-			// console.log(data);
 			setUser(data);
 		});
-		// console.log("hello 78");
-		// console.log(user);
-	},);
+	},[]);
 
 	return (
 		<div className="friends-wrapper">
-			<div className="chan-list">
+			<div className="burger-menu">
+				<button className='open-chan-joined-button' id='open-chan-joined-button' name='open-chan-joined-button' onClick={OpenConvs}>Channels</button>
+				<button className='open-friend-list-button' id='open-friend-list-button' name='open-friend-list-button' onClick={OpenConvs}>Friends</button>
+			</div>
+			<div className="chan-list" id='chan-list'>
 				<ChanList activeConv={activeConv} />
 				<div className="chan-list-buttons">
 					<button onClick={OpenCreateChanModal}>Create chan</button>

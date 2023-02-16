@@ -20,6 +20,17 @@ export const ChanList = (props: ChanListProps) => {
 
 	const [chanList, setChanList] = useState<any>([]);
 
+	const closeChanList = (event: any): void => {
+		var sidenav = document.getElementById("chan-list");
+		sidenav?.classList.remove("active-chan-list");
+
+		var button1 = document.getElementById("open-chan-joined-button");
+		var button2 = document.getElementById("open-friend-list-button");
+
+		button1?.classList.remove("hidden-button");
+		button2?.classList.remove("hidden-button");
+	};
+
 	useEffect(() => {
 		//console.log("buzz");
 		socket.emit('channels_listJoined', {}, (data: any) => {
@@ -31,6 +42,7 @@ export const ChanList = (props: ChanListProps) => {
 
 	return (
 		<div className="ChanList-wrapper">
+			<span className='close-chan-list' id='close-chan-list' onClick={closeChanList}>close</span>
 			{chanList.map((chan: any) => (
 				<Chan chan_id={chan.id} activeConv={props.activeConv} chan_name={chan.name}/>
 			))}
