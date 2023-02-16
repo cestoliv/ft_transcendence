@@ -51,6 +51,17 @@ export const FriendsList = (props: PersonListProps) => {
 		);
     };
 
+	const closeFriendList = (event: any): void => {
+		var sidenav = document.getElementById("priv-conv-list");
+		sidenav?.classList.remove("active-friend-list");
+
+		var button1 = document.getElementById("open-chan-joined-button");
+		var button2 = document.getElementById("open-friend-list-button");
+
+		button1?.classList.remove("hidden-button");
+		button2?.classList.remove("hidden-button");
+	};
+
 	useEffect(() => {
         socket.emit(
             'users_get',
@@ -70,7 +81,8 @@ export const FriendsList = (props: PersonListProps) => {
 	},[]);
 
 	return (
-		<div className="priv-conv-list">
+		<div className="priv-conv-list" id='priv-conv-list'>
+			<span className='close-friend-list' id='close-friend-list' onClick={closeFriendList}>close</span>
 			<div className="friendsList-wrapper">
 				{props.user_me.friends && props.user_me.friends.map((user) => (
 					<Friend key={user.id} user={user} activeConv={props.activeConv}/>

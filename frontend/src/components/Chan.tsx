@@ -36,7 +36,7 @@ export const Chan = (props: ChanProps) => {
 
 	return (
         <div id={props.chan_id} data-id={props.chan_id} data-conv-type='chan-conv' className="wrapper-active-conv" onClick={props.activeConv}>
-            <span className="wrapper-active-conv-span" onClick={props.activeConv}>{props.chan_name}{props.chan_id}</span>
+            <span className="wrapper-active-conv-span" onClick={props.activeConv}>{props.chan_name}</span>
             <span className="e-icons e-medium e-close" onClick={leaveChan}></span>
         </div>
 	);
