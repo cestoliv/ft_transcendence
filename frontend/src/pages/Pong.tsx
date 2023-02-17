@@ -1,12 +1,18 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext, useCallback, useDebugValue } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { flexbox } from '@mui/system';
-import { ClientRequest } from 'http';
+import { SocketContext } from '../context/socket';
+import { Socket } from 'socket.io-client';
+import { throttle, useDebounce, usePrevious, useStateCallback } from '../utils';
 
 const Pong: React.FC = () => {
+	const socket = useContext(SocketContext);
+	window.socket = socket;
+
+	const [isMounted, setIsMounted] = useState(false);
+
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	// canvas var
@@ -17,14 +23,14 @@ const Pong: React.FC = () => {
 	// game var
 
 	const [racketHeight, setRacketHeight] = useState(canvasHeight / 6);
-	const [leftRacketY, setLeftRacketY] = useState(
-		canvasHeight / 2 - racketHeight / 2,
-	);
-	const [rightRacketY, setRightRacketY] = useState(
-		canvasHeight / 2 - racketHeight / 2,
-	);
+	const [leftRacketY, setLeftRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
+	const [rightRacketY, setRightRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
+
 	const [ballX, setBallX] = useState(canvasWidth / 2);
 	const [ballY, setBallY] = useState(canvasHeight / 2);
+	// const prevBallX = usePrevious(ballX);
+	// const prevBallY = usePrevious(ballY);
+
 	const [ballSpeedX, setBallSpeedX] = useState(canvasWidth / 210);
 	const [ballSpeedY, setBallSpeedY] = useState(Math.random() * 3);
 	const [dx, setDx] = useState(canvasWidth / 320);
@@ -40,6 +46,12 @@ const Pong: React.FC = () => {
 
 	const [open, setOpen] = React.useState(false);
 	const [redirect, setRedirect] = useState<boolean>(false);
+
+	const victoryScore = 10;
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
 
 	const draw = () => {
 		if (canvasRef.current) {
@@ -65,29 +77,114 @@ const Pong: React.FC = () => {
 		}
 	};
 
+	/* Sockets */
+	// const [isHost, setIsHost] = useState<boolean | undefined>(undefined);
+	const [isHost, setIsHost, setIsHostCallback] = useStateCallback<boolean | undefined>(undefined);
+
+	// Racket move
+	useEffect(() => {
+		if (!isMounted) return;
+		console.log(isHost);
+		// Send the new position of the clayer rackets to the server
+		socket.emit('games_move', { newY: rightRacketY }, (data: any) => {
+			console.log(data);
+		});
+	}, [rightRacketY]);
+
+	socket.on('games_move', (data: any) => {
+		if (data.newY) setLeftRacketY(data.newY);
+	});
+
+	// Start game
+	useEffect(() => {
+		if (!isMounted) return;
+		// Set Host
+		if (gameStarted && isHost === undefined)
+			setIsHostCallback(true, (newState) => {
+				console.log('game started', isHost, newState);
+				socket.emit('games_start', { started: gameStarted }, (data: any) => {
+					console.log(data);
+					setGameStarted(data.started);
+				});
+			});
+	}, [gameStarted]);
+
+	useEffect(() => {
+		if (!isMounted) return;
+		console.log('new isHost', isHost);
+	}, [isHost]);
+
+	socket.on('games_start', (data: any) => {
+		if (isHost === false) return;
+		if (data.started) {
+			// Set Host
+			if (!gameStarted && isHost === undefined) setIsHost(false);
+			console.log('socket', 'game started', isHost);
+			setGameStarted(data.started);
+		}
+	});
+
+	// Ball move
+	const sendBallMove = (x: number, y: number) => {
+		console.log('hello from debounce');
+		socket.emit('games_ball', { newX: x, newY: y }, (data: any) => {
+			console.log(data);
+		});
+	};
+	const throttledSendBallMove = throttle(sendBallMove, 1000 / 20);
+
+	// const [ballDebounce] = useDebounce(sendBallMove, 500);
+
+	useEffect(() => {
+		if (!isMounted) return;
+		console.log('ball move', isHost);
+		if (isHost !== true) return;
+		console.log('ball move', isHost, ballX, ballY);
+
+		throttledSendBallMove(ballX, ballY);
+
+		// Check if the position of the ball has changed
+		// if (
+		// 	Math.round(prevBallX || ballX) === Math.round(ballX) &&
+		// 	Math.round(prevBallY || ballY) === Math.round(ballY)
+		// )
+		// 	return;
+		// Send the new position of the ball to the server
+	}, [ballX, ballY]);
+
+	socket.on('games_ball', (data: any) => {
+		console.log('socket', 'ball move');
+		if (isHost) return;
+		if (data.newX && data.newY) {
+			console.log('socket', 'ball move', data.newX, data.newY);
+			setBallX(data.newX);
+			setBallY(data.newY);
+		}
+	});
+	/* End Sockets */
+
 	useEffect(() => {
 		draw();
-	}, [
-		leftRacketY,
-		rightRacketY,
-		ballX,
-		ballY,
-		gameStarted,
-		canvasHeight,
-		canvasWidth,
-		racketHeight,
-	]);
+	}, [leftRacketY, rightRacketY, ballX, ballY, gameStarted, canvasHeight, canvasWidth, racketHeight]);
 
 	useEffect(() => {
 		if (gameStarted && !gameEnd) {
 			const intervalId = setInterval(() => {
-				if (rightScore == 2 || leftScore == 2) {
+				if (rightScore == victoryScore || leftScore == victoryScore) {
 					setGameEnd(true);
 					setOpen(true);
 					return () => {
 						clearInterval(intervalId);
 					};
 				}
+
+				if (isHost === false) {
+					console.log('not host', isHost);
+					return () => {
+						clearInterval(intervalId);
+					};
+				}
+
 				//collide right
 				if (
 					ballSpeedX > 0 &&
@@ -130,10 +227,7 @@ const Pong: React.FC = () => {
 					}
 				}
 				// Rebounds on top and bottom
-				if (
-					ballY + ballSpeedY + 5 > canvasHeight ||
-					ballY + ballSpeedY + 5 < 0
-				) {
+				if (ballY + ballSpeedY + 5 > canvasHeight || ballY + ballSpeedY + 5 < 0) {
 					setBallSpeedY(ballSpeedY * -1);
 				}
 				// goal
@@ -165,17 +259,13 @@ const Pong: React.FC = () => {
 				setRightRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 40:
-				setRightRacketY((prevY) =>
-					Math.min(canvasHeight - racketHeight, prevY + 20),
-				);
+				setRightRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
 				break;
 			case 90:
 				setLeftRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 83:
-				setLeftRacketY((prevY) =>
-					Math.min(canvasHeight - racketHeight, prevY + 20),
-				);
+				setLeftRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
 				break;
 			default:
 				break;
@@ -216,20 +306,13 @@ const Pong: React.FC = () => {
 	return (
 		<div className="pong-wrapper">
 			{renderRedirect()}
-			<Modal
-				open={open}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
+			<Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
 				<Box className="end-game-modal">
 					<h1>Score</h1>
 					<h3>
 						hadrien {leftScore} - {rightScore} Olivier
 					</h3>
-					<button
-						className="redirect-game-button"
-						onClick={handleRedirect}
-					>
+					<button className="redirect-game-button" onClick={handleRedirect}>
 						Continuer
 					</button>
 				</Box>

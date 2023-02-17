@@ -32,7 +32,7 @@ export const ChanList = (props: ChanListProps) => {
 	return (
 		<div className="ChanList-wrapper">
 			{chanList.map((chan: any) => (
-				<Chan chan_id={chan.id} activeConv={props.activeConv} chan_name={chan.name}/>
+				<Chan chan_id={chan.id} activeConv={props.activeConv} chan_name={chan.name} />
 			))}
 		</div>
 	);

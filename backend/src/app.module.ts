@@ -16,6 +16,8 @@ import { UserFriend } from './users/entities/user-friend.entity';
 import { BannedUser } from './users/entities/user-banned.entity';
 import { MutedUser } from './users/entities/user-muted.entity';
 import { UserMessage } from './users/entities/user.message.entity';
+import { GamesModule } from './games/games.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
 	imports: [
@@ -28,7 +30,7 @@ import { UserMessage } from './users/entities/user.message.entity';
 			useFactory: (configService: ConfigService) => ({
 				type: 'postgres',
 				host: configService.get('DB_HOST'),
-				port: +configService.get('DB_PORT'),
+				port: configService.get('DB_PORT'),
 				username: configService.get('DB_USER'),
 				password: configService.get('DB_PASS'),
 				database: configService.get('DB_NAME'),
@@ -48,9 +50,11 @@ import { UserMessage } from './users/entities/user.message.entity';
 			}),
 			inject: [ConfigService],
 		}),
+		ScheduleModule.forRoot(),
 		UsersModule,
 		AuthModule,
 		ChannelsModule,
+		GamesModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

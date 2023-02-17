@@ -66,12 +66,7 @@ export const Settings = () => {
 
 					<div className="googl-auth-div">
 						<label>Google auth : </label>
-						<input
-							type="checkbox"
-							id="scales"
-							name="scales"
-							onChange={handleChangeCheckbox}
-						/>
+						<input type="checkbox" id="scales" name="scales" onChange={handleChangeCheckbox} />
 					</div>
 
 					<input

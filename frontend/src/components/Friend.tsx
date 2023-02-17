@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 
-import PrivateChanJoined from './PrivateChanJoined'
+import PrivateChanJoined from './PrivateChanJoined';
 
 import { SocketContext } from '../context/socket';
 
@@ -12,7 +12,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
 type FriendProps = {
-	user: IUser,
+	user: IUser;
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 };
 
@@ -21,7 +21,7 @@ export const Friend = (props: FriendProps) => {
 
 	const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
 
-    const [openFActionModal, setOpenFriendActionModal] = React.useState(false);
+	const [openFActionModal, setOpenFriendActionModal] = React.useState(false);
 	const OpenFriendActionModal = () => setOpenFriendActionModal(true);
 	const CloseFriendActionModal = () => setOpenFriendActionModal(false);
 
@@ -36,11 +36,10 @@ export const Friend = (props: FriendProps) => {
 				id: props.user.id,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-	}
+	};
 
 	useEffect(() => {
 		socket.emit('channels_listJoined', {}, (data: any) => {
@@ -49,10 +48,13 @@ export const Friend = (props: FriendProps) => {
 	}, []);
 
 	return (
-		<div data-id={props.user.id} data-conv-type='friend-conv' className="wrapper-active-conv" onClick={props.activeConv}>
-			<Link to={`/profile/${props.user.id}`}>
-				{props.user.username}
-			</Link>
+		<div
+			data-id={props.user.id}
+			data-conv-type="friend-conv"
+			className="wrapper-active-conv"
+			onClick={props.activeConv}
+		>
+			<Link to={`/profile/${props.user.id}`}>{props.user.username}</Link>
 			<div className="friendsList-settings">
 				{/* {props.states === 'connected' && (
 					<span className="e-icons e-medium e-play"></span>
@@ -60,7 +62,7 @@ export const Friend = (props: FriendProps) => {
 				{props.states === 'ingame' && (
 					<span className="e-icons e-medium e-radio-button"></span>
 				)} */}
-				<span className="e-icons e-medium e-menu"  onClick={OpenFriendActionModal}></span>
+				<span className="e-icons e-medium e-menu" onClick={OpenFriendActionModal}></span>
 				<Modal
 					open={openFActionModal}
 					onClose={CloseFriendActionModal}
@@ -72,27 +74,26 @@ export const Friend = (props: FriendProps) => {
 						<button>Regarder la partie</button>
 						<button onClick={OpenChanListModal}>Inviter channel</button>
 						<button onClick={removeFriend}>Suprrimer</button>
-                	</Box>
-            	</Modal>
+					</Box>
+				</Modal>
 			</div>
 			<Modal
-                open={openChanListModal}
-                onClose={CloseChanListModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box className="chan-user-modal">
-					{chanListJoined?.filter(chan => {
-							if (chan.visibility === 'private')
-								return true;
-							return false
+				open={openChanListModal}
+				onClose={CloseChanListModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="chan-user-modal">
+					{chanListJoined
+						?.filter((chan) => {
+							if (chan.visibility === 'private') return true;
+							return false;
 						})
-						.map(chan => (
-							<PrivateChanJoined chan={chan} userToInviteId={props.user.id}/>
-						))
-					}
-                </Box>
-            </Modal>
+						.map((chan) => (
+							<PrivateChanJoined chan={chan} userToInviteId={props.user.id} />
+						))}
+				</Box>
+			</Modal>
 		</div>
 	);
 };

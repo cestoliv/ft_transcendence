@@ -16,8 +16,7 @@ export const OtherUserProfile = () => {
 
 	useEffect(() => {
 		let x: number;
-		if (params.userId)
-			x = +params.userId;
+		if (params.userId) x = +params.userId;
 		const dataUser = users.find((element) => element.idd === x);
 		if (dataUser) setUser(dataUser);
 		else setRedirect(true);

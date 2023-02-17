@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { OnGatewayConnection, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ChannelsService } from './channels/channels.service';
+import { GamesService } from './games/games.service';
 import { SocketWithUser } from './types';
 import { UsersService } from './users/users.service';
 
@@ -29,6 +30,9 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		readonly usersService: UsersService,
 		@Inject(forwardRef(() => ChannelsService))
 		readonly channelsService: ChannelsService,
+		@Inject(forwardRef(() => GamesService))
+		readonly gamesService: GamesService,
+
 		readonly connectedClientsService: ConnectedClientsService,
 	) {}
 

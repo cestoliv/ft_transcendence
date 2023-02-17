@@ -16,8 +16,8 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-  type FriendsProps = {
-	user_me : IUser,
+type FriendsProps = {
+	user_me: IUser;
 };
 
 export default function Friends(props: FriendsProps) {
@@ -25,8 +25,8 @@ export default function Friends(props: FriendsProps) {
 
 	const [user, setUser] = useState<IUser>();
 
-	let [activeConvId, setActivConvId] = useState<number>(-1);
-	let [chanConv, setChanConv] = useState<number>(-1)
+	const [activeConvId, setActivConvId] = useState<number>(-1);
+	const [chanConv, setChanConv] = useState<number>(-1);
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -50,15 +50,11 @@ export default function Friends(props: FriendsProps) {
 	const [joinChanMdp, setJoinChanMdp] = useState<string>('');
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'create-chan-name')
-			setChanName(event.target.value);
-		if (event.target.name === 'create-chan-mdp')
-			setChanMdp(event.target.value);
+		if (event.target.name === 'create-chan-name') setChanName(event.target.value);
+		if (event.target.name === 'create-chan-mdp') setChanMdp(event.target.value);
 
-		if (event.target.name === 'join-chan-name')
-			setJoinChanName(event.target.value);
-		if (event.target.name === 'join-chan-mdp')
-			setJoinChanMdp(event.target.value);
+		if (event.target.name === 'join-chan-name') setJoinChanName(event.target.value);
+		if (event.target.name === 'join-chan-mdp') setJoinChanMdp(event.target.value);
 	};
 
 	const createChan = (event: any): void => {
@@ -72,8 +68,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: chanMdp === '' ? 'public' : 'password-protected',
 				},
 				(data: any) => {
-					if (data.messages)
-						alert(data.messages);
+					if (data.messages) alert(data.messages);
 				},
 			);
 			setChanName('');
@@ -88,8 +83,7 @@ export default function Friends(props: FriendsProps) {
 					password: joinChanMdp,
 				},
 				(data: any) => {
-					if (data.messages)
-						alert(data.messages);
+					if (data.messages) alert(data.messages);
 				},
 			);
 			setJoinChanName('');
@@ -101,26 +95,20 @@ export default function Friends(props: FriendsProps) {
 	const activeConv = (event: any) => {
 		let newId;
 		let element;
-		
+
 		if (event.target.classList != 'wrapper-active-conv' && event.target.classList != 'wrapper-active-conv-span')
 			return;
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
-		if (event.target.classList == 'wrapper-active-conv-span')
-			element = event.target.parentElement;
-		else
-			element = event.target;
+		if (event.target.classList == 'wrapper-active-conv-span') element = event.target.parentElement;
+		else element = event.target;
 		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
 		const newActivConv = document.getElementById('active-conv-bg');
-		if (newActivConv)
-			newId = newActivConv.getAttribute('data-id');
-		if (newId)
-			setActivConvId(parseInt(newId));
-		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv')
-			setChanConv(1);
-		else
-			setChanConv(2);
+		if (newActivConv) newId = newActivConv.getAttribute('data-id');
+		if (newId) setActivConvId(parseInt(newId));
+		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv') setChanConv(1);
+		else setChanConv(2);
 	};
 
 	useEffect(() => {
@@ -128,18 +116,20 @@ export default function Friends(props: FriendsProps) {
 		// 	console.log("hello15 : ");
 		// 	console.log(data);
 		// });
-		socket.emit('users_get',
-		{
-			id : props.user_me.id,
-		},
-		(data: any) => {
-			// console.log("hello15 : ");
-			// console.log(data);
-			setUser(data);
-		});
+		socket.emit(
+			'users_get',
+			{
+				id: props.user_me.id,
+			},
+			(data: any) => {
+				// console.log("hello15 : ");
+				// console.log(data);
+				setUser(data);
+			},
+		);
 		// console.log("hello 78");
 		// console.log(user);
-	},);
+	});
 
 	return (
 		<div className="friends-wrapper">
@@ -155,9 +145,7 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="list-chan-modal">
-							{ user && <AllChan user_me={user}/> }
-						</Box>
+						<Box className="list-chan-modal">{user && <AllChan user_me={user} />}</Box>
 					</Modal>
 					<Modal
 						open={openCModal}
@@ -245,10 +233,8 @@ export default function Friends(props: FriendsProps) {
 				) : null}
 			</div>
 			<div className="infos-conv">
-				{activeConvId != -1 && user ? (
-						<InfosConv user_me={user} activeConvId={activeConvId} />
-					) : null}
+				{activeConvId != -1 && user ? <InfosConv user_me={user} activeConvId={activeConvId} /> : null}
 			</div>
 		</div>
 	);
-};
+}

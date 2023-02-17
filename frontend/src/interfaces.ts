@@ -2,33 +2,33 @@ export interface IUser {
 	id: number;
 	id42: number;
 	username: string;
-	invitedFriends: IUserFriend[],
-	friendOf: IUserFriend[],
-	friends: IUser[],
+	invitedFriends: IUserFriend[];
+	friendOf: IUserFriend[];
+	friends: IUser[];
 }
 
-export interface IUserMessage{
-	id: number,
+export interface IUserMessage {
+	id: number;
 
-	senderId: number,
-	sender: IUser,
+	senderId: number;
+	sender: IUser;
 
-	receiverId: number,
-	receiver: IUser,
+	receiverId: number;
+	receiver: IUser;
 
-	message: string,
+	message: string;
 
-	sentAt: Date
+	sentAt: Date;
 }
 
-export interface IUserFriend{
-	inviterId: number,
-	inviter: IUser,
+export interface IUserFriend {
+	inviterId: number;
+	inviter: IUser;
 
-	inviteeId: number,
-	invitee: IUser,
+	inviteeId: number;
+	invitee: IUser;
 
-	accepted: boolean
+	accepted: boolean;
 }
 
 export interface IAuth {
@@ -47,41 +47,41 @@ export interface IChannel {
 	banned: IChannelBannedUser[];
 	muted: IUser[];
 	invited: IChannelInvitedUser[];
-  }
-
-  export interface IChannelBannedUser {
-	userId: number,
-	user: IUser,
-
-	channelId: number,
-	channel: IChannel,
-
-	until: Date,
 }
 
-export interface IChannelInvitedUser{
-	userId: number,
-	user: IUser,
+export interface IChannelBannedUser {
+	userId: number;
+	user: IUser;
 
-	inviterId: number,
-	inviter: IUser,
+	channelId: number;
+	channel: IChannel;
 
-	channelId: number,
-	channel: IChannel,
-
-	invited_at: Date,
+	until: Date;
 }
 
-export interface IChannelMessage{
-	id: number,
+export interface IChannelInvitedUser {
+	userId: number;
+	user: IUser;
 
-	senderId: number,
-	sender: IUser,
+	inviterId: number;
+	inviter: IUser;
 
-	channelId: number,
-	channel: IChannel,
+	channelId: number;
+	channel: IChannel;
 
-	message: string,
+	invited_at: Date;
+}
 
-	sentAt: Date,
+export interface IChannelMessage {
+	id: number;
+
+	senderId: number;
+	sender: IUser;
+
+	channelId: number;
+	channel: IChannel;
+
+	message: string;
+
+	sentAt: Date;
 }

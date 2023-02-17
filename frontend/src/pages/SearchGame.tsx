@@ -30,11 +30,10 @@ const style = {
 };
 
 type FriendsProps = {
-	user_me : IUser,
+	user_me: IUser;
 };
 
 export const SearchGame = (props: FriendsProps) => {
-
 	const [redirect, setRedirect] = useState<boolean>(false);
 
 	const [mode, setMode] = React.useState('');
@@ -78,13 +77,10 @@ export const SearchGame = (props: FriendsProps) => {
 	return (
 		<div className="searchGame-wrapper">
 			<div className="searchGame-friendsList">
-				<FriendsList activeConv={activeConv} user_me={props.user_me}/>
+				<FriendsList activeConv={activeConv} user_me={props.user_me} />
 			</div>
 			<div className="searchRandomPlayer">
-				<button
-					className="searchRandomPlayer-button"
-					onClick={handleOpen}
-				>
+				<button className="searchRandomPlayer-button" onClick={handleOpen}>
 					Search a game
 				</button>
 				{renderRedirect()}
@@ -95,10 +91,7 @@ export const SearchGame = (props: FriendsProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box sx={style}>
-						<button
-							className="redirect-button"
-							onClick={handleRedirect}
-						>
+						<button className="redirect-button" onClick={handleRedirect}>
 							redirect
 						</button>
 					</Box>
@@ -108,9 +101,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Mode
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Mode</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
@@ -127,9 +118,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-time-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Time
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Time</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
@@ -146,9 +135,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-points-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Points
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Points</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
