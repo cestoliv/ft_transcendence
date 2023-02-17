@@ -1,4 +1,5 @@
 import * as React from 'react';
+import default_avatar from "../../public/default-avatar.png";
 import { useState, useEffect } from 'react';
 import { IUser } from '../interfaces';
 import { socket, SocketContext } from '../context/socket';
@@ -63,9 +64,14 @@ export const Stats = (props :StatsProps ) => {
 
 	return (
 		<div className="stats-wrapper">
+			<div className="rank">
+				<img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/d6df2d66-13da-4ce4-ae85-8009742c5c94/d6u3aiw-18765c64-e07c-418e-a1d9-ffc958e48202.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi9kNmRmMmQ2Ni0xM2RhLTRjZTQtYWU4NS04MDA5NzQyYzVjOTQvZDZ1M2Fpdy0xODc2NWM2NC1lMDdjLTQxOGUtYTFkOS1mZmM5NThlNDgyMDIucG5nIn1dXX0.Nfy5H5LA8hOJG0tCTSQayRJ3R2H2ThI9eQbbUQNKE84" alt="marche po" />
+			</div>
 			<div className="profil">
-				<div className="avatar"></div>
-				<h1>{user.username}</h1>
+				<div className="avatar">
+					<img src="https://upload.wikimedia.org/wikipedia/en/9/9a/Trollface_non-free.png" alt="marche po" />
+				</div>
+				<h2 className="userName">{user.username}</h2>
 				<h2>{user.elo}</h2>
 			</div>
 			<div className="historic">

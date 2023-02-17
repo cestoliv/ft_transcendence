@@ -1,55 +1,64 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
 .stats-wrapper {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40% 40% 20%;
+    grid-template-rows: 60% 40%;
+    grid-template-areas: 
+    "rank profil hist"
+    "stats stats hist";
     flex-grow: 1;
-    background-color: #131B23;
-    justify-content: space-around;
+    background-image: url("../png/stat_background.png");
+    background-size: 100% 100%;
+    justify-content: space-between;
+    align-content: space-around;
     align-items: center;
-    gap: 40px;
-    padding: 0px 80px;
+    justify-items: center;
+}
+
+.rank img{
+    grid-area: rank;
+    height: 100%;
+    width: 100%;
+    /* background-image: url("../png/diamant.png");
+    background-size: 100% 100% */
 }
 
 .profil {
-    height: 60%;
-    width: 400px;
-    background-color: #816C61;
-    border-radius: 30px;
-    display: flex;
-    flex-direction: column;
+    grid-area: profil;
+    display: grid;
+    grid-row: 90% 5% 5%;
+    height: 100%;
+    width: 100%;
     align-items: center;
-    gap: 10px;
-    padding-bottom: 20px;
+    justify-items: center;
     font-family: 'VT323', monospace;
-    font-size: 20px;
+    font-size: 1rem;
+}
+.profil h2{
+    display: block;
+    height: 20px;
+    width: 20px;
 }
 
-.avatar {
-    height: 200px;
-    width: 200px;
+.avatar img{
     border-radius: 50%;
-    background-color: black;
-    margin-top: 50px;
-}
-
-.historic {
-    height: 80%;
-    width: 400px;
-    background-color: #816C61;
-    border-radius: 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding-bottom: 20px;
-    font-family: 'VT323', monospace;
-    font-size: 20px;
+    border: 2px solid black;
+    height: 90%;
+    width: 90%;
+    margin-left: 20px;
+    /* padding-top: 10%;
+    padding-left: 10%;
+    padding-right: 10%; */
 }
 
 .stats {
-    height: 80%;
-    width: 400px;
-    background-color: #816C61;
-    border-radius: 30px;
+    grid-area: stats;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,7 +69,7 @@
     font-size: 20px;
 }
 
-.classement {
+/* .classement {
     height: 80%;
     width: 400px;
     background-color: #816C61;
@@ -73,6 +82,18 @@
     padding-bottom: 20px;
     font-family: 'VT323', monospace;
     font-size: 20px;
+} */
+.historic {
+    grid-area: hist;
+    display: flex;
+    height: 100%;
+    width: 95%;
+    border: 2px solid black;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'VT323', monospace;
+    font-size: 0.8rem;
 }
 
 .historic-item {
@@ -93,7 +114,7 @@
     align-items: center;
     justify-content: center;
 }
-
+/* 
 .classement-item {
     flex-grow: 1;
     border-bottom: 1px solid #E7DFC6;
@@ -101,4 +122,4 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+} */

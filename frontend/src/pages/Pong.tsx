@@ -68,14 +68,9 @@ const Pong: React.FC = () => {
 	useEffect(() => {
 		draw();
 	}, [
-		leftRacketY,
-		rightRacketY,
 		ballX,
 		ballY,
-		gameStarted,
-		canvasHeight,
-		canvasWidth,
-		racketHeight,
+		gameStarted
 	]);
 
 	useEffect(() => {
