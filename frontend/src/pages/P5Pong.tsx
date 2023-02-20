@@ -26,8 +26,10 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		return { width, height };
 	};
 
+	// Vars
 	let canvasSize: { width: number; height: number } = computeCanvasSize();
 	let mP5: p5Types;
+	let started = false;
 
 	const ball = {
 		x: canvasSize.width / 2,
@@ -186,6 +188,9 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		mP5 = p5;
 		if (!canvasSize) canvasSize = computeCanvasSize();
 
+		// if (!started) return;
+		console.log(started, 'started');
+
 		p5.background(0);
 
 		// If pos changed, send it to the server
@@ -215,6 +220,19 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	}, []);
 
 	// Socket
+	socket.off('games_start'); // Unbind previous event
+	socket.on('games_start', (data: any) => {
+		console.log('games_start', data);
+		if (mP5) {
+			// Start the game at the right time
+			let delay = data.startAt - Date.now();
+			if (delay < 0) delay = 0;
+			setTimeout(() => {
+				console.log('start');
+				started = true;
+			}, delay);
+		}
+	});
 	socket.off('games_opponentMove'); // Unbind previous event
 	socket.on('games_opponentMove', (data: any) => {
 		if (mP5) {

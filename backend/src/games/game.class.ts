@@ -21,6 +21,7 @@ interface Player {
 export class Game {
 	id: string;
 	started: boolean;
+	startAt: Date;
 	players: Array<Player>;
 	ball: {
 		x: number;
@@ -39,6 +40,7 @@ export class Game {
 	constructor(id: string, creator: SocketWithUser) {
 		this.id = id;
 		this.started = false;
+		this.startAt = null;
 		this.players = [];
 		this.screen = {
 			width: 512,
@@ -102,12 +104,28 @@ export class Game {
 		socket.join(`game_${this.id}`);
 
 		if (this.players.length === 2) {
-			this.started = true;
-			this.resetBall();
+			this.start();
 		}
 	}
 
+	start() {
+		// Delay start by 3 seconds
+		this.startAt = new Date();
+		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
+		this.players.forEach((player) => {
+			console.log('startAt', this.startAt);
+			player.socket.emit('games_start', {
+				startAt: this.startAt.getTime(),
+			});
+		});
+		setTimeout(() => {
+			this.started = true;
+			this.resetBall();
+		}, 3000);
+	}
+
 	movePlayer(socket: SocketWithUser, y: number) {
+		if (!this.started) return;
 		const player = this.players.find(
 			(p) => p.socket.user.id === socket.user.id,
 		);
@@ -119,8 +137,20 @@ export class Game {
 			(p) => p.socket.user.id !== socket.user.id,
 		);
 		opponent.socket.emit('games_opponentMove', { y });
+	}
 
-		console.log('movePlayer', socket.user.id, y);
+	addScore(player: Player) {
+		player.score++;
+		this.players[0].socket.emit('games_score', {
+			you: this.players[0].score,
+			opponent: this.players[1].score,
+		});
+		this.players[1].socket.emit('games_score', {
+			you: this.players[1].score,
+			opponent: this.players[0].score,
+		});
+		this.resetBall();
+		this.resetPlayers();
 	}
 
 	update() {
@@ -148,10 +178,7 @@ export class Game {
 					3,
 					9,
 				);
-			} else {
-				// opponent misses the ball
-				this.resetBall();
-			}
+			} else this.addScore(this.players[1]);
 		}
 
 		// // x: me
@@ -172,10 +199,7 @@ export class Game {
 					3,
 					9,
 				);
-			} else {
-				// I misse the ball
-				this.resetBall();
-			}
+			} else this.addScore(this.players[0]);
 		}
 		this.ball.x += this.ball.speed.x;
 
