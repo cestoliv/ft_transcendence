@@ -1148,6 +1148,11 @@ Send game information 3 seconds before the start of the game.
 - Event name: `games_start`
 - Data type: [LocalGameInfo](#localgameinfo)
 
+### **Invitation to a game**
+
+- Event name: `games_invitation`
+- Data type: [LocalGameInfo](#localgameinfo)
+
 ### **Game end**
 
 - Event name: `games_end`

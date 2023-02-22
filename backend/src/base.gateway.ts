@@ -15,6 +15,10 @@ export class ConnectedClientsService {
 		this.clients.set(userId, socket);
 	}
 
+	get(userId: number) {
+		return this.clients.get(userId);
+	}
+
 	delete(userId: number) {
 		this.clients.delete(userId);
 	}

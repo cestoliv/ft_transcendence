@@ -204,7 +204,10 @@ export class LocalGame {
 		)
 			this.invited.push(invitee);
 
-		// TODO: Send notification to invitee
+		// Send notification to invitee
+		this.connectedClientsService
+			.get(invitee.id)
+			.emit('game_invitation', this.getInfo());
 		return invitee;
 	}
 
