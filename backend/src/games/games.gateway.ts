@@ -3,6 +3,7 @@ import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj } from 'src/utils';
+import { LocalGameInfo } from './game.class';
 
 @WebSocketGateway({
 	cors: {
@@ -18,7 +19,7 @@ export class GamesGateway extends BaseGateway {
 	async create(
 		client: SocketWithUser,
 		payload: any,
-	): Promise<any | WSResponse> {
+	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
@@ -49,7 +50,7 @@ export class GamesGateway extends BaseGateway {
 	async join(
 		client: SocketWithUser,
 		payload: any,
-	): Promise<any | WSResponse> {
+	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
@@ -71,7 +72,9 @@ export class GamesGateway extends BaseGateway {
 	}
 
 	@SubscribeMessage('games_joinMatchmaking')
-	async joinMatchmaking(client: SocketWithUser): Promise<any | WSResponse> {
+	async joinMatchmaking(
+		client: SocketWithUser,
+	): Promise<boolean | WSResponse> {
 		// Join Matchmaking
 		return this.gamesService
 			.joinMatchmaking(client)

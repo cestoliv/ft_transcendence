@@ -8,7 +8,7 @@ import { SocketWithUser } from 'src/types';
 import { User } from 'src/users/entities/user.entity';
 import { GamesService } from './games.service';
 
-interface Player {
+interface LocalGamePlayer {
 	// TODO: Store only user and get socket from connectedClientsService
 	socket: SocketWithUser;
 	score: number;
@@ -17,6 +17,16 @@ interface Player {
 		y: number;
 		radius: number;
 	};
+}
+
+export interface LocalGameInfo {
+	id: string;
+	state: 'waiting' | 'started' | 'ended' | 'saved';
+	startAt: number | null;
+	players: Array<{
+		user: User;
+		score: number;
+	}>;
 }
 
 export class GameOptions {
@@ -80,7 +90,7 @@ export class LocalGame {
 	id: string;
 	state: 'waiting' | 'started' | 'ended' | 'saved';
 	startAt: Date;
-	players: Array<Player>;
+	players: Array<LocalGamePlayer>;
 	invited: Array<User>;
 	ball: {
 		x: number;
@@ -136,14 +146,13 @@ export class LocalGame {
 		this.addPlayer(creator);
 	}
 
-	getInfo() {
+	getInfo(): LocalGameInfo {
 		return {
 			id: this.id,
 			state: this.state,
 			startAt: this.startAt ? this.startAt.getTime() : null,
 			players: this.players.map((player) => ({
-				id: player.socket.user.id,
-				username: player.socket.user.username,
+				user: player.socket.user,
 				score: player.score,
 			})),
 		};
@@ -186,7 +195,7 @@ export class LocalGame {
 			throw new ForbiddenException('Game is already full');
 		// Check if user is online
 		if (!this.connectedClientsService.has(invitee.id))
-			throw new ForbiddenException('User offline');
+			throw new ForbiddenException('User is offline');
 
 		// Check if game is private and user is not invited
 		if (
@@ -194,8 +203,6 @@ export class LocalGame {
 			!this.invited.find((user) => user.id === invitee.id)
 		)
 			this.invited.push(invitee);
-
-		console.log('invite', invitee.username);
 
 		// TODO: Send notification to invitee
 		return invitee;
@@ -239,14 +246,6 @@ export class LocalGame {
 		setTimeout(() => {
 			this.end();
 		}, this.options.maxDuration * 60 * 1000);
-
-		// this.ballSpped.intervalId = setInterval(() => {
-		// 	if (this.ball.speed.x >= this.ballSpped.max) return;
-		// 	if (this.ball.speed.y >= this.ballSpped.max) return;
-
-		// 	this.ball.speed.x += this.ballSpped.increase;
-		// 	this.ball.speed.y += this.ballSpped.increase;
-		// }, this.ballSpped.interval);
 	}
 
 	async end(winner: User | null = null) {
@@ -335,7 +334,7 @@ export class LocalGame {
 		opponent.socket.emit('games_opponentMove', { y });
 	}
 
-	addScore(player: Player) {
+	addScore(player: LocalGamePlayer) {
 		player.score++;
 		this.players[0].socket.emit('games_score', {
 			you: this.players[0].score,
