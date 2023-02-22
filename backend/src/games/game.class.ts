@@ -124,6 +124,7 @@ export class LocalGame {
 		return {
 			id: this.id,
 			state: this.state,
+			startAt: this.startAt ? this.startAt.getTime() : null,
 			players: this.players.map((player) => ({
 				id: player.socket.user.id,
 				username: player.socket.user.username,
@@ -212,10 +213,7 @@ export class LocalGame {
 		this.startAt = new Date();
 		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
 		this.players.forEach((player) => {
-			console.log('startAt', this.startAt);
-			player.socket.emit('games_start', {
-				startAt: this.startAt.getTime(),
-			});
+			player.socket.emit('games_start', this.getInfo());
 		});
 		setTimeout(() => {
 			this.state = 'started';

@@ -18,7 +18,8 @@ export class GamesService {
 		private readonly gamesRepository: Repository<Game>,
 	) {}
 
-	public games = new Map<string, LocalGame>();
+	public games = new Map<string, LocalGame>(); // Game ID -> Game
+	public queue: Array<SocketWithUser> = [];
 
 	async create(
 		creator: SocketWithUser,
@@ -71,10 +72,39 @@ export class GamesService {
 		return game.invite(inviter.user, invitee);
 	}
 
+	async joinMatchmaking(user: SocketWithUser) {
+		this.queue.push(user);
+		return true;
+	}
+
 	@Interval(1000 / 60)
 	loop(): void {
 		this.games.forEach((game) => {
 			game.update();
 		});
+	}
+
+	@Interval(5000)
+	async matchmaking(): Promise<void> {
+		this.queue.forEach(async (socket) => {
+			await this.matchmake(socket);
+		});
+	}
+
+	async matchmake(socket: SocketWithUser) {
+		// Find public games, in waiting state and with space
+		const publicGames = Array.from(this.games.values()).filter(
+			(game) =>
+				game.options.visibility === 'public' &&
+				game.state === 'waiting' &&
+				game.players.length < 2,
+		);
+
+		// If there are public games, join the first one
+		if (publicGames.length > 0) {
+			await this.join(publicGames[0].id, socket);
+			// Remove the user from the queue
+			this.queue = this.queue.filter((user) => user !== socket);
+		}
 	}
 }

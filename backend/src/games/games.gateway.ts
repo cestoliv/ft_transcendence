@@ -32,7 +32,7 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
-		const options = new GameOptions(1, 5, 'classic', 'private');
+		const options = new GameOptions(1, 5, 'classic', 'public');
 
 		// Create game
 		return this.gamesService
@@ -63,6 +63,15 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.join(payload.id, client)
 			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_joinMatchmaking')
+	async joinMatchmaking(client: SocketWithUser): Promise<any | WSResponse> {
+		// Join Matchmaking
+		return this.gamesService
+			.joinMatchmaking(client)
+			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
 	}
 
@@ -114,7 +123,7 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
-		// Move player
+		// Invite player
 		return this.gamesService
 			.invite(payload.id, client, payload.user_id)
 			.then((invitee) => invitee)
