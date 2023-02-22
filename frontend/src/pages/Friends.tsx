@@ -16,8 +16,8 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-type FriendsProps = {
-	user_me: IUser;
+  type FriendsProps = {
+	user_me : IUser,
 };
 
 export default function Friends(props: FriendsProps) {
@@ -111,29 +111,39 @@ export default function Friends(props: FriendsProps) {
 		else setChanConv(2);
 	};
 
+	const OpenConvs = (event: any): void => {
+		if (event.target.name === 'open-chan-joined-button') {
+			var sidenav = document.getElementById("chan-list");
+			sidenav?.classList.add("active-chan-list");
+		}
+		if (event.target.name === 'open-friend-list-button') {
+			var sidenav = document.getElementById("priv-conv-list");
+			sidenav?.classList.add("active-friend-list");
+		}
+		var button1 = document.getElementById("open-chan-joined-button");
+		var button2 = document.getElementById("open-friend-list-button");
+
+		button1?.classList.add("hidden-button");
+		button2?.classList.add("hidden-button");
+	};
+
 	useEffect(() => {
-		// socket.emit('channels_list', {}, (data: any) => {
-		// 	console.log("hello15 : ");
-		// 	console.log(data);
-		// });
-		socket.emit(
-			'users_get',
-			{
-				id: props.user_me.id,
-			},
-			(data: any) => {
-				// console.log("hello15 : ");
-				// console.log(data);
-				setUser(data);
-			},
-		);
-		// console.log("hello 78");
-		// console.log(user);
-	});
+		socket.emit('users_get',
+		{
+			id : props.user_me.id,
+		},
+		(data: any) => {
+			setUser(data);
+		});
+	},[]);
 
 	return (
 		<div className="friends-wrapper">
-			<div className="chan-list">
+			<div className="burger-menu">
+				<button className='open-chan-joined-button' id='open-chan-joined-button' name='open-chan-joined-button' onClick={OpenConvs}>Channels</button>
+				<button className='open-friend-list-button' id='open-friend-list-button' name='open-friend-list-button' onClick={OpenConvs}>Friends</button>
+			</div>
+			<div className="chan-list" id='chan-list'>
 				<ChanList activeConv={activeConv} />
 				<div className="chan-list-buttons">
 					<button onClick={OpenCreateChanModal}>Create chan</button>
@@ -145,7 +155,9 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="list-chan-modal">{user && <AllChan user_me={user} />}</Box>
+						<Box className="list-chan-modal background-modal pixel-font">
+							{ user && <AllChan user_me={user}/> }
+						</Box>
 					</Modal>
 					<Modal
 						open={openCModal}
@@ -153,10 +165,11 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="create-chan-modal">
+						<Box className="create-chan-modal background-modal">
 							<form className="create-channel-form">
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="create-chan-name"
 										placeholder="Name"
@@ -169,14 +182,14 @@ export default function Friends(props: FriendsProps) {
 										type="text"
 										name="create-chan-mdp"
 										placeholder="Mot de passe"
-										className="mdp-channel-form-label"
+										className="mdp-channel-form-label pixel-font"
 										onChange={handleChange}
 									/>
 								</label>
 								<button
 									name="button-create-chan"
 									type="submit"
-									className="redirect-button"
+									className="pixel-font"
 									onClick={createChan}
 								>
 									Create
@@ -190,10 +203,11 @@ export default function Friends(props: FriendsProps) {
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
-						<Box className="join-chan-modal">
+						<Box className="join-chan-modal background-modal">
 							<form className="join-channel-form">
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="join-chan-name"
 										placeholder="Code"
@@ -203,6 +217,7 @@ export default function Friends(props: FriendsProps) {
 								</label>
 								<label>
 									<input
+										className='pixel-font'
 										type="text"
 										name="join-chan-mdp"
 										placeholder="Mot de passe"
@@ -213,7 +228,7 @@ export default function Friends(props: FriendsProps) {
 								<button
 									name="button-join-chan"
 									type="submit"
-									className="redirect-button"
+									className="pixe-font"
 									onClick={createChan}
 								>
 									Join
@@ -233,7 +248,9 @@ export default function Friends(props: FriendsProps) {
 				) : null}
 			</div>
 			<div className="infos-conv">
-				{activeConvId != -1 && user ? <InfosConv user_me={user} activeConvId={activeConvId} /> : null}
+				{activeConvId != -1 && user && chanConv == 1 ? (
+						<InfosConv user_me={user} activeConvId={activeConvId} />
+					) : null}
 			</div>
 		</div>
 	);

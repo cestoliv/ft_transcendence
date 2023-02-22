@@ -5,13 +5,25 @@
     flex-direction: row;
     font-family: 'VT323', monospace;
     font-size: 20px;
+    background-color: black;
 }
+
+.burger-menu {
+    display: none;
+}
+
+/* .burger-menu-buttons {
+    background-color: green;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+} */
 
 .chan-list {
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(52, 63, 62);
+    background-color: #726DA8;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -21,7 +33,7 @@
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(80, 90, 91);
+    background-color: #7D8CC4;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -37,7 +49,7 @@
     width: 15%;
     height: 90vh;
     max-height: 90vh;
-    background-color: rgb(143, 145, 162);
+    background-color: #7D8CC4;
 }
 
 .chan-list ul{
@@ -60,7 +72,7 @@
 } */
 
 #active-conv-bg {
-    background-color: rgb(60, 70, 69);
+    opacity: 0.7;
 }
 
 .priv-conv-list ul{
@@ -87,7 +99,7 @@
 }
 
 .chan-list-buttons button {
-    background-color: rgb(60, 70, 69);
+    background-color: #615C99;
     border: none;
     border-radius: 5px;
     font-family: 'VT323', monospace;
@@ -96,9 +108,9 @@
 }
 
 .chan-list-buttons button:hover {
-    background-color: black;
+    background-color: #514D80;
     cursor: pointer;
-    color: rgb(60, 70, 69);
+    color: black;
 }
 
 /* .status {
@@ -147,26 +159,33 @@
     margin-bottom: 10px;
 }
 .create-channel-form label input {
-    background-color: rgb(60, 70, 69);
+    background-color: #8FCB9B;
     border-radius: 15px;
     border: 0px solid black;
     padding: 5px;
 }
 
+.create-channel-form label input::placeholder {
+    outline: none;
+    color: black;
+}
+
 .create-channel-form label input:focus {
     outline: none;
+    background-color: #8FCB9B;
 }
 
 .create-channel-form button {
     border-radius: 15px;
-    background-color: black;
+    background-color: #47715E;
     padding: 10px 0px;
-    color: white;
+    border: none;
+    color: black;
 }
 
 .create-channel-form button:hover {
     cursor: pointer;
-    background-color: rgb(46, 43, 43)
+    background-color: #375849;
 }
 
 /* join chan modal */
@@ -193,7 +212,7 @@
     margin-bottom: 10px;
 }
 .join-channel-form label input {
-    background-color: rgb(60, 70, 69);
+    background-color: #8FCB9B;
     border-radius: 15px;
     border: 0px solid black;
     padding: 5px;
@@ -205,14 +224,15 @@
 
 .join-channel-form button {
     border-radius: 15px;
-    background-color: black;
+    background-color: #47715E;
+    border: none;
     padding: 10px 0px;
-    color: white;
+    color: black;
 }
 
 .join-channel-form button:hover {
     cursor: pointer;
-    background-color: rgb(46, 43, 43)
+    background-color: #375849;
 }
 
 .e-menu:hover {
@@ -262,8 +282,7 @@
 
 
 .ChansOther-item-wrapper {
-    width: 90%;
-
+    width: 100%;
 }
 
 .ChansBan-item-wrapper {
@@ -290,7 +309,7 @@
 
 
 .chan-list-item {
-    background-color: rgb(75, 88, 87);
+    background-color: #8fcb9b;
     border-radius: 15px;
     padding: 10px;
     margin-bottom: 3px;
@@ -308,7 +327,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 300px;
-    background-color: rgb(52, 63, 62);
+    background-color: #5B9279;
     border-radius: 20px;
     box-Shadow: 24;
     padding: 10px;
@@ -320,13 +339,181 @@
 }
 
 .chan-password-input {
-    background-color: rgb(76, 88, 87);
+    background-color: #5B9279;
     border-radius: 20px;
     padding: 5px;
     border: none;
-    margin: 0 auto
+    margin: 0 auto;
+    color: black;
+}
+
+.chan-password-input::placeholder {
+    color: black;
 }
 
 .chan-password-input:focus {
     outline: none;
+}
+
+@media only screen and (max-width: 1300px) {
+    .chan-list {
+        width: 20%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .priv-conv-list {
+        width: 15%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .chat {
+        width: 55%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
+}
+
+@media only screen and (max-width: 1300px) {
+    .chan-list {
+        width: 20%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .priv-conv-list {
+        width: 15%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .chat {
+        width: 55%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
+}
+
+@media only screen and (max-width: 1000px) {
+    .burger-menu {
+        z-index: 1;
+        display: block;
+        position: fixed;
+        top: 11vh;
+        left: 40%;
+        width: 10%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .burger-menu button {
+        font-family: 'VT323', monospace;
+        font-weight: bold;
+        font-size: 20px;
+        display: inline-block;
+        width: 120px;
+        height: 30px;
+        background-color: #89C7D2;
+        border: none;   
+        border-radius: 20px;
+        margin-right: 3px;
+        transition: 0.5s ease;
+    }
+
+    .burger-menu button:hover {
+        cursor: pointer;
+    }
+    
+    .hidden-button {
+        /* display: none !important; */
+        /* visibility: hidden !important; */
+        opacity: 0;
+        visibility: hidden !important;
+    }
+
+    .chan-list {
+        position: fixed;
+        z-index: 1;
+        top: 10vh;
+        left: -300px;
+        width: 300px;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: left 0.5s ease;
+    }
+
+    .active-chan-list {
+        left: 0;
+    }
+    
+    .priv-conv-list {
+        position: fixed;
+        z-index: 1;
+        top: 10vh;
+        left: -200px;
+        width: 200px;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: left 0.5s ease;
+    }
+
+    .active-friend-list {
+        left: 0;
+    }
+    
+    .chat {
+        position: fixed;
+        width: 90%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        position: fixed;
+        left: 90%;
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
 }

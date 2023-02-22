@@ -99,12 +99,13 @@ function App() {
 			<Menu />
 			<Routes>
 				<Route path="/" element={<Home user={user} auth={auth} />} />
-				<Route path="/friends" element={<Friends user_me={user} />} />
-				<Route path="/searchGame" element={<SearchGame user_me={user} />} />
-				<Route path="/stats" element={<Stats />} />
+				<Route path="/friends" element={<Friends user_me={user}/>} />
+				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
+				<Route path="/stats" element={<Stats user_me={user} />} />
+				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />
-				<Route path="/settings" element={<Settings />} />
+				<Route path="/settings" element={<Settings user_me={user}/>} />
 				<Route path="/pong" element={<Pong user={user} auth={auth} />} />
 			</Routes>
 		</SocketContext.Provider>

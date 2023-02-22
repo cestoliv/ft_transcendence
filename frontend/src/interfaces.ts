@@ -2,13 +2,24 @@ export interface IUser {
 	id: number;
 	id42: number;
 	username: string;
-	invitedFriends: IUserFriend[];
-	friendOf: IUserFriend[];
-	friends: IUser[];
+	elo: number;
+	wins: number;
+	loses: number;
+	scores: IScore[];
+	invitedFriends: IUserFriend[],
+	friendOf: IUserFriend[],
+	friends: IUser[],
+}
+
+export interface IScore
+{
+	me: number;
+	op: number;
+	op_name: string;
 }
 
 export interface IUserMessage {
-	id: number;
+	id: number,
 
 	senderId: number;
 	sender: IUser;

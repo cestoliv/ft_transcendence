@@ -41,6 +41,34 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
+	const muteFriend = (event: any): void => {
+		socket.emit(
+			'users_mute',
+			{
+				id: props.user.id,
+				until : new Date().toISOString(),
+			},
+			(data: any) => {
+				if (data.messages)
+					alert(data.messages);
+			},
+		);
+	}
+
+	const banFriend = (event: any): void => {
+		socket.emit(
+			'users_ban',
+			{
+				id: props.user.id,
+				until : new Date().toISOString(),
+			},
+			(data: any) => {
+				if (data.messages)
+					alert(data.messages);
+			},
+		);
+	}
+
 	useEffect(() => {
 		socket.emit('channels_listJoined', {}, (data: any) => {
 			setChanListJoined(data);
@@ -69,10 +97,12 @@ export const Friend = (props: FriendProps) => {
 					aria-labelledby="modal-modal-title"
 					aria-describedby="modal-modal-description"
 				>
-					<Box className="friend-action-modal">
+					<Box className="friend-action-modal background-modal">
 						<button>Inviter à jouer</button>
 						<button>Regarder la partie</button>
 						<button onClick={OpenChanListModal}>Inviter channel</button>
+						<button onClick={muteFriend}>Mute</button>
+						<button onClick={banFriend}>Ban</button>
 						<button onClick={removeFriend}>Suprrimer</button>
 					</Box>
 				</Modal>

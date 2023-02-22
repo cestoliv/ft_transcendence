@@ -28,11 +28,8 @@ const Pong: React.FC = () => {
 
 	const [ballX, setBallX] = useState(canvasWidth / 2);
 	const [ballY, setBallY] = useState(canvasHeight / 2);
-	// const prevBallX = usePrevious(ballX);
-	// const prevBallY = usePrevious(ballY);
-
-	const [ballSpeedX, setBallSpeedX] = useState(canvasWidth / 210);
-	const [ballSpeedY, setBallSpeedY] = useState(Math.random() * 3);
+	const [ballSpeedX, setBallSpeedX] = useState(canvasWidth / 630);
+	const [ballSpeedY, setBallSpeedY] = useState(Math.random() * 9);
 	const [dx, setDx] = useState(canvasWidth / 320);
 	const [dy, setDy] = useState(canvasHeight / 240);
 	const [gameStarted, setGameStarted] = useState(false);
@@ -168,92 +165,101 @@ const Pong: React.FC = () => {
 	}, [leftRacketY, rightRacketY, ballX, ballY, gameStarted, canvasHeight, canvasWidth, racketHeight]);
 
 	useEffect(() => {
-		if (gameStarted && !gameEnd) {
-			const intervalId = setInterval(() => {
-				if (rightScore == victoryScore || leftScore == victoryScore) {
-					setGameEnd(true);
-					setOpen(true);
-					return () => {
-						clearInterval(intervalId);
-					};
-				}
+		let animationId: any;
 
-				if (isHost === false) {
-					console.log('not host', isHost);
-					return () => {
-						clearInterval(intervalId);
-					};
-				}
-
-				//collide right
-				if (
-					ballSpeedX > 0 &&
-					ballX > canvasWidth - 20 &&
-					ballX < canvasWidth - 10 &&
-					ballY + ballSpeedY < rightRacketY + racketHeight &&
-					ballY + ballSpeedY > rightRacketY
-				) {
-					// Change direction
-					setBallSpeedX(-ballSpeedX);
-					const impact = ballY - rightRacketY - racketHeight / 2;
-					const ratio = 100 / (racketHeight / 2);
-
-					// Get a value between 0 and 10
-					setBallSpeedY(Math.round((impact * ratio) / 10));
-
-					// Increase speed if it has not reached max speed
-					if (Math.abs(ballSpeedX) < 12) {
-						setBallSpeedX(ballSpeedX * -1.2);
-					}
-					// colide left
-				} else if (
-					ballSpeedX < 0 &&
-					ballX < 20 &&
-					ballX > 10 &&
-					ballY + ballSpeedY < leftRacketY + racketHeight &&
-					ballY + ballSpeedY > leftRacketY
-				) {
-					// Change direction
-					setBallSpeedX(ballSpeedX * -1);
-					const impact = ballY - leftRacketY - racketHeight / 2;
-					const ratio = 100 / (racketHeight / 2);
-
-					// Get a value between 0 and 10
-					setBallSpeedY(Math.round((impact * ratio) / 10));
-
-					// Increase speed if it has not reached max speed
-					if (Math.abs(ballSpeedX) < 12) {
-						setBallSpeedX(ballSpeedX * -1.2);
-					}
-				}
-				// Rebounds on top and bottom
-				if (ballY + ballSpeedY + 5 > canvasHeight || ballY + ballSpeedY + 5 < 0) {
-					setBallSpeedY(ballSpeedY * -1);
-				}
-				// goal
-				if (ballX < 0 || ballX > canvasWidth) {
-					// add goal
-					if (ballX < 0) setRightScore(rightScore + 1);
-					else setLeftScore(leftScore + 1);
-					// reset
-					setBallX(canvasWidth / 2);
-					setBallY(canvasHeight / 2);
-					setBallSpeedX(3);
-					setBallSpeedY(Math.random() * 3);
-					return;
-				}
-				// new position
-				setBallX(ballX + ballSpeedX);
-				setBallY(ballY + ballSpeedY);
-			}, 16);
-
+		const gameLoop = () => {
+		  // ...code pour mettre à jour la position de la balle...
+		  if (rightScore == 2 || leftScore == 2) {
+			setGameEnd(true);
+			setOpen(true);
 			return () => {
-				clearInterval(intervalId);
+				window.cancelAnimationFrame(animationId);
+			  };
+			}
+			//collide right
+			if (
+				ballSpeedX > 0 &&
+				ballX > canvasWidth - 20 &&
+				ballX < canvasWidth - 10 &&
+				ballY + ballSpeedY < rightRacketY + racketHeight &&
+				ballY + ballSpeedY > rightRacketY
+			) {
+				// Change direction
+				setBallSpeedX(-ballSpeedX);
+				const impact = ballY - rightRacketY - racketHeight / 2;
+				const ratio = 100 / (racketHeight / 2);
+
+				// Get a value between 0 and 10
+				setBallSpeedY(Math.round((impact * ratio) / 10));
+
+				// Increase speed if it has not reached max speed
+				if (Math.abs(ballSpeedX) < 12) {
+					setBallSpeedX(ballSpeedX * -1.2);
+				}
+				// colide left
+			} else if (
+				ballSpeedX < 0 &&
+				ballX < 20 &&
+				ballX > 10 &&
+				ballY + ballSpeedY < leftRacketY + racketHeight &&
+				ballY + ballSpeedY > leftRacketY
+			) {
+				// Change direction
+				setBallSpeedX(ballSpeedX * -1);
+				const impact = ballY - leftRacketY - racketHeight / 2;
+				const ratio = 100 / (racketHeight / 2);
+
+				// Get a value between 0 and 10
+				setBallSpeedY(Math.round((impact * ratio) / 10));
+
+				// Increase speed if it has not reached max speed
+				if (Math.abs(ballSpeedX) < 12) {
+					setBallSpeedX(ballSpeedX * -1.2);
+				}
+			}
+			// Rebounds on top and bottom
+			if (
+				ballY + ballSpeedY + 5 > canvasHeight ||
+				ballY + ballSpeedY + 5 < 0
+			) {
+				setBallSpeedY(ballSpeedY * -1);
+			}
+			// goal
+			if (ballX < 0 || ballX > canvasWidth) {
+				// add goal
+				if (ballX < 0) setRightScore(rightScore + 1);
+				else setLeftScore(leftScore + 1);
+				// reset
+				setBallX(canvasWidth / 2);
+				setBallY(canvasHeight / 2);
+				setBallSpeedX(3);
+				setBallSpeedY(Math.random() * 3);
+				return;
+			}
+			// new position
+			setBallX(ballX + ballSpeedX);
+			setBallY(ballY + ballSpeedY);
 			};
-		}
-	}, [gameStarted, ballX, ballY, ballSpeedX, ballSpeedY, racketHeight]);
+
+			if (gameStarted && !gameEnd) {
+				animationId = window.requestAnimationFrame(gameLoop);
+			}
+	  }, [gameStarted, gameEnd, rightRacketY, leftRacketY, ballX, ballY, ballSpeedX, ballSpeedY]);
+
+	// useEffect(() => {
+	// 	if (gameStarted && !gameEnd) {
+	// 		const intervalId = setInterval(() => {
+
+	// 		}, 32);
+
+	// 		return () => {
+	// 			clearInterval(intervalId);
+	// 		};
+	// 	}
+	// }, [gameStarted, ballX, ballY, ballSpeedX, ballSpeedY, racketHeight]);
 
 	const handleKeyDown = (event: KeyboardEvent) => {
+		console.log("5");
 		switch (event.keyCode) {
 			case 38:
 				setRightRacketY((prevY) => Math.max(0, prevY - 20));
@@ -273,6 +279,7 @@ const Pong: React.FC = () => {
 	};
 
 	useEffect(() => {
+		console.log("3");
 		window.addEventListener('keydown', handleKeyDown);
 
 		return () => {
@@ -287,6 +294,7 @@ const Pong: React.FC = () => {
 	};
 
 	useEffect(() => {
+		console.log("4");
 		window.addEventListener('keypress', handleKeyPress);
 		return () => {
 			window.removeEventListener('keypress', handleKeyPress);

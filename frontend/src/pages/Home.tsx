@@ -18,8 +18,8 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 
 	socket.off('channels_message'); // Unbind previous event
 	socket.on('channels_message', (data: any) => {
-		console.log('Socket channels_message:');
-		console.log(data);
+		//console.log('Socket channels_message:');
+		//console.log(data);
 	});
 
 	socket.off('users_message'); // Unbind previous event

@@ -1,7 +1,13 @@
 .ChanList-wrapper {
+    flex-grow: 1;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
     margin: 10px;
+}
+
+.ChanList-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 .ChanList-wrapper div {
@@ -15,4 +21,21 @@
 
 .e-close:hover{
     cursor: pointer;
+}
+
+.close-chan-list {
+    display: none;
+}
+
+.close-chan-list:hover {
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 1000px) {
+    .close-chan-list {
+        display: inline;
+        position: absolute;
+        top: 1px;
+        right: 4px;
+    }
 }

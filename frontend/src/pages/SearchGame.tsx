@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { ChangeEvent, useEffect, useContext } from 'react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -17,6 +17,8 @@ import Modal from '@mui/material/Modal';
 
 import FriendsList from '../components/FriendsList';
 
+import { SocketContext } from '../context/socket';
+
 const style = {
 	position: 'absolute' as const,
 	top: '50%',
@@ -34,7 +36,11 @@ type FriendsProps = {
 };
 
 export const SearchGame = (props: FriendsProps) => {
+	const socket = useContext(SocketContext);
+
 	const [redirect, setRedirect] = useState<boolean>(false);
+
+	const [user, setUser] = useState<IUser>();
 
 	const [mode, setMode] = React.useState('');
 	const [time, setTime] = React.useState('');
@@ -74,11 +80,19 @@ export const SearchGame = (props: FriendsProps) => {
 		}
 	};
 
+	useEffect(() => {
+		socket.emit('users_get',
+		{
+			id : props.user_me.id,
+		},
+		(data: any) => {
+			setUser(data);
+		});
+	},);
+
 	return (
 		<div className="searchGame-wrapper">
-			<div className="searchGame-friendsList">
-				<FriendsList activeConv={activeConv} user_me={props.user_me} />
-			</div>
+			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="searchRandomPlayer">
 				<button className="searchRandomPlayer-button" onClick={handleOpen}>
 					Search a game

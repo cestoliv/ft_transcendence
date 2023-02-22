@@ -102,10 +102,6 @@ export default function Chat(props: ChatProps) {
 	};
 
 	useEffect(() => {
-		// let windowHeight = window.innerHeight;
-		// let chatnav = document.getElementById('chat-nav');
-		// if (chatnav)
-		// 	chatnav.style.height = '50px';
 		socket.emit(
 			'channels_get',
 			{
@@ -134,20 +130,18 @@ export default function Chat(props: ChatProps) {
 								}
 								label="Private"
 							/>
-							<form className="mpd-form">
+							<form className="mpd-form" onSubmit={addPassWord}>
 								<label htmlFor="mdp" id="mdp-label">
-									mdp
+									mdp :
 								</label>
 								<input
-									name="password-input"
+									className='change-password-input'
+									name='password-input'
 									type="text"
 									id="mdp"
 									value={passWord}
 									onChange={handleChange}
 								/>
-								<button type="submit" id="mdp-submit-button" onClick={addPassWord}>
-									Change
-								</button>
 							</form>
 						</div>
 						<span onClick={toggleHidden} className="e-icons e-large e-settings"></span>

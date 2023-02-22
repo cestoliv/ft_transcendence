@@ -15,3 +15,19 @@
 @import './privatechanjoined.css';
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+.background-modal {
+    background-color: #5B9279 !important;
+}
+
+/* .background-modal input {
+    background-color: #8FCB9B !important;
+} */
+
+.pixel-font {
+    font-family: 'VT323', monospace !important;
+}
+
+.buzz {
+    color: #8FCB9B;
+}
