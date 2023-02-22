@@ -1,16 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { v4 as uuidv4 } from 'uuid';
 import { SocketWithUser } from 'src/types';
-import { Game } from './game.class';
+import { GameOptions, LocalGame } from './game.class';
+import { Game } from './entities/game.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UsersService } from 'src/users/users.service';
+import { ConnectedClientsService } from 'src/base.gateway';
 
 @Injectable()
 export class GamesService {
-	public games = new Map<string, Game>();
+	constructor(
+		@Inject(UsersService)
+		private readonly usersService: UsersService,
+		@InjectRepository(Game)
+		private readonly gamesRepository: Repository<Game>,
+	) {}
 
-	async create(creator: SocketWithUser) {
+	public games = new Map<string, LocalGame>();
+
+	async create(
+		creator: SocketWithUser,
+		options: GameOptions,
+		connectedClientsService: ConnectedClientsService,
+	) {
 		const id = uuidv4();
-		const game = new Game(id, creator);
+		const game = new LocalGame(
+			id,
+			creator,
+			options,
+			this,
+			connectedClientsService,
+		);
 		this.games.set(id, game);
 		return game.getInfo();
 	}
@@ -25,7 +47,28 @@ export class GamesService {
 	async movePlayer(id: string, player: SocketWithUser, y: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
-		game.movePlayer(player, y);
+		return game.movePlayer(player, y);
+	}
+
+	async save(localGame: LocalGame) {
+		const game = new Game();
+		game.visibility = localGame.options.visibility;
+		game.mode = localGame.options.mode;
+		game.maxDuration = localGame.options.maxDuration;
+		game.maxScore = localGame.options.maxScore;
+		game.winner = localGame.winner.user;
+		game.winnerScore = localGame.winner.score;
+		game.loser = localGame.loser.user;
+		game.loserScore = localGame.loser.score;
+		return this.gamesRepository.save(game);
+	}
+
+	async invite(id: string, inviter: SocketWithUser, inviteeId: number) {
+		const game = this.games.get(id);
+		if (!game) throw new NotFoundException('Game not found');
+		const invitee = await this.usersService.findOne(inviteeId);
+		if (!invitee) throw new NotFoundException('User not found');
+		return game.invite(inviter.user, invitee);
 	}
 
 	@Interval(1000 / 60)

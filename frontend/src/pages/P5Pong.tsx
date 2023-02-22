@@ -189,7 +189,6 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		if (!canvasSize) canvasSize = computeCanvasSize();
 
 		// if (!started) return;
-		console.log(started, 'started');
 
 		p5.background(0);
 
@@ -252,6 +251,10 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 			serverBall.x = data.x;
 			serverBall.y = data.y;
 		}
+	});
+	socket.off('games_end'); // Unbind previous event
+	socket.on('games_end', (data: any) => {
+		console.log('games_end', data);
 	});
 
 	// Handle

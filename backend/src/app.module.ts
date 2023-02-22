@@ -18,6 +18,7 @@ import { MutedUser } from './users/entities/user-muted.entity';
 import { UserMessage } from './users/entities/user.message.entity';
 import { GamesModule } from './games/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { Game } from './games/entities/game.entity';
 
 @Module({
 	imports: [
@@ -45,6 +46,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 					ChannelMutedUser,
 					ChannelInvitedUser,
 					ChannelMessage,
+					Game,
 				],
 				synchronize: true,
 			}),

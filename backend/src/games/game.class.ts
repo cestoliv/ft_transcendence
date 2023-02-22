@@ -1,14 +1,11 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConnectedClientsService } from 'src/base.gateway';
 import { SocketWithUser } from 'src/types';
-
-function p5Map(value, a, b, c, d) {
-	// first map value from (a..b) to (0..1)
-	value = (value - a) / (b - a);
-	// then map it from (0..1) to (c..d) and return it
-	return c + value * (d - c);
-}
+import { User } from 'src/users/entities/user.entity';
+import { GamesService } from './games.service';
 
 interface Player {
+	// TODO: Store only user and get socket from connectedClientsService
 	socket: SocketWithUser;
 	score: number;
 	paddle: {
@@ -18,11 +15,57 @@ interface Player {
 	};
 }
 
-export class Game {
+export class GameOptions {
+	// From creator
+	maxDuration: 1 | 2 | 3;
+	maxScore: 5 | 10 | 30 | null;
+	mode: 'classic' | 'hardcore';
+	visibility: 'public' | 'private';
+
+	// Computed from mode
+	speed: 2 | 5;
+	paddleHeight: 10 | 30;
+
+	constructor(
+		maxDuration: 1 | 2 | 3,
+		maxScore: 5 | 10 | 30 | null,
+		mode: 'classic' | 'hardcore',
+		visibility: 'public' | 'private' = 'public',
+	) {
+		this.maxDuration = maxDuration;
+		this.maxScore = maxScore;
+		this.mode = mode;
+		this.visibility = visibility;
+		if (this.mode === 'classic') {
+			this.speed = 2;
+			this.paddleHeight = 30;
+		} else if (this.mode === 'hardcore') {
+			this.speed = 5;
+			this.paddleHeight = 10;
+		}
+	}
+}
+
+function p5Map(value, a, b, c, d) {
+	// first map value from (a..b) to (0..1)
+	value = (value - a) / (b - a);
+	// then map it from (0..1) to (c..d) and return it
+	return c + value * (d - c);
+}
+
+function degRad(degrees) {
+	return degrees * (Math.PI / 180);
+}
+
+export class LocalGame {
+	gamesService: GamesService;
+	connectedClientsService: ConnectedClientsService;
+
 	id: string;
-	started: boolean;
+	state: 'waiting' | 'started' | 'ended' | 'saved';
 	startAt: Date;
 	players: Array<Player>;
+	invited: Array<User>;
 	ball: {
 		x: number;
 		y: number;
@@ -36,24 +79,51 @@ export class Game {
 		width: number;
 		height: number;
 	};
+	options: GameOptions;
 
-	constructor(id: string, creator: SocketWithUser) {
+	// After
+	winner: {
+		user: User;
+		score: number;
+	};
+	loser: {
+		user: User;
+		score: number;
+	};
+
+	constructor(
+		id: string,
+		creator: SocketWithUser,
+		options: GameOptions,
+		gamesService: GamesService,
+		connectedClientsService: ConnectedClientsService,
+	) {
+		this.gamesService = gamesService;
+		this.connectedClientsService = connectedClientsService;
+
 		this.id = id;
-		this.started = false;
+		this.state = 'waiting';
 		this.startAt = null;
 		this.players = [];
+		this.invited = [];
+		this.options = options;
 		this.screen = {
 			width: 512,
 			height: 256,
 		};
+		this.winner = null;
+		this.loser = null;
+
+		// Ball
 		this.resetBall();
+
 		this.addPlayer(creator);
 	}
 
 	getInfo() {
 		return {
 			id: this.id,
-			started: this.started,
+			state: this.state,
 			players: this.players.map((player) => ({
 				id: player.socket.user.id,
 				username: player.socket.user.username,
@@ -63,15 +133,18 @@ export class Game {
 	}
 
 	resetBall() {
+		// P5JS version: random(-PI/4, PI/4)
+		const angle = (Math.random() * Math.PI) / 2 - Math.PI / 4;
 		this.ball = {
 			x: this.screen.width / 2,
 			y: this.screen.height / 2,
 			radius: 5,
 			speed: {
-				x: Math.cos(Math.random() * Math.PI * 2) * 4,
-				y: Math.sin(Math.random() * Math.PI * 2) * 4,
+				x: Math.cos(angle) * this.options.speed,
+				y: Math.sin(angle) * this.options.speed,
 			},
 		};
+		if (Math.random() > 0.5) this.ball.speed.x *= -1;
 	}
 
 	resetPlayers() {
@@ -79,25 +152,51 @@ export class Game {
 		if (this.players.length < 1) return;
 		this.players[0].paddle.x = 10;
 		this.players[0].paddle.y = this.screen.height / 2;
-		this.players[0].paddle.radius = 30;
+		this.players[0].paddle.radius = this.options.paddleHeight;
 		// Opponent, right side
 		if (this.players.length < 2) return;
 		this.players[1].paddle.x = this.screen.width - 10;
 		this.players[1].paddle.y = this.screen.height / 2;
-		this.players[1].paddle.radius = 30;
+		this.players[1].paddle.radius = this.options.paddleHeight;
+	}
+
+	async invite(inviter: User, invitee: User) {
+		// Check that inviter is the creator
+		if (this.players[0].socket.user.id !== inviter.id)
+			throw new ForbiddenException('Only the creator can invite');
+		// Check if game is waiting for players and is not full
+		if (this.state !== 'waiting' || this.players.length >= 2)
+			throw new ForbiddenException('Game is already full');
+		// Check if user is online
+		if (!this.connectedClientsService.has(invitee.id))
+			throw new ForbiddenException('User offline');
+
+		// Check if game is private and user is not invited
+		if (
+			this.options.visibility === 'private' &&
+			!this.invited.find((user) => user.id === invitee.id)
+		)
+			this.invited.push(invitee);
+
+		console.log('invite', invitee.username);
+
+		// TODO: Send notification to invitee
+		return invitee;
 	}
 
 	addPlayer(socket: SocketWithUser) {
 		if (this.players.length >= 2) throw new ForbiddenException('Game full');
+		if (
+			this.options.visibility === 'private' &&
+			!this.invited.find((user) => user.id === socket.user.id) &&
+			this.players.length !== 0 // Creator can join
+		)
+			throw new ForbiddenException('User not invited');
 
 		this.players.push({
 			socket,
 			score: 0,
-			paddle: {
-				x: 0,
-				y: 0,
-				radius: 30,
-			},
+			paddle: { x: 0, y: 0, radius: 0 },
 		});
 		this.resetPlayers();
 		// Add user to room
@@ -119,13 +218,96 @@ export class Game {
 			});
 		});
 		setTimeout(() => {
-			this.started = true;
+			this.state = 'started';
 			this.resetBall();
 		}, 3000);
+
+		setTimeout(() => {
+			this.end();
+		}, this.options.maxDuration * 60 * 1000);
+
+		// this.ballSpped.intervalId = setInterval(() => {
+		// 	if (this.ball.speed.x >= this.ballSpped.max) return;
+		// 	if (this.ball.speed.y >= this.ballSpped.max) return;
+
+		// 	this.ball.speed.x += this.ballSpped.increase;
+		// 	this.ball.speed.y += this.ballSpped.increase;
+		// }, this.ballSpped.interval);
+	}
+
+	async end(winner: User | null = null) {
+		if (this.state === 'ended') return;
+		this.state = 'ended';
+
+		this.winner = {
+			user: winner,
+			score: 0,
+		};
+
+		// If winner is not null, then the other player gave up
+		if (!winner) {
+			// If winner is null, then we need to check the score
+			this.winner.user =
+				this.players[0].score > this.players[1].score
+					? this.players[0].socket.user
+					: this.players[1].socket.user;
+			if (this.players[0].score === this.players[1].score)
+				this.winner = null;
+		}
+
+		// Set winner and loser
+		this.winner.score = this.players.find(
+			(player) => player.socket.user.id === this.winner.user.id,
+		).score;
+		const loser = this.players.find(
+			(player) => player.socket.user.id !== this.winner.user.id,
+		);
+		this.loser = {
+			user: loser.socket.user,
+			score: loser.score,
+		};
+
+		// Send score to players
+		this.players[0].socket.emit('games_end', {
+			winner: this.winner,
+			score: this.players[0].score,
+			opponent_score: this.players[1].score,
+		});
+		this.players[1].socket.emit('games_end', {
+			winner: this.winner,
+			score: this.players[1].score,
+			opponent_score: this.players[0].score,
+		});
+
+		// Remove players from room
+		this.players.forEach((player) => {
+			player.socket.leave(`game_${this.id}`);
+		});
+
+		// Save game to database
+		this.gamesService.save(this);
+		console.log('Game ended', this.winner);
+
+		// Remove game from games array
+		this.gamesService.games.delete(this.id);
+	}
+
+	giveUp(socket: SocketWithUser) {
+		if (this.state != 'started') return;
+		const player = this.players.find(
+			(p) => p.socket.user.id === socket.user.id,
+		);
+		if (!player) throw new NotFoundException('Player not found');
+		const opponent = this.players.find(
+			(p) => p.socket.user.id !== socket.user.id,
+		);
+
+		// End the game with the opponent as winner
+		this.end(opponent.socket.user);
 	}
 
 	movePlayer(socket: SocketWithUser, y: number) {
-		if (!this.started) return;
+		if (this.state != 'started') return;
 		const player = this.players.find(
 			(p) => p.socket.user.id === socket.user.id,
 		);
@@ -149,12 +331,16 @@ export class Game {
 			you: this.players[1].score,
 			opponent: this.players[0].score,
 		});
+
+		// Check score
+		if (player.score >= this.options.maxScore) this.end();
+
 		this.resetBall();
 		this.resetPlayers();
 	}
 
 	update() {
-		if (!this.started) return;
+		if (this.state != 'started') return;
 		// y: keep ball inside of vertical bounds
 		if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {
 			this.ball.speed.y *= -1;
@@ -169,15 +355,18 @@ export class Game {
 					this.players[0].paddle.y + this.players[0].paddle.radius
 			) {
 				// opponent hits the ball
-				const angle = this.ball.y - this.players[0].paddle.y;
-				this.ball.speed.y = angle / 9;
-				this.ball.speed.x = p5Map(
-					Math.abs(angle),
+				const diff =
+					this.ball.y -
+					(this.players[0].paddle.y - this.players[0].paddle.radius);
+				const angle = p5Map(
+					diff,
 					0,
 					this.players[0].paddle.radius,
-					3,
-					9,
+					degRad(45),
+					degRad(45),
 				);
+				this.ball.speed.x = Math.sin(angle) * this.options.speed;
+				this.ball.speed.y = Math.cos(angle) * this.options.speed;
 			} else this.addScore(this.players[1]);
 		}
 
@@ -190,15 +379,18 @@ export class Game {
 					this.players[1].paddle.y + this.players[1].paddle.radius
 			) {
 				// I hits the ball
-				const angle = this.ball.y - this.players[1].paddle.y;
-				this.ball.speed.y = angle / 9;
-				this.ball.speed.x = -p5Map(
-					Math.abs(angle),
+				const diff =
+					this.ball.y -
+					(this.players[1].paddle.y - this.players[1].paddle.radius);
+				const angle = p5Map(
+					diff,
 					0,
-					this.players[1].paddle.radius,
-					3,
-					9,
+					this.players[0].paddle.radius,
+					degRad(225),
+					degRad(135),
 				);
+				this.ball.speed.x = Math.sin(angle) * this.options.speed;
+				this.ball.speed.y = Math.cos(angle) * this.options.speed;
 			} else this.addScore(this.players[0]);
 		}
 		this.ball.x += this.ball.speed.x;

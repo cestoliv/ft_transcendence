@@ -3,6 +3,7 @@ import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj } from 'src/utils';
+import { GameOptions } from './game.class';
 
 @WebSocketGateway({
 	cors: {
@@ -15,7 +16,7 @@ import { exceptionToObj } from 'src/utils';
 })
 export class GamesGateway extends BaseGateway {
 	@SubscribeMessage('games_create')
-	async start(
+	async create(
 		client: SocketWithUser,
 		payload: any,
 	): Promise<any | WSResponse> {
@@ -31,9 +32,11 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
+		const options = new GameOptions(1, 5, 'classic', 'private');
+
 		// Create game
 		return this.gamesService
-			.create(client)
+			.create(client, options, this.connectedClientsService)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
@@ -87,6 +90,34 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.movePlayer(payload.id, client, payload.y)
 			.then(() => null)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_invite')
+	async invite(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<any | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined)
+			errors.push('Game id pos is not specified');
+		if (payload.user_id === undefined)
+			errors.push('Id of user to invite is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Move player
+		return this.gamesService
+			.invite(payload.id, client, payload.user_id)
+			.then((invitee) => invitee)
 			.catch((err) => exceptionToObj(err));
 	}
 }
