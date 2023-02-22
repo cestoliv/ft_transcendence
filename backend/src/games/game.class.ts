@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	ForbiddenException,
+	NotFoundException,
+} from '@nestjs/common';
 import { ConnectedClientsService } from 'src/base.gateway';
 import { SocketWithUser } from 'src/types';
 import { User } from 'src/users/entities/user.entity';
@@ -30,12 +34,24 @@ export class GameOptions {
 		maxDuration: 1 | 2 | 3,
 		maxScore: 5 | 10 | 30 | null,
 		mode: 'classic' | 'hardcore',
-		visibility: 'public' | 'private' = 'public',
+		visibility: 'public' | 'private',
 	) {
+		if (![1, 2, 3].includes(maxDuration))
+			throw new BadRequestException('Invalid maxDuration');
 		this.maxDuration = maxDuration;
+
+		if (![5, 10, 30, null].includes(maxScore))
+			throw new BadRequestException('Invalid maxScore');
 		this.maxScore = maxScore;
+
+		if (!['classic', 'hardcore'].includes(mode))
+			throw new BadRequestException('Invalid mode');
 		this.mode = mode;
+
+		if (!['public', 'private'].includes(visibility))
+			throw new BadRequestException('Invalid visibility');
 		this.visibility = visibility;
+
 		if (this.mode === 'classic') {
 			this.speed = 2;
 			this.paddleHeight = 30;
@@ -331,7 +347,8 @@ export class LocalGame {
 		});
 
 		// Check score
-		if (player.score >= this.options.maxScore) this.end();
+		if (this.options.maxScore && player.score >= this.options.maxScore)
+			this.end();
 
 		this.resetBall();
 		this.resetPlayers();

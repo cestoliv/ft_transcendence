@@ -23,9 +23,16 @@ export class GamesService {
 
 	async create(
 		creator: SocketWithUser,
-		options: GameOptions,
+		payload: any,
 		connectedClientsService: ConnectedClientsService,
 	) {
+		const options = new GameOptions(
+			payload.maxDuration,
+			payload.maxScore,
+			payload.mode,
+			payload.visibility,
+		);
+
 		const id = uuidv4();
 		const game = new LocalGame(
 			id,

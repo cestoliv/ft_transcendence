@@ -1,8 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import Sketch from 'react-p5';
 import p5Types from 'p5'; //Import this for typechecking and intellisense
-import { Modal } from '@mui/material';
-import { Box } from '@mui/system';
 import { IUser, IAuth } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import { throttle } from '../utils';
@@ -32,28 +30,6 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	let started = false;
 
 	const ball = {
-		x: canvasSize.width / 2,
-		y: canvasSize.height / 2,
-		radius: 10,
-		speed: {
-			x: Math.cos(Math.random() * Math.PI * 2) * 4,
-			y: Math.sin(Math.random() * Math.PI * 2) * 4,
-		},
-		draw: function () {
-			mP5.stroke(255);
-			mP5.fill(255);
-			mP5.circle(this.x, this.y, this.radius);
-		},
-		reset: function () {
-			this.x = canvasSize.width / 2;
-			this.y = canvasSize.height / 2;
-			// Random angle
-			const angle = Math.random() * Math.PI * 2;
-			this.speed.x = Math.cos(angle) * 4;
-			this.speed.y = Math.cos(angle) * 4;
-		},
-	};
-	const serverBall = {
 		x: canvasSize.width / 2,
 		y: canvasSize.height / 2,
 		radius: 10,
@@ -114,51 +90,10 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		},
 	};
 	const game = {
-		over: false,
 		reset: function () {
-			this.over = false;
 			ball.reset();
-			// serverBall.reset();
 			me.reset();
 			opponent.reset();
-		},
-		tick: function () {
-			// No more needed because the ball is now synced with the server
-			// if (this.over === false) {
-			// 	// y: keep ball inside of vertical bounds
-			// 	if (ball.y < 10 || ball.y > canvasSize.height - 10) {
-			// 		ball.speed.y *= -1;
-			// 	}
-			// 	ball.y += ball.speed.y;
-			// 	// x: opponent
-			// 	if (ball.x - ball.radius <= opponent.x) {
-			// 		if (ball.y > opponent.y - opponent.radius && ball.y < opponent.y + opponent.radius) {
-			// 			// opponent hits the ball
-			// 			const angle = ball.y - opponent.y;
-			// 			ball.speed.y = angle / 9;
-			// 			ball.speed.x = mP5.map(mP5.abs(angle), 0, opponent.radius, 3, 9);
-			// 		} else {
-			// 			// opponent misses the ball
-			// 			this.over = true;
-			// 			game.reset();
-			// 		}
-			// 	}
-			// 	// x: me
-			// 	if (ball.x + ball.radius >= me.x) {
-			// 		if (ball.y > me.y - me.radius && ball.y < me.y + me.radius) {
-			// 			// I hits the ball
-			// 			const angle = ball.y - me.y;
-			// 			ball.speed.y = angle / 9;
-			// 			ball.speed.x = -mP5.map(mP5.abs(angle), 0, me.radius, 3, 9);
-			// 		} else {
-			// 			// I misse the ball
-			// 			this.over = true;
-			// 			game.reset();
-			// 		}
-			// 	}
-			// }
-			// ball.x += ball.speed.x;
-			// ball.draw();
 		},
 	};
 
@@ -173,22 +108,14 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	const sendPaddlePos = (y: number) => {
 		if (y == 0) return;
 		// Apply ratio, server side is 512x256
-		console.log('sendPaddlePos', y, y * (256 / canvasSize.height));
 		y = y * (256 / canvasSize.height);
-		socket.emit(
-			'games_playerMove',
-			{ id: gameId, y } /*, (data: any) => {
-			console.log(data);
-		}*/,
-		);
+		socket.emit('games_playerMove', { id: gameId, y });
 	};
 	const throttledSendPaddlePos = throttle(sendPaddlePos, 1000 / 30);
 
 	const draw = (p5: p5Types) => {
 		mP5 = p5;
 		if (!canvasSize) canvasSize = computeCanvasSize();
-
-		// if (!started) return;
 
 		p5.background(0);
 
@@ -200,10 +127,7 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		me.draw();
 
 		opponent.draw();
-		// ball.draw();
-		serverBall.draw();
-
-		game.tick();
+		ball.draw();
 	};
 
 	const windowResized = (p5: p5Types) => {
@@ -235,21 +159,16 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	socket.off('games_opponentMove'); // Unbind previous event
 	socket.on('games_opponentMove', (data: any) => {
 		if (mP5) {
-			// Apply ratio, server side is 512x256
-			console.log('games_opponentMove', data.y, data.y * (canvasSize.height / 256));
-			data.y = data.y * (canvasSize.height / 256);
-
-			opponent.position(data.y);
+			// Apply ratio, server side is 512x25
+			opponent.position(data.y * (canvasSize.height / 256));
 		}
 	});
 	socket.off('games_ballMove'); // Unbind previous event
 	socket.on('games_ballMove', (data: any) => {
 		if (mP5) {
 			// Apply ratio, server side is 512x256
-			data.x = data.x * (canvasSize.width / 512);
-			data.y = data.y * (canvasSize.height / 256);
-			serverBall.x = data.x;
-			serverBall.y = data.y;
+			ball.x = data.x * (canvasSize.width / 512);
+			ball.y = data.y * (canvasSize.height / 256);
 		}
 	});
 	socket.off('games_end'); // Unbind previous event
@@ -259,7 +178,13 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 
 	// Handle
 	const createGame = () => {
-		socket.emit('games_create', {}, (data: any) => {
+		const options = {
+			maxDuration: 9,
+			maxScore: 5,
+			mode: 'classic',
+			visibility: 'public',
+		};
+		socket.emit('games_create', options, (data: any) => {
 			if (data.id) setGameId(data.id);
 			else console.error(data);
 		});

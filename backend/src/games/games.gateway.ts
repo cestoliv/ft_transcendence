@@ -3,7 +3,6 @@ import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj } from 'src/utils';
-import { GameOptions } from './game.class';
 
 @WebSocketGateway({
 	cors: {
@@ -24,6 +23,13 @@ export class GamesGateway extends BaseGateway {
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
+		if (payload.maxDuration === undefined)
+			errors.push('Max duration is not specified');
+		if (payload.maxScore === undefined)
+			errors.push('Max score is not specified');
+		if (payload.mode === undefined) errors.push('Mode is not specified');
+		if (payload.visibility === undefined)
+			errors.push('Visibility is not specified');
 
 		if (errors.length != 0)
 			return {
@@ -32,11 +38,9 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
-		const options = new GameOptions(1, 5, 'classic', 'public');
-
 		// Create game
 		return this.gamesService
-			.create(client, options, this.connectedClientsService)
+			.create(client, payload, this.connectedClientsService)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
