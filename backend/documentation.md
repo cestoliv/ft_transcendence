@@ -51,6 +51,7 @@
 	+ **Websocket API**
 		* [Create a game](#create-a-game)
 		* [Join a game](#join-a-game)
+		* [Quit a game](#quit-a-game)
 		* [Join the matchmaking](#join-matchmaking)
 		* [Send new player position](#send-new-player-position)
 		* [Invite a user in a game](#invite-a-player-in-a-game)
@@ -1005,6 +1006,34 @@ payload: {
 		statusCode: 403,
 		error: 'Forbidden',
 		messages: ['User not invited'],
+	}
+	```
+
+### **Quit a game**
+
+#### Input
+```typescript
+message: `games_quit`
+payload: {
+	id: string, // Game ID
+}
+```
+
+#### Return
+- The game object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		error: 'Not Found',
+		messages: ['Game not found'] |
+					['Player not found'],
 	}
 	```
 

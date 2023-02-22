@@ -71,6 +71,31 @@ export class GamesGateway extends BaseGateway {
 			.catch((err) => exceptionToObj(err));
 	}
 
+	@SubscribeMessage('games_quit')
+	async quit(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('Game id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Join game
+		return this.gamesService
+			.quit(payload.id, client)
+			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+	}
+
 	@SubscribeMessage('games_joinMatchmaking')
 	async joinMatchmaking(
 		client: SocketWithUser,

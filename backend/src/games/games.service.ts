@@ -52,6 +52,20 @@ export class GamesService {
 		return game.getInfo();
 	}
 
+	async quit(id: string, quitter: SocketWithUser) {
+		const game = this.games.get(id);
+		if (!game) throw new NotFoundException('Game not found');
+
+		if (game.players.length == 1) game.end();
+		else if (game.players[0].socket.user.id == quitter.user.id)
+			game.giveUp(game.players[1].socket);
+		else if (game.players[1].socket.user.id == quitter.user.id)
+			game.giveUp(game.players[0].socket);
+		else throw new NotFoundException('Player not found');
+
+		return game.getInfo();
+	}
+
 	async movePlayer(id: string, player: SocketWithUser, y: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
