@@ -32,7 +32,7 @@ const style = {
 };
 
 type FriendsProps = {
-	user_me : IUser,
+	user_me: IUser;
 };
 
 export const SearchGame = (props: FriendsProps) => {
@@ -94,10 +94,7 @@ export const SearchGame = (props: FriendsProps) => {
 		<div className="searchGame-wrapper">
 			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="searchRandomPlayer">
-				<button
-					className="searchRandomPlayer-button"
-					onClick={handleOpen}
-				>
+				<button className="searchRandomPlayer-button" onClick={handleOpen}>
 					Search a game
 				</button>
 				{renderRedirect()}
@@ -108,10 +105,7 @@ export const SearchGame = (props: FriendsProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box sx={style}>
-						<button
-							className="redirect-button"
-							onClick={handleRedirect}
-						>
+						<button className="redirect-button" onClick={handleRedirect}>
 							redirect
 						</button>
 					</Box>
@@ -121,9 +115,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Mode
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Mode</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
@@ -140,9 +132,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-time-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Time
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Time</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
@@ -159,9 +149,7 @@ export const SearchGame = (props: FriendsProps) => {
 				<div className="formControl formControl-points-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">
-								Points
-							</InputLabel>
+							<InputLabel id="demo-simple-select-label">Points</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"

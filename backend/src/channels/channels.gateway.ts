@@ -356,14 +356,11 @@ export class ChannelsGateway extends BaseGateway {
 			return channelBannedUser;
 
 		// Loop through all connected clients and make user leave the channel
-		this.connectedClientsService.get().forEach((cClientId) => {
-			const cClient = this.server.sockets.sockets.get(
-				cClientId,
-			) as SocketWithUser;
-			if (cClient.user.id == payload.user_id) {
-				cClient.leave(`channel_${payload.id}`);
-				return;
-			}
+		this.connectedClientsService.array().forEach((cClient) => {
+			// TODO: check that this new way of getting the socket is working
+			const socket = cClient[1];
+			if (socket.user.id == payload.user_id)
+				socket.leave(`channel_${payload.id}`);
 		});
 
 		return channelBannedUser;

@@ -1,9 +1,66 @@
 # Table of content
 
-- [Rest Api](#rest-api)
-- [Websocket Api](#websocket-api)
+- [Rest API](#rest-api)
+- [Websocket API](#websocket-api)
 - [Websocker Events](#websocket-events)
 - [Objects](#objects)
+
+## Per modules
+
+- **Auth**
+	+ **Rest API**
+		* [Login](#login)
+		* [Register](#register)
+		* [42 oauth callback](#42-oauth-callback)
+		* [Enable TOTP](#enable-totp)
+		* [Validate TOTP](#validate-totp)
+- **Users**
+	+ **Rest API**
+		* [Get informations about yourself](#get-my-profile)
+	+ **Websocket API**
+		* [Get a user](#get-user)
+		* [Update a user](#update-user)
+		* [Invite a firend](#invite-as-friend)
+		* [Accept a friendship request](#accept-friendship-request)
+		* [Remove a friend or decline friendship request](#remove-friend-or-decline-friendship-request)
+		* [Ban a user from your friend](#ban-user)
+		* [Mute a user](#mute-user)
+		* [Send a private message](#send-a-message)
+		* [Retrieve a conversation](#get-messages)
+	+ **Websocket Events**
+		* [New private message](#new-private-message)
+- **Channels**
+	+ **Websocket API**
+		* [Create a channel](#create-channel)
+		* [List visible channels](#list-channels)
+		* [Get a channel](#get-channel)
+		* [Update a channel](#update-channel)
+		* [Join a channel](#join-channel)
+		* [List joined channels](#list-joined-channel)
+		* [Leave a channel](#leave-channel)
+		* [Add a channel administrator](#add-channel-administrator)
+		* [Remove a channel administrator](#remove-channel-administrator)
+		* [Ban a user](#ban-user-from-channel)
+		* [Mute a user](#mute-user-from-channel)
+		* [Invite a user in a channel](#invite-user-in-channel)
+		* [Send a message in a channel](#send-message-into-channel)
+		* [Retrieve channel conversation](#get-channel-messages)
+	+ **Websocket Events**
+		* [New message](#new-channel-message)
+- **Games**
+	+ **Websocket API**
+		* [Create a game](#create-a-game)
+		* [Join a game](#join-a-game)
+		* [Quit a game](#quit-a-game)
+		* [Join the matchmaking](#join-matchmaking)
+		* [Send new player position](#send-new-player-position)
+		* [Invite a user in a game](#invite-a-player-in-a-game)
+	+ **Websocket Events**
+		+ [Before game start](#game-start)
+		+ [On game end](#game-end)
+		+ [New opponent position](#new-opponent-position)
+		+ [New score](#new-score-after-a-goal)
+		+ [New ball position](#new-ball-position)
 
 # REST API
 
@@ -51,7 +108,7 @@ POST /api/v1/auth/totp/enable
 ```
 
 ### Return
-```javascript
+```typescript
 {
 	secret: string, // the TOTP secret that the user must store
 	url: string, // the url that can be used to create a QRCode for authentificator apps
@@ -67,15 +124,15 @@ POST /api/v1/auth/totp/{totp}
 If the given TOTP is correct, return a new bearer token that can be used in the whole app.
 
 ### Return
--	```javascript
+-	```typescript
 	{
 		bearer: string, // a bearer token that can be used in the whole app
 	}
 	```
--	```javascript
+-	```typescript
 	{
 		statusCode: 401,
-		message: 'Unauthorized',
+		error: 'Unauthorized',
 		error: 'Invalid token'
 				| 'Invalid TOTP',
 	}
@@ -90,10 +147,10 @@ GET /api/v1/users/me
 ### Return
 - The user profile ([User](#user))
 - **401** error because the user is not signed in, or haven't provided it's TOTP
-	```javascript
+	```typescript
 	{
 		statusCode: 401,
-		message: 'Unauthorized',
+		error: 'Unauthorized',
 		error: string
 				| 'TOTP not validated, go to /api/v1/auth/totp',
 	}
@@ -103,22 +160,22 @@ GET /api/v1/users/me
 
 Every websocket requests can return an Unauthorized error if the user is not logged in.
 
-```javascript
+```typescript
 {
-	code: 401,
-	message: 'Unauthorized',
+	statusCode: 401,
+	error: 'Unauthorized',
 	error: string,
 }
 ```
 
 ## Example
 
-```javascript
+```typescript
 socket.emit('channels_create', {
 	name: 'My new Channel',
 	visibility: 'public',
 }, (data) => {
-	//console.log(data); // The new channel object
+	console.log(data); // The new channel object
 });
 ```
 
@@ -127,7 +184,7 @@ socket.emit('channels_create', {
 ### **Create channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_create`
 payload: {
 	name: string,
@@ -139,11 +196,11 @@ payload: {
 #### Return
 - The created channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
 
@@ -152,7 +209,7 @@ payload: {
 List every channel the user can see. That includes public channels, private channels in which the user is invited and every channels the user has joined.
 
 #### Input
-```javascript
+```typescript
 message: `channels_list`
 payload: empty
 ```
@@ -163,7 +220,7 @@ payload: empty
 ### **Get channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_get`
 payload: {
 	id: number, // the id of the channel
@@ -173,32 +230,32 @@ payload: {
 #### Return
 - A channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You are not allowed to see this channel']
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You are not allowed to see this channel']
 		}
 		```
 
 ### **Update channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_update`
 payload: {
 	id: number, // the id of the channel,
@@ -211,32 +268,32 @@ payload: {
 #### Return
 - The updated channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel owner can update channel']
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel owner can update channel']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 		}
 		```
 
 ### **Join channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_join`
 payload: {
 	code: string,
@@ -247,35 +304,35 @@ payload: {
 #### Return
 - The joined channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You are not invited to this channel']
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You are not invited to this channel']
 					| ['Password is required']
 					| ['Wrong password']
 					| ['You are banned from this channel']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 		}
 		```
 
 ### **List joined channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_listJoined`
 payload: empty
 ```
@@ -286,7 +343,7 @@ payload: empty
 ### **Leave channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_leave`
 payload: {
 	id: number, // the channel id
@@ -296,25 +353,25 @@ payload: {
 #### Return
 - The leaved channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 		}
 		```
 
 ### **Add channel administrator**
 
 #### Input
-```javascript
+```typescript
 message: `channels_addAdmin`
 payload: {
 	id: number, // the channel id
@@ -325,26 +382,26 @@ payload: {
 #### Return
 - The channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 					| ['User is not a member of this channel']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel owner can add admins'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel owner can add admins'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 					| ['User not found']
 		}
 		```
@@ -352,7 +409,7 @@ payload: {
 ### **Remove channel administrator**
 
 #### Input
-```javascript
+```typescript
 message: `channels_removeAdmin`
 payload: {
 	id: number, // the channel id
@@ -363,26 +420,26 @@ payload: {
 #### Return
 - The channel object ([Channel](#channel))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 					| ['User is not an admin of the channel']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel owner can remove admins'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel owner can remove admins'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 					| ['User not found']
 		}
 		```
@@ -392,7 +449,7 @@ payload: {
 To unban a user, simply ban the user again with a past date.
 
 #### Input
-```javascript
+```typescript
 message: `channels_banUser`
 payload: {
 	id: number, // the channel id
@@ -404,25 +461,25 @@ payload: {
 #### Return
 - A ChannelBannedUser object ([ChannelBannedUser](#channelbanneduser))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel admins can ban users'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel admins can ban users'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 					| ['User not found']
 		}
 		```
@@ -432,7 +489,7 @@ payload: {
 To unmute a user, simply mute the user again with a past date.
 
 #### Input
-```javascript
+```typescript
 message: `channels_muteUser`
 payload: {
 	id: number, // the channel id
@@ -444,25 +501,25 @@ payload: {
 #### Return
 - A ChannelMutedUser object ([ChannelMutedUser](#channelmuteduser))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel admins can mute users'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel admins can mute users'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 					| ['User not found']
 		}
 		```
@@ -470,7 +527,7 @@ payload: {
 ### **Invite user in channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_inviteUser`
 payload: {
 	id: number, // the channel id
@@ -481,25 +538,25 @@ payload: {
 #### Return
 - A ChannelInvitedUser object ([ChannelInvitedUser](#channelinviteduser))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel admins can invite users'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel admins can invite users'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 					| ['User not found']
 		}
 		```
@@ -507,7 +564,7 @@ payload: {
 ### **Send message into channel**
 
 #### Input
-```javascript
+```typescript
 message: `channels_sendMessage`
 payload: {
 	id: number, // the channel id
@@ -518,26 +575,26 @@ payload: {
 #### Return
 - A ChannelMessage object ([ChannelMessage](#channelmessage))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['Only channel members can send messages'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['Only channel members can send messages'],
 					| ['You are muted in this channel']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['Channel not found']
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['Channel not found']
 		}
 		```
 
@@ -546,7 +603,7 @@ payload: {
 Retrieve 50 message before the date passed.
 
 #### Input
-```javascript
+```typescript
 message: `channels_messages`
 payload: {
 	id: number, // the channel id
@@ -556,38 +613,38 @@ payload: {
 
 ### Example
 To retrieve the last 50 messages.
-```javascript
+```typescript
 socket.emit('channels_messages', {
 	id: 1,
 	before: new Date().toISOString(),
 },
 	(data) => {
-	//	console.log(data); // The messages array
+		console.log(data); // The messages array
 	}
 );
 ```
 
 #### Return
 - An array of ChannelMessage object ([ChannelMessage[]](#channelmessage))
-- ```javascript
+- ```typescript
 	{
-		code: 400,
-		message: 'Bad request',
-		errors: string[] // describing malformed payload
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
 	}
 	```
-- ```javascript
+- ```typescript
 	{
-		code: 403,
-		message: 'Forbidden',
-		errors: ['Only channel members can read messages'],
+		statusCode: 403,
+		error: 'Forbidden',
+		messages: ['Only channel members can read messages'],
 	}
 	```
-- ```javascript
+- ```typescript
 	{
-		code: 404,
-		message: 'Not found',
-		errors: ['Channel not found']
+		statusCode: 404,
+		error: 'Not found',
+		messages: ['Channel not found']
 	}
 	```
 
@@ -596,7 +653,7 @@ socket.emit('channels_messages', {
 ### **Get user**
 
 #### Input
-```javascript
+```typescript
 message: `users_get`
 payload: {
 	id: number // User id
@@ -606,18 +663,18 @@ payload: {
 #### Return
 - The user object ([User](#user))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
 
 ### **Update user**
 
 #### Input
-```javascript
+```typescript
 message: `users_update`
 payload: {
 	id: number, // User id
@@ -628,32 +685,32 @@ payload: {
 #### Return
 - The updated user object ([User](#user))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You can only update your own user'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You can only update your own user'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Invite as friend**
 
 #### Input
-```javascript
+```typescript
 message: `users_inviteFriend`
 payload: {
 	username: string, // Username of the friend to invite
@@ -663,39 +720,39 @@ payload: {
 #### Return
 - The new friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You have been banned'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You have been banned'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 409,
-			message: 'Conflict',
-			errors: ['User already invited or already friend'],
+			statusCode: 409,
+			error: 'Conflict',
+			messages: ['User already invited or already friend'],
 		}
 		```
 
 ### **Accept friendship request**
 
 #### Input
-```javascript
+```typescript
 message: `users_acceptFriend`
 payload: {
 	id: number, // Id of the user how invited the client
@@ -705,32 +762,32 @@ payload: {
 #### Return
 - The updated friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 409,
-			message: 'Conflict',
-			errors: ['Friendship already accepted'],
+			statusCode: 409,
+			error: 'Conflict',
+			messages: ['Friendship already accepted'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Remove friend (or decline friendship request)**
 
 #### Input
-```javascript
+```typescript
 message: `users_removeFriend`
 payload: {
 	id: number, // Id of the user how invited the client
@@ -740,32 +797,32 @@ payload: {
 #### Return
 - The deleted friendship object ([UserFriend](#userfriend))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 409,
-			message: 'Conflict',
-			errors: ['Friendship not found'],
+			statusCode: 409,
+			error: 'Conflict',
+			messages: ['Friendship not found'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Ban user**
 
 #### Input
-```javascript
+```typescript
 message: `users_ban`
 payload: {
 	id: number, // Id of the user to ban
@@ -776,25 +833,25 @@ payload: {
 #### Return
 - The new user banned object ([BannedUser](#banneduser))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Mute user**
 
 #### Input
-```javascript
+```typescript
 message: `users_mute`
 payload: {
 	id: number, // Id of the user to ban
@@ -805,25 +862,25 @@ payload: {
 #### Return
 - The new user muted object ([MutedUser](#muteduser))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Send a message**
 
 #### Input
-```javascript
+```typescript
 message: `users_sendMessage`
 payload: {
 	id: number, // Id of a friend
@@ -834,33 +891,33 @@ payload: {
 #### Return
 - The new message object ([UserMessage](#usermessage))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You can only send messages to friends'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You can only send messages to friends'],
 					| ['You are muted by this user']
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
 
 ### **Get messages**
 
 #### Input
-```javascript
+```typescript
 message: `users_getMessages`
 payload: {
 	id: number, // Id of a friend
@@ -871,50 +928,277 @@ payload: {
 #### Return
 - An array of messages object ([UserMessage[]](#usermessage))
 - A [WSResponse](#wsresponse)
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 400,
-			message: 'Bad request',
-			errors: string[] // describing malformed payload
+			statusCode: 400,
+			error: 'Bad request',
+			messages: string[] // describing malformed payload
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 403,
-			message: 'Forbidden',
-			errors: ['You can only get messages from friends'],
+			statusCode: 403,
+			error: 'Forbidden',
+			messages: ['You can only get messages from friends'],
 		}
 		```
-	+ ```javascript
+	+ ```typescript
 		{
-			code: 404,
-			message: 'Not found',
-			errors: ['User not found'],
+			statusCode: 404,
+			error: 'Not found',
+			messages: ['User not found'],
 		}
 		```
+
+## Games
+
+### **Create a game**
+
+#### Input
+```typescript
+message: `games_create`
+payload: {
+	maxDuration: 1 | 2 | 3;
+	maxScore: 5 | 10 | 30 | null;
+	mode: 'classic' | 'hardcore';
+	visibility: 'public' | 'private';
+}
+```
+
+#### Return
+- The new game object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+
+### **Join a game**
+
+#### Input
+```typescript
+message: `games_join`
+payload: {
+	id: string, // Local game id
+}
+```
+
+#### Return
+- The game object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['Game not found'],
+	}
+	```
+- ```typescript
+	{
+		statusCode: 403,
+		error: 'Forbidden',
+		messages: ['User not invited'],
+	}
+	```
+
+### **Quit a game**
+
+#### Input
+```typescript
+message: `games_quit`
+payload: {
+	id: string, // Game ID
+}
+```
+
+#### Return
+- The game object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		error: 'Not Found',
+		messages: ['Game not found'] |
+					['Player not found'],
+	}
+	```
+
+### **Join matchmaking**
+
+#### Input
+```typescript
+message: `games_joinMatchmaking`
+payload: empty
+```
+
+#### Return
+- `true` when you joined matchmaking
+
+### **Invite a player in a game**
+
+#### Input
+```typescript
+message: `games_invite`
+payload: {
+	id: string, // Local game id
+	user_id: number, // ID of user to invite
+}
+```
+
+#### Return
+- The user invited ([User](#user))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['Game not found'] |
+					['User not found'],
+	}
+	```
+- ```typescript
+	{
+		statusCode: 403,
+		error: 'Forbidden',
+		messages: ['Only the creator can invite'] |
+					['Game is already full'] |
+					['User is offline'],
+	}
+	```
+
+### **Send new player position**
+
+#### Input
+```typescript
+message: `games_playerMove`
+payload: {
+	id: string, // Local game id
+	y: number, // The new Y position
+}
+```
+
+#### Return
+- A `null` response (means everything is alright)
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['Game not found'] |
+					['Player not found'],
+	}
+	```
 
 # Websocket Events
 
-## Channel
+## Users
 
-### **New message**
+### **New private message**
+
+- Event name: `users_message`
+- Data type: [UserMessage](#usermessage)
+
+## Channels
+
+### **New channel message**
 
 - Event name: `channels_message`
 - Data type: [ChannelMessage](#channelmessage)
 
 #### Example
 
-```javascript
+```typescript
 socket.on('channels_message', (data: any) => {
-	//console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
+	console.log(`New message from ${data.user.username} in ${data.channel.name}: ${data.message}`)
 });
 ```
+
+## Games
+
+### **Game start**
+
+Send game information 3 seconds before the start of the game.
+
+- Event name: `games_start`
+- Data type: [LocalGameInfo](#localgameinfo)
+
+### **Invitation to a game**
+
+- Event name: `games_invitation`
+- Data type: [LocalGameInfo](#localgameinfo)
+
+### **Game end**
+
+- Event name: `games_end`
+- Data type:
+	```typescript
+		{
+			winner: {
+				user: User,
+				score: number,
+			},
+			score: number,
+			opponent_score: number,
+		}
+	```
+
+### **New opponent position**
+
+- Event name: `games_opponentMove`
+- Data type:
+	```typescript
+		{ y: number }
+	```
+
+### **New score (after a goal)**
+
+- Event name: `games_score`
+- Data type:
+	```typescript
+		you: number, // your score
+		opponent: number, // opponent score
+	```
+
+### **New ball position**
+
+- Event name: `games_ballMove`
+- Data type:
+	```typescript
+		x: number,
+		y: number
+	```
 
 # Objects
 
 ## WSResponse
 
-```javascript
+```typescript
 {
 	statusCode: number, // HTTP status code
 	error: string, // Relatded HTTP message
@@ -924,7 +1208,7 @@ socket.on('channels_message', (data: any) => {
 
 ## User
 
-```javascript
+```typescript
 {
 	id: number,
 	id42: number, // -1 for non-42 users
@@ -937,7 +1221,7 @@ socket.on('channels_message', (data: any) => {
 
 ## UserFriend
 
-```javascript
+```typescript
 {
 	inviterId: number,
 	inviter: User,
@@ -951,7 +1235,7 @@ socket.on('channels_message', (data: any) => {
 
 ## BannedUser
 
-```javascript
+```typescript
 {
 	userId: number,
 	user: User,
@@ -965,7 +1249,7 @@ socket.on('channels_message', (data: any) => {
 
 ## MutedUser
 
-```javascript
+```typescript
 {
 	userId: number,
 	user: User,
@@ -979,7 +1263,7 @@ socket.on('channels_message', (data: any) => {
 
 ## UserMessage
 
-```javascript
+```typescript
 {
 	id: number,
 
@@ -997,7 +1281,7 @@ socket.on('channels_message', (data: any) => {
 
 ## Channel
 
-```javascript
+```typescript
 {
 	id: number,
 	code: string,
@@ -1013,7 +1297,7 @@ socket.on('channels_message', (data: any) => {
 ```
 
 ## ChannelBannedUser
-```javascript
+```typescript
 {
 	userId: number,
 	user: User,
@@ -1026,7 +1310,7 @@ socket.on('channels_message', (data: any) => {
 ```
 
 ## ChannelMutedUser
-```javascript
+```typescript
 {
 	userId: number,
 	user: User,
@@ -1039,7 +1323,7 @@ socket.on('channels_message', (data: any) => {
 ```
 
 ## ChannelInvitedUser
-```javascript
+```typescript
 {
 	userId: number,
 	user: User,
@@ -1055,7 +1339,7 @@ socket.on('channels_message', (data: any) => {
 ```
 
 ## ChannelMessage
-```javascript
+```typescript
 {
 	id: number,
 
@@ -1068,5 +1352,19 @@ socket.on('channels_message', (data: any) => {
 	message: string,
 
 	sentAt: Date,
+}
+```
+
+
+## LocalGameInfo
+```typescript
+{
+	id: string,
+	state: "waiting" | "started" | "ended" | "saved",
+	startAt: number | null,
+	players: Array<{
+		user: User,
+		score: number,
+	}>,
 }
 ```

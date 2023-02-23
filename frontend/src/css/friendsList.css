@@ -122,3 +122,20 @@
     cursor: pointer;
     background-color: #65B876;
 }
+
+.close-friend-list {
+    display: none;
+}
+
+.close-friend-list:hover {
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 1000px) {
+    .close-friend-list {
+        display: inline;
+        position: absolute;
+        top: 1px;
+        right: 4px;
+    }
+}

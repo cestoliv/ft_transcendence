@@ -10,11 +10,11 @@ import Otp from './components/Otp/Otp';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
 import OtherUserProfile from './pages/OtherUserProfile';
-import Pong from './pages/Pong';
+import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
-import { IAuth, IUser, IUserFriend, IChannel } from './interfaces';
+import { IAuth, IUser, IUserFriend, IChannel, IChannelMessage } from './interfaces';
 import NoUserFound from './pages/404';
 
 function App() {
@@ -25,17 +25,15 @@ function App() {
 		otp_ok: false,
 	} as IAuth);
 	const [user, setUser] = useState({} as IUser);
+	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	const fetchUser = async () => {
-		const response = await fetch(
-			process.env.REACT_APP_API_URL + '/users/me',
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${cookies.bearer}`,
-				},
+		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${cookies.bearer}`,
 			},
-		);
+		});
 		const data = await response.json();
 		if (response.ok) {
 			setUser(data);
@@ -50,8 +48,7 @@ function App() {
 				setAuth({ bearer: cookies.bearer, otp_ok: false });
 		} else if (response.status === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false)
-				setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
 		} else console.error(data);
 	};
 
@@ -69,8 +66,7 @@ function App() {
 		console.log('Socket error:', error);
 		if (error.code === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false)
-				setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
 		}
 	});
 
@@ -104,14 +100,14 @@ function App() {
 			<Menu />
 			<Routes>
 				<Route path="/" element={<Home user={user} auth={auth} />} />
-				<Route path="/friends" element={<Friends user_me={user}/>} />
+				<Route path="/friends" element={<Friends user_me={user} messages={allChanMessages}/>} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/stats" element={<Stats user_me={user} />} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />
 				<Route path="/settings" element={<Settings user_me={user}/>} />
-				<Route path="/pong" element={<Pong />} />
+				<Route path="/pong" element={<Pong user={user} auth={auth} />} />
 			</Routes>
 		</SocketContext.Provider>
 	);

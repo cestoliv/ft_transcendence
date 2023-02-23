@@ -9,6 +9,7 @@ import { ChannelBannedUser } from './entities/channel-banned.entity';
 import { ChannelInvitedUser } from './entities/channel-invited.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
 import { ConnectedClientsService } from 'src/base.gateway';
+import { GamesModule } from 'src/games/games.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { ConnectedClientsService } from 'src/base.gateway';
 			ChannelMessage,
 		]),
 		forwardRef(() => UsersModule),
+		forwardRef(() => GamesModule),
 	],
 	providers: [ChannelsGateway, ChannelsService, ConnectedClientsService],
 	exports: [ChannelsService],

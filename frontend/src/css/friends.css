@@ -8,6 +8,17 @@
     background-color: black;
 }
 
+.burger-menu {
+    display: none;
+}
+
+/* .burger-menu-buttons {
+    background-color: green;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+} */
+
 .chan-list {
     width: 15%;
     height: 90vh;
@@ -248,7 +259,7 @@
     border-radius: 20px;
     align-items: center;
     justify-content: center;
-    padding: 0px 20px;
+    padding: 10px 20px;
 }
 
 .display-chan-title {
@@ -342,4 +353,167 @@
 
 .chan-password-input:focus {
     outline: none;
+}
+
+@media only screen and (max-width: 1300px) {
+    .chan-list {
+        width: 20%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .priv-conv-list {
+        width: 15%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .chat {
+        width: 55%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
+}
+
+@media only screen and (max-width: 1300px) {
+    .chan-list {
+        width: 20%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .priv-conv-list {
+        width: 15%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .chat {
+        width: 55%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
+}
+
+@media only screen and (max-width: 1000px) {
+    .burger-menu {
+        z-index: 1;
+        display: block;
+        position: fixed;
+        top: 11vh;
+        left: 40%;
+        width: 10%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .burger-menu button {
+        font-family: 'VT323', monospace;
+        font-weight: bold;
+        font-size: 20px;
+        display: inline-block;
+        width: 120px;
+        height: 30px;
+        background-color: #89C7D2;
+        border: none;   
+        border-radius: 20px;
+        margin-right: 3px;
+        transition: 0.5s ease;
+    }
+
+    .burger-menu button:hover {
+        cursor: pointer;
+    }
+    
+    .hidden-button {
+        /* display: none !important; */
+        /* visibility: hidden !important; */
+        opacity: 0;
+        visibility: hidden !important;
+    }
+
+    .chan-list {
+        position: fixed;
+        z-index: 1;
+        top: 10vh;
+        left: -300px;
+        width: 300px;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #726DA8;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: left 0.5s ease;
+    }
+
+    .active-chan-list {
+        left: 0;
+    }
+    
+    .priv-conv-list {
+        position: fixed;
+        z-index: 1;
+        top: 10vh;
+        left: -200px;
+        width: 200px;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: left 0.5s ease;
+    }
+
+    .active-friend-list {
+        left: 0;
+    }
+    
+    .chat {
+        position: fixed;
+        width: 90%;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .infos-conv {
+        position: fixed;
+        left: 90%;
+        width: 10%;
+        height: 90vh;
+        max-height: 90vh;
+        background-color: #7D8CC4;
+    }
 }

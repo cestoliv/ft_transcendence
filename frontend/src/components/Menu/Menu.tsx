@@ -10,9 +10,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/home"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span className="e-icons e-large e-home"></span>
 					</NavLink>
@@ -20,9 +18,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/friends"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span className="e-icons e-large e-people"></span>
 					</NavLink>
@@ -30,9 +26,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/searchGame"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span className="e-icons e-large e-play"></span>
 					</NavLink>
@@ -40,9 +34,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/stats"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span className="e-icons e-large e-change-chart-type"></span>
 					</NavLink>
@@ -50,9 +42,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/settings"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span className="e-icons e-large e-settings"></span>
 					</NavLink>
@@ -60,9 +50,7 @@ export default function Menu() {
 				<li>
 					<NavLink
 						to="/pong"
-						className={({ isActive }: { isActive: boolean }) =>
-							isActive ? 'activeLink' : undefined
-						}
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
 						<span>Pong</span>
 					</NavLink>
