@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	ConflictException,
 	ForbiddenException,
 	forwardRef,
@@ -10,8 +11,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 import { authenticator } from 'otplib';
-import { AuthService } from 'src/auth/auth.service';
+import { pipeline, Readable } from 'stream';
+import * as fs from 'fs';
+import * as path from 'path';
+import sharp from 'sharp';
+import Avatar from 'avatar-builder';
 import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
+import { AuthService } from 'src/auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { BannedUser } from './entities/user-banned.entity';
@@ -52,9 +58,14 @@ export class UsersService {
 		});
 	}
 
-	findOne(id: number, withTotp = false) {
+	findOne(
+		id: number,
+		{ withTotp = false, with42ProfilePicture = false } = {},
+	) {
 		const select = ['id', 'id42', 'username'];
 		if (withTotp) select.push('otp');
+		if (with42ProfilePicture) select.push('profile_picture_42');
+
 		return this.usersRepository.findOne({
 			where: { id },
 			select: select as FindOptionsSelect<User>,
@@ -62,9 +73,14 @@ export class UsersService {
 		});
 	}
 
-	findOneBy42Id(id42: number, withTotp = false) {
+	findOneBy42Id(
+		id42: number,
+		{ withTotp = false, with42ProfilePicture = false } = {},
+	) {
 		const select = ['id', 'id42', 'username'];
 		if (withTotp) select.push('otp');
+		if (with42ProfilePicture) select.push('profile_picture_42');
+
 		return this.usersRepository.findOne({
 			where: { id42 },
 			select: select as FindOptionsSelect<User>,
@@ -72,9 +88,14 @@ export class UsersService {
 		});
 	}
 
-	findOneByUsername(username: string, withTotp = false) {
+	findOneByUsername(
+		username: string,
+		{ withTotp = false, with42ProfilePicture = false } = {},
+	) {
 		const select = ['id', 'id42', 'username'];
 		if (withTotp) select.push('otp');
+		if (with42ProfilePicture) select.push('profile_picture_42');
+
 		return this.usersRepository.findOne({
 			where: { username },
 			select: select as FindOptionsSelect<User>,
@@ -101,6 +122,11 @@ export class UsersService {
 	}
 
 	async save(user: User) {
+		delete user.invitedFriends;
+		delete user.friendOf;
+		delete user.friends;
+		delete user.banned;
+		delete user.muted;
 		await this.usersRepository.save(user);
 		return this.findOne(user.id);
 	}
@@ -309,5 +335,98 @@ export class UsersService {
 			order: { sentAt: 'DESC' },
 			take: 50,
 		});
+	}
+
+	async updateProfilePicture(user: User, file: any) {
+		const ppPath = path.join(
+			'./',
+			'uploads',
+			'profile-pictures',
+			`${user.id}.webp`,
+		);
+		const pipelinePromise = new Promise<void>((resolve, reject) => {
+			pipeline(
+				file,
+				sharp()
+					.resize(600, 600, {
+						fit: 'cover',
+					})
+					.webp(),
+				fs.createWriteStream(ppPath),
+				(err) => {
+					if (err) {
+						// If the file type is not an image
+						if (
+							err.message.includes(
+								'Input buffer contains unsupported image format',
+							)
+						)
+							reject(
+								new BadRequestException(
+									'File type not supported',
+								),
+							);
+						else {
+							console.log(err);
+							reject(
+								new BadRequestException(
+									'Error while uploading the file',
+								),
+							);
+						}
+					} else resolve();
+				},
+			);
+		});
+
+		try {
+			await pipelinePromise;
+			return this.findOne(user.id);
+		} catch (err) {
+			throw err;
+		}
+	}
+
+	async set42ProfilePicture(user: User) {
+		if (!user.profile_picture_42 || !user.id42)
+			throw new BadRequestException(
+				'You need to be logged in with 42 to use this feature',
+			);
+
+		const downloadPromise = new Promise<void>((resolve, reject) => {
+			fetch(user.profile_picture_42)
+				.then((res) => res.arrayBuffer())
+				.then(async (buffer) => {
+					const readable = new Readable({
+						read() {
+							this.push(Buffer.from(buffer));
+							this.push(null);
+						},
+					});
+					await this.updateProfilePicture(user, readable);
+					resolve();
+				})
+				.catch((err) => reject(new Error(err)));
+		});
+
+		try {
+			await downloadPromise;
+			return this.findOne(user.id);
+		} catch (err) {
+			throw err;
+		}
+	}
+
+	async generateAvatar(user: User) {
+		const avatar = Avatar.squareBuilder(600);
+		const buffer = await avatar.create(user.username);
+		const readable = new Readable({
+			read() {
+				this.push(buffer);
+				this.push(null);
+			},
+		});
+		await this.updateProfilePicture(user, readable);
+		return this.findOne(user.id);
 	}
 }

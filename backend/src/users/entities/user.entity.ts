@@ -53,4 +53,17 @@ export class User {
 	// Muted users array, One-to-many relationship with MutedUser
 	@OneToMany(() => MutedUser, (muted) => muted.user)
 	muted: MutedUser[];
+
+	// Profile picture URL
+	@Column({ select: false, nullable: true })
+	profile_picture: string;
+
+	@AfterLoad()
+	getProfilePicture() {
+		this.profile_picture = `/api/v1/users/profile-picture/${this.id}`;
+	}
+
+	// 42 Profile picture URL
+	@Column({ select: false, nullable: true })
+	profile_picture_42: string;
 }
