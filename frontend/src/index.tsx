@@ -6,6 +6,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
+import { AuthProvider } from './context/AuthProvider';
 
 declare global {
 	interface Window {
@@ -19,9 +20,11 @@ const root = ReactDOM.createRoot(
 root.render(
 	<React.StrictMode>
 		<BrowserRouter>
-			<App />
+			<AuthProvider>
+				<App />
+			</AuthProvider>
 		</BrowserRouter>
-	</React.StrictMode>
+	</React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

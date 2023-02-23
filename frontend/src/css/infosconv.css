@@ -1,35 +1,34 @@
 .i-conv-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: rgb(143, 145, 162);
-    font-family: 'VT323', monospace;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: rgb(143, 145, 162);
+	font-family: 'VT323', monospace;
 }
 
 .chan_user_wrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 .i-conv-wrapper-button {
-    width: 100%;
-    padding: 10px;
-    background-color: rgb(143, 145, 162);
-    border: none;
-    border-bottom: 1px solid black;
-    font-family: 'VT323', monospace;
-    font-size: 20px;
+	width: 100%;
+	padding: 10px;
+	background-color: rgb(143, 145, 162);
+	border: none;
+	border-bottom: 1px solid black;
+	font-family: 'VT323', monospace;
+	font-size: 20px;
 }
 
 .i-conv-wrapper-button:hover {
-    cursor: pointer;
-    background-color: rgb(122, 124, 141);
+	cursor: pointer;
+	background-color: rgb(122, 124, 141);
 }
 
 .i-conv-person-popup-button {
-    flex-grow: 1;
+	flex-grow: 1;
 }
-

@@ -1,0 +1,44 @@
+.menu {
+	font-size: 1.2em;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background-color: black;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-family: 'VT323', monospace;
+	font-size: 20px;
+	height: 10vh;
+	box-shadow: rgb(0 0 0 / 15%) 0px 3px 2.6px;
+	.e-icons {
+		color: white;
+	}
+}
+
+.menu ul {
+	list-style: none;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 30%;
+}
+
+.menu ul li {
+	align-self: center;
+	background-color: none;
+	font-family: 'VT323', monospace;
+}
+
+a {
+	text-decoration: none;
+	color: black;
+}
+
+.activeLink {
+	font-weight: bold;
+	color: #c7cee6;
+}
+
+.e-settings {
+	background-color: none;
+}
