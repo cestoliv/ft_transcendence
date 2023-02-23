@@ -27,14 +27,10 @@ export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
 			(data: any) => {
 				if (data.messages)
 						alert(data.messages);
-				else
-				{
-					console.log("hello100");
-					console.log(data);
-				}
 			},
 		);
 	}
+	
 	return (
 		<div className="wrapper-private-chan-joined-item">
 			<div className='private-chan-joined-item' onClick={chanInvit}>{props.chan.name}</div >

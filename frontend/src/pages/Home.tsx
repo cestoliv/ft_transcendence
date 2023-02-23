@@ -4,7 +4,6 @@ import { IAuth, IUser } from '../interfaces';
 
 const Home = (props: { user: IUser; auth: IAuth }) => {
 	const socket = useContext(SocketContext);
-
 	window.socket = socket;
 
 	const [message, setMessage] = useState('');

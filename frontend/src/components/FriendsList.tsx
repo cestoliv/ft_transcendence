@@ -12,7 +12,13 @@ import Box from '@mui/material/Box';
 
 type PersonListProps = {
 	user_me : IUser,
+	chanList : IChannel[],
+	friends : IUser[],
+	friendOf : IUserFriend[],
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
+	AddFriend: (username : string) => void;
+	accept_friend_request : (inviter_id : number) => void;
+	removeFriend : (user_id : number) => void;
 };
 
 export const FriendsList = (props: PersonListProps) => {
@@ -20,9 +26,8 @@ export const FriendsList = (props: PersonListProps) => {
 
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
-	const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
-	const[friends, setFriends] = useState<IUser[]>([]);
-	
+	// const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
+	// const[friends, setFriends] = useState<IUser[]>([]);
 
 	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
 	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
@@ -32,23 +37,10 @@ export const FriendsList = (props: PersonListProps) => {
 		if (event.target.name === 'add-friend-input') setAddFriendValue(event.target.value);
 	};
 
-	const submitAddFriend = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-		socket.emit(
-			'users_inviteFriend',
-			{
-				username : addFriendValue,
-			},
-			(data: any) => {
-				if (data.messages)
-						alert(data.messages);
-				else
-				{
-					console.log(data);
-					setAddFriendValue('');
-				}	
-			},
-		);
+	const handleAddFriendSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event?.preventDefault();
+		props.AddFriend(addFriendValue);
+		setAddFriendValue('');
     };
 
 	const closeFriendList = (event: any): void => {
@@ -62,42 +54,43 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove("hidden-button");
 	};
 
-	useEffect(() => {
-        socket.emit(
-            'users_get',
-            {
-                id: props.user_me.id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-				{
-					setFriendOf(data.friendOf);
-					setFriends(data.friends);
-				}
-            },
-        );
-	},[]);
+	// useEffect(() => {
+	// 	console.log("FriendsList useEffect");
+    //     // socket.emit(
+    //     //     'users_get',
+    //     //     {
+    //     //         id: props.user_me.id,
+    //     //     },
+    //     //     (data: any) => {
+    //     //         if (data.messages)
+	// 	// 			alert(data.messages);
+    //     //         else
+	// 	// 		{
+	// 	// 			setFriendOf(data.friendOf);
+	// 	// 			setFriends(data.friends);
+	// 	// 		}
+    //     //     },
+    //     // );
+	// },[props.friends]);
 
 	return (
 		<div className="priv-conv-list" id='priv-conv-list'>
 			<span className='close-friend-list' id='close-friend-list' onClick={closeFriendList}>close</span>
 			<div className="friendsList-wrapper">
-				{props.user_me.friends && props.user_me.friends.map((user) => (
-					<Friend key={user.id} user={user} activeConv={props.activeConv}/>
+				{props.friends && props.friends.map((user) => (
+					<Friend key={user.id} user={user} chanList={props.chanList} activeConv={props.activeConv} removeFriend={props.removeFriend} />
 				))}
 			</div>
 			<div className="add-accept-friend">
 				<button className="en-attente-button" onClick={OpenListFriendRequest}>En attente</button>
 				<Modal open={OpenLFriendRequest} onClose={CloseListFriendRequest} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
 					<Box className="friend-request-modal background-modal">
-						{friendOf && friendOf.map((friend_request) => (
-							<FriendRequests friend_request={friend_request}/>
+						{props.friendOf && props.friendOf.map((friend_request) => (
+							<FriendRequests friend_request={friend_request} accept_friend_request={props.accept_friend_request}/>
 						))}
 					</Box>
 				</Modal>
-				<form className="add-friend-form" onSubmit={submitAddFriend}>
+				<form className="add-friend-form" onSubmit={handleAddFriendSubmit}>
 						<input value={addFriendValue} name='add-friend-input' id='message-input' type='message' placeholder='Add a friend' onChange={handleChange} required className="add-friend-form-input"/>
 				</form>
 			</div>
