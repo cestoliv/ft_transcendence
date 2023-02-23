@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 
 type PrivateChanJoinedProps = {
 	chan: IChannel;
-	userToInviteId: number;
+	userToInviteId : number;
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
@@ -25,19 +25,15 @@ export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
 				user_id: props.userToInviteId,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
-				else {
-					console.log('hello100');
-					console.log(data);
-				}
+				if (data.messages)
+						alert(data.messages);
 			},
 		);
-	};
+	}
+	
 	return (
 		<div className="wrapper-private-chan-joined-item">
-			<div className="private-chan-joined-item" onClick={chanInvit}>
-				{props.chan.name}
-			</div>
+			<div className='private-chan-joined-item' onClick={chanInvit}>{props.chan.name}</div >
 		</div>
 	);
 };

@@ -12,14 +12,16 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
 type FriendProps = {
-	user: IUser;
+	user: IUser,
+	chanList : IChannel[],
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
+	removeFriend : (user_id : number) => void;
 };
 
 export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
 
-	const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
+	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
 
 	const [openFActionModal, setOpenFriendActionModal] = React.useState(false);
 	const OpenFriendActionModal = () => setOpenFriendActionModal(true);
@@ -29,17 +31,9 @@ export const Friend = (props: FriendProps) => {
 	const OpenChanListModal = () => setOpenChanListModal(true);
 	const CloseChanListModal = () => setOpenChanListModal(false);
 
-	const removeFriend = (event: any): void => {
-		socket.emit(
-			'users_removeFriend',
-			{
-				id: props.user.id,
-			},
-			(data: any) => {
-				if (data.messages) alert(data.messages);
-			},
-		);
-	};
+	const removeFriendClick = (event: any): void => {
+		props.removeFriend(props.user.id);
+	}
 
 	const muteFriend = (event: any): void => {
 		socket.emit(
@@ -69,11 +63,12 @@ export const Friend = (props: FriendProps) => {
 		);
 	}
 
-	useEffect(() => {
-		socket.emit('channels_listJoined', {}, (data: any) => {
-			setChanListJoined(data);
-		});
-	}, []);
+	// useEffect(() => {
+	// 	console.log("Friend useEffect");
+	// 	socket.emit('channels_listJoined', {}, (data: any) => {
+	// 		setChanListJoined(data);
+	// 	});
+	// }, []);
 
 	return (
 		<div
@@ -103,21 +98,21 @@ export const Friend = (props: FriendProps) => {
 						<button onClick={OpenChanListModal}>Inviter channel</button>
 						<button onClick={muteFriend}>Mute</button>
 						<button onClick={banFriend}>Ban</button>
-						<button onClick={removeFriend}>Suprrimer</button>
-					</Box>
-				</Modal>
+						<button onClick={removeFriendClick}>Suprrimer</button>
+            </Box>
+          </Modal>
 			</div>
 			<Modal
-				open={openChanListModal}
-				onClose={CloseChanListModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box className="chan-user-modal">
-					{chanListJoined
-						?.filter((chan) => {
-							if (chan.visibility === 'private') return true;
-							return false;
+                open={openChanListModal}
+                onClose={CloseChanListModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box className="chan-user-modal">
+					{props.chanList?.filter(chan => {
+							if (chan.visibility === 'private')
+								return true;
+							return false
 						})
 						.map((chan) => (
 							<PrivateChanJoined chan={chan} userToInviteId={props.user.id} />

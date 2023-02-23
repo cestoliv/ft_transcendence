@@ -4,15 +4,14 @@ import 'reactjs-popup/dist/index.css';
 
 import Chan from './Chan';
 
-import userChans from '../mock-data/userchans';
+import { IChannel, IUser, IUserFriend, IChannelMessage } from '../interfaces';
+
 import { SocketContext } from '../context/socket';
 
 type ChanListProps = {
-	// chans : {
-	//     name :string,
-	//     id : number,
-	// }[],
+	chanList : IChannel[],
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
+	leaveChan: (chan_id: number) => void;
 };
 
 export const ChanList = (props: ChanListProps) => {
@@ -31,20 +30,20 @@ export const ChanList = (props: ChanListProps) => {
 		button2?.classList.remove("hidden-button");
 	};
 
-	useEffect(() => {
-		//console.log("buzz");
-		socket.emit('channels_listJoined', {}, (data: any) => {
-			// console.log("hello10 : ");
-			// console.log(data);
-			setChanList(data);
-		});
-	}, [chanList]);
+	// useEffect(() => {
+	// 	console.log("ChansList UseEffect");
+	// 	socket.emit('channels_listJoined', {}, (data: any) => {
+	// 		// console.log("hello10 : ");
+	// 		// console.log(data);
+	// 		setChanList(data);
+	// 	});
+	// }, [chanList]);
 
 	return (
 		<div className="ChanList-wrapper">
 			<span className='close-chan-list' id='close-chan-list' onClick={closeChanList}>close</span>
-			{chanList.map((chan: any) => (
-				<Chan chan_id={chan.id} activeConv={props.activeConv} chan_name={chan.name} />
+			{props.chanList.map((chan: any) => (
+				<Chan chan_id={chan.id} activeConv={props.activeConv} leaveChan={props.leaveChan} chan_name={chan.name} chanList={props.chanList}/>
 			))}
 		</div>
 	);

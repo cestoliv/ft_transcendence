@@ -20,6 +20,7 @@ export default function InfosConv(props: InfosConvProps) {
 	const [channel, setChannel] = useState<IChannel | null>(null);
 
 	useEffect(() => {
+		console.log("InfosConv useEffect");
 		socket.emit(
 			'channels_get',
 			{
@@ -29,7 +30,7 @@ export default function InfosConv(props: InfosConvProps) {
 				setChannel(data);
 			},
 		);
-	}, [channel]);
+	}, [props.activeConvId]);
 
 	return (
 		<div className="i-conv-wrapper">

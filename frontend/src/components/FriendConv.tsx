@@ -5,7 +5,7 @@ import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IUser, IUserMessage } from '../interfaces';
 
 import FriendConvMessages from './FriendConvMessages'
 
@@ -21,6 +21,7 @@ export default function FriendConv(props: FriendConvProps) {
 	const [passWord, setPassWord] = useState<string>('');
 	const [message, setMessage] = useState<string>('');
 	const [talkTo, setTalkto] = useState<IUser>();
+	const [chanMessages, setChanMessages] = useState<IUserMessage[]>([]);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'password-input')
@@ -30,13 +31,9 @@ export default function FriendConv(props: FriendConvProps) {
 	};
 
 	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
-        console.log("hello 78");
-        console.log(message);
-        console.log(props.activeConvId);
         event.preventDefault();
 		if (message != '')
 		{
-            console.log("hello789");
 			socket.emit(
 				'users_sendMessage',
 				{
@@ -47,18 +44,18 @@ export default function FriendConv(props: FriendConvProps) {
                     if (data.messages)
 						alert(data.messages);
                     else
-                    {
-                        console.log("hello 546");
-                        console.log(data);
-                        setMessage('');
-                    }
+					{
+						setChanMessages((prevMessages) => [data, ...prevMessages]);
+						setMessage('');
+					}
 				},
 			);
 		}
     };
 
 	useEffect(() => {
-
+		console.log("FriendConv useEffect");
+		console.log(props.activeConvId);
 		socket.emit(
             'users_get',
             {
@@ -71,14 +68,24 @@ export default function FriendConv(props: FriendConvProps) {
 					setTalkto(data);
             },
         );
-	}, []);
+		{
+            socket.emit('users_getMessages', {
+                id: props.activeConvId,
+                before: new Date().toISOString(),
+            },
+                (data: any) => {
+                    setChanMessages(data);
+                }
+            );
+        }
+	}, [props.activeConvId]);
 
 	return (
 		<div className="chat-wrapper">
 			<div className="chat-nav" id='chat-nav'>
 				<span>{talkTo?.username}</span>
 			</div>
-			<FriendConvMessages user_me={props.user_me} chan_id={props.activeConvId}/>
+			<FriendConvMessages user_me={props.user_me} chan_id={props.activeConvId} chanMessages={chanMessages}/>
 			<form className="write-message" onSubmit={submitMessage}>
 					<input
 						value={message}

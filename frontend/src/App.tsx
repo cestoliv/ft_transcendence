@@ -14,7 +14,7 @@ import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
-import { IAuth, IUser, IUserFriend, IChannel } from './interfaces';
+import { IAuth, IUser, IUserFriend, IChannel, IChannelMessage } from './interfaces';
 import NoUserFound from './pages/404';
 
 function App() {
@@ -25,6 +25,7 @@ function App() {
 		otp_ok: false,
 	} as IAuth);
 	const [user, setUser] = useState({} as IUser);
+	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	const fetchUser = async () => {
 		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
@@ -99,7 +100,7 @@ function App() {
 			<Menu />
 			<Routes>
 				<Route path="/" element={<Home user={user} auth={auth} />} />
-				<Route path="/friends" element={<Friends user_me={user}/>} />
+				<Route path="/friends" element={<Friends user_me={user} messages={allChanMessages}/>} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/stats" element={<Stats user_me={user} />} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
