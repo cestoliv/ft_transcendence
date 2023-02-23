@@ -7,13 +7,16 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IUser, IChannelMessage } from '../interfaces';
 
 import ChanBanItem from './ChanBanItem'
 
 type ChansOtherProps = {
 	chan: IChannel | null,
 	user_me : IUser,
+    chanList : IChannel[],
+    chanListJoin: (chan_code: string | undefined) => void;
+    chanListJoinPassWord: (chan_code: string | undefined, psswrd : string) => Promise<any>;
 };
 
 export const ChansOther = (props: ChansOtherProps) => {
@@ -30,43 +33,29 @@ export const ChansOther = (props: ChansOtherProps) => {
 		if (event.target.name === 'chan-password-input') setPasswordValue(event.target.value);
 	};
 
-    const joinChan = (event: any): void => {
+    const handleJoinClick = () => {
         if (props.chan?.visibility != "password-protected")
         {
-            socket.emit(
-                'channels_join',
-                {
-                    code: props.chan?.code,
-                },
-                (data: any) => {
-                    if (data.messages)
-						alert(data.messages);
-                },
-            );
+            props.chanListJoin(props.chan?.code)
         }
         else if (props.chan?.visibility === "password-protected")
             openPassWordProtectedModal();
-    }
+    };
 
-    const submitChanPassword = (event: any): void => {
+
+    const handleJoinPassWordSubmit = async (event: any) => {
         event.preventDefault();
-        socket.emit(
-            'channels_join',
+        try {
+            const data = await props.chanListJoinPassWord(props.chan?.code, passwordValue);
+            if (data)
             {
-                code: props.chan?.code,
-                password: passwordValue,
-            },
-            (data: any) => {
-                if (data.messages)
-                    alert(data.messages);
-                else
-                {
-                    closePassWordProtectedModal();
-                    setPasswordValue('');   
-                }
-            },
-        );
-    }
+                closePassWordProtectedModal();
+                setPasswordValue('');
+            }
+        } catch (error) {
+            console.error('Join channel error:');
+        }
+    };
 
 	const display = (): boolean => {
         let i = 0;
@@ -106,7 +95,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 		socket.emit('channels_listJoined', {}, (data: any) => {
 			setChanJoined(data);
 		});
-	}, [chanJoined]);
+	}, [props.chanList]);
 
 	return (
 		<div className="ChansOther-item-wrapper">	
@@ -117,7 +106,7 @@ export const ChansOther = (props: ChansOtherProps) => {
                 aria-describedby="modal-modal-description"
             >
                 <Box className="password-chan-modal background-modal">
-                    <form className="chan-password-form" onSubmit={submitChanPassword}>
+                    <form className="chan-password-form" onSubmit={handleJoinPassWordSubmit}>
                         <input value={passwordValue} name='chan-password-input' type='message' placeholder='password' onChange={handleChange} required className="chan-password-input"/>
                     </form>
                 </Box>
@@ -125,7 +114,7 @@ export const ChansOther = (props: ChansOtherProps) => {
             {display() && (
                 <div className='chan-list-item'>
                     <span>{props.chan?.name}</span>
-                    <span className="e-icons e-medium e-plus" onClick={joinChan}></span>
+                    <span className="e-icons e-medium e-plus" onClick={handleJoinClick}></span>
                 </div>
             )}
 		</div>

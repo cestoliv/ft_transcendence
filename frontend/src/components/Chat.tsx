@@ -5,13 +5,14 @@ import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IUser, IChannelMessage } from '../interfaces';
 
 import ChatMessages from './ChatMessages'
 
 type ChatProps = {
 	user_me : IUser,
 	activeConvId : number,
+	messages : IChannelMessage[],
 };
 
 export default function Chat(props: ChatProps) {
@@ -40,7 +41,8 @@ export default function Chat(props: ChatProps) {
 					message : message,
 				},
 				(data: any) => {
-					setMessage('');	
+					setMessage('');
+					props.messages.push(data);
 				},
 			);
 		}
@@ -115,8 +117,7 @@ export default function Chat(props: ChatProps) {
 		return false;
     }
 
-	useEffect(() => {
-
+	const fetchData = () => {
 		socket.emit(
 			'channels_get',
 			{
@@ -129,7 +130,12 @@ export default function Chat(props: ChatProps) {
 					setChan(data);
 			},
 		);
-	}, [chan]);
+	};
+
+	useEffect(() => {
+		console.log("Chat useEffect");
+		fetchData();
+	}, [props.activeConvId]);
 
 	return (
 		<div className="chat-wrapper">
@@ -164,7 +170,7 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId}/>
+			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages}/>
 			<form className="write-message" onSubmit={submitMessage}>
 					<input
 						value={message}

@@ -17,7 +17,6 @@ type ChansBanProps = {
 };
 
 export const ChansBan = (props: ChansBanProps) => {
-    const socket = useContext(SocketContext);
 
 	const isBan = (): boolean => {
         if (props.chan)
