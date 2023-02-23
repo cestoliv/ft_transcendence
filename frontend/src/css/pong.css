@@ -13,11 +13,16 @@
 } */
 
 .pong-wrapper {
-    flex-grow: 1;
-    background-color: brown;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+	flex-grow: 1;
+	background-color: brown;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.canvas-wrapper {
+	margin: 0 auto;
+	overflow: hidden;
 }
 
 .end-game-modal{

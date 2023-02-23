@@ -29,7 +29,7 @@ export default function FriendConv(props: FriendConvProps) {
 		if (event.target.name === 'message-input')
 			setMessage(event.target.value);
 	};
-	  
+
 	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 		if (message != '')

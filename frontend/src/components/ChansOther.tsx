@@ -98,7 +98,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 	}, [props.chanList]);
 
 	return (
-		<div className="ChansOther-item-wrapper">	
+		<div className="ChansOther-item-wrapper">
             <Modal
                 open={openPassWordModal}
                 onClose={closePassWordProtectedModal}
@@ -110,7 +110,7 @@ export const ChansOther = (props: ChansOtherProps) => {
                         <input value={passwordValue} name='chan-password-input' type='message' placeholder='password' onChange={handleChange} required className="chan-password-input"/>
                     </form>
                 </Box>
-            </Modal>		
+            </Modal>
             {display() && (
                 <div className='chan-list-item'>
                     <span>{props.chan?.name}</span>

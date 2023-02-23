@@ -34,8 +34,8 @@ export default function Friends(props: FriendsProps) {
 	const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	const[friends, setFriends] = useState<IUser[]>([]);
 
-	let [activeConvId, setActivConvId] = useState<number>(-1);
-	let [chanConv, setChanConv] = useState<number>(-1)
+	const [activeConvId, setActivConvId] = useState<number>(-1);
+	const [chanConv, setChanConv] = useState<number>(-1);
 
 	//modal
 	const [openCModal, setOpenCModal] = React.useState(false);
@@ -59,15 +59,11 @@ export default function Friends(props: FriendsProps) {
 	const [joinChanMdp, setJoinChanMdp] = useState<string>('');
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'create-chan-name')
-			setChanName(event.target.value);
-		if (event.target.name === 'create-chan-mdp')
-			setChanMdp(event.target.value);
+		if (event.target.name === 'create-chan-name') setChanName(event.target.value);
+		if (event.target.name === 'create-chan-mdp') setChanMdp(event.target.value);
 
-		if (event.target.name === 'join-chan-name')
-			setJoinChanName(event.target.value);
-		if (event.target.name === 'join-chan-mdp')
-			setJoinChanMdp(event.target.value);
+		if (event.target.name === 'join-chan-name') setJoinChanName(event.target.value);
+		if (event.target.name === 'join-chan-mdp') setJoinChanMdp(event.target.value);
 	};
 
 	const createChan = (event: any): void => {
@@ -210,26 +206,20 @@ export default function Friends(props: FriendsProps) {
 	const activeConv = (event: any) => {
 		let newId;
 		let element;
-		
+
 		if (event.target.classList != 'wrapper-active-conv' && event.target.classList != 'wrapper-active-conv-span')
 			return;
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
-		if (event.target.classList == 'wrapper-active-conv-span')
-			element = event.target.parentElement;
-		else
-			element = event.target;
+		if (event.target.classList == 'wrapper-active-conv-span') element = event.target.parentElement;
+		else element = event.target;
 		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
 		const newActivConv = document.getElementById('active-conv-bg');
-		if (newActivConv)
-			newId = newActivConv.getAttribute('data-id');
-		if (newId)
-			setActivConvId(parseInt(newId));
-		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv')
-			setChanConv(1);
-		else
-			setChanConv(2);
+		if (newActivConv) newId = newActivConv.getAttribute('data-id');
+		if (newId) setActivConvId(parseInt(newId));
+		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv') setChanConv(1);
+		else setChanConv(2);
 	};
 
 	const OpenConvs = (event: any): void => {
@@ -426,4 +416,4 @@ export default function Friends(props: FriendsProps) {
 			</div>
 		</div>
 	);
-};
+}

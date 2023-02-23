@@ -11,6 +11,7 @@ import { UserFriend } from './entities/user-friend.entity';
 import { BannedUser } from './entities/user-banned.entity';
 import { MutedUser } from './entities/user-muted.entity';
 import { UserMessage } from './entities/user.message.entity';
+import { GamesModule } from 'src/games/games.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { UserMessage } from './entities/user.message.entity';
 		]),
 		forwardRef(() => AuthModule),
 		forwardRef(() => ChannelsModule),
+		forwardRef(() => GamesModule),
 	],
 	controllers: [UsersController],
 	providers: [UsersService, UsersGateway, ConnectedClientsService],

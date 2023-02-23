@@ -30,7 +30,7 @@ export const AllChan = (props: AllChanProps) => {
     useEffect(() => {
       console.log("AllChan UseEffect");
         socket.emit(
-            'channels_list', 
+            'channels_list',
             {},
              (data: IChannel[]) => {
                 console.log(data);
