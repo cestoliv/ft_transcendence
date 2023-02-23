@@ -97,7 +97,7 @@ function App() {
 			/>
 		);
 	}
-
+	console.log("APP");
 	// If user is connected and has entered a TOTP, show app
 	return (
 		<SocketContext.Provider value={socket}>
