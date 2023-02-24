@@ -77,12 +77,7 @@ export const Settings = (props: SettingsProps) => {
 
 					<div className="googl-auth-div">
 						<label>Google auth : </label>
-						<input
-							type="checkbox"
-							id="scales"
-							name="scales"
-							onChange={handleChangeCheckbox}
-						/>
+						<input type="checkbox" id="scales" name="scales" onChange={handleChangeCheckbox} />
 					</div>
 
 					<input

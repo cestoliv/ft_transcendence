@@ -1,10 +1,5 @@
 import '../../css/app.css';
-import React, {
-	Dispatch,
-	FormEventHandler,
-	SetStateAction,
-	useState,
-} from 'react';
+import React, { Dispatch, FormEventHandler, SetStateAction, useState } from 'react';
 import { IAuth } from '../../interfaces';
 import { RemoveCookie, SetAuth, SetCookie } from '../../types';
 
@@ -17,18 +12,15 @@ const submitTOTP = async (
 	setCookie: SetCookie,
 	removeCookie: RemoveCookie,
 ) => {
-	const response = await fetch(
-		`${process.env.REACT_APP_API_URL}/auth/totp/${totp}`,
-		{
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${auth.bearer}`,
-			},
+	const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/${totp}`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${auth.bearer}`,
 		},
-	);
+	});
 
 	const data = await response.json();
-	console.log(data);
+	//console.log(data);
 	if (response.ok) {
 		// User is logged
 		setCookie('bearer', data.bearer, {
@@ -43,8 +35,7 @@ const submitTOTP = async (
 	} else {
 		// This will bring the user back to the login page
 		removeCookie('bearer');
-		if (auth.bearer !== null || auth.otp_ok !== false)
-			setAuth({ bearer: null, otp_ok: false });
+		if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
 		console.error(data);
 	}
 };
@@ -60,17 +51,8 @@ const Otp = (props: {
 
 	const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
-		const totp_input = e.currentTarget.elements.namedItem(
-			'otp-input',
-		) as HTMLInputElement;
-		submitTOTP(
-			totp_input.value,
-			setFormError,
-			props.auth,
-			props.setAuth,
-			props.setCookie,
-			props.removeCookie,
-		);
+		const totp_input = e.currentTarget.elements.namedItem('otp-input') as HTMLInputElement;
+		submitTOTP(totp_input.value, setFormError, props.auth, props.setAuth, props.setCookie, props.removeCookie);
 	};
 
 	return (

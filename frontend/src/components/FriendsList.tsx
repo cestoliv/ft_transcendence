@@ -28,7 +28,6 @@ export const FriendsList = (props: PersonListProps) => {
 
 	// const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	// const[friends, setFriends] = useState<IUser[]>([]);
-	
 
 	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
 	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
@@ -37,7 +36,6 @@ export const FriendsList = (props: PersonListProps) => {
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'add-friend-input') setAddFriendValue(event.target.value);
 	};
-
 
 	const handleAddFriendSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event?.preventDefault();

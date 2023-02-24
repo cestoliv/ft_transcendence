@@ -7,16 +7,14 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser } from '../interfaces';
 
-import ChanUser from './ChanUser'
+import ChanUser from './ChanUser';
 
 type InfosConvProps = {
-	user_me : IUser,
-	activeConvId : number | undefined,
+	user_me: IUser;
+	activeConvId: number | undefined;
 };
 
-
 export default function InfosConv(props: InfosConvProps) {
-
 	const socket = useContext(SocketContext);
 
 	const [channel, setChannel] = useState<IChannel | null>(null);
@@ -42,7 +40,7 @@ export default function InfosConv(props: InfosConvProps) {
 						<ChanUser username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins} user_me_id={props.user_me.id}/>
 					))}
 				</div>
-      		)}
+			)}
 		</div>
 	);
 }
