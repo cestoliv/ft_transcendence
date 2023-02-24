@@ -246,7 +246,7 @@ export default function Friends(props: FriendsProps) {
 	});
 
 	  useEffect(() => {
-		console.log("Friends UseEffect");
+		console.log("channels_listJoined UseEffect");
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
 		  // Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
@@ -270,7 +270,7 @@ export default function Friends(props: FriendsProps) {
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
 		  setUser(data);
 		});
-	  }, []);
+	  }, [chanList]);
 
 	  	socket.off('users_message'); // Unbind previous event
 		socket.on('users_message', (data: any) => {

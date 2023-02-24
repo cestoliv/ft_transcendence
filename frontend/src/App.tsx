@@ -10,7 +10,7 @@ import Otp from './components/Otp/Otp';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
 import OtherUserProfile from './pages/OtherUserProfile';
-import Pong from './pages/P5Pong';
+// import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
@@ -107,7 +107,7 @@ function App() {
 				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />
 				<Route path="/settings" element={<Settings user_me={user}/>} />
-				<Route path="/pong" element={<Pong user={user} auth={auth} />} />
+				{/* <Route path="/pong" element={<Pong user={user} auth={auth} />} /> */}
 			</Routes>
 		</SocketContext.Provider>
 	);
