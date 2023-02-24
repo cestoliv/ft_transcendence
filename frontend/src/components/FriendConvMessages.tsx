@@ -12,36 +12,26 @@ import { IChannel, IUser, IChannelMessage, IUserMessage } from '../interfaces';
 type FriendConvMessagesProps = {
 	user_me : IUser,
 	chan_id : number,
-    chanMessages : IUserMessage[];
+    allPrivateConvMessages : IUserMessage[];
 };
 
 export const FriendConvMessages = (props: FriendConvMessagesProps) => {
-    const socket = useContext(SocketContext);
-    // const [chanMessages, setChanMessages] = useState<IUserMessage[] | null>(null);
-
-    useEffect(() => {
-        console.log("FriendConvMessages useEffect");
-        // if (props.chan_id)
-        // {
-        //     socket.emit('users_getMessages', {
-        //         id: props.chan_id,
-        //         before: new Date().toISOString(),
-        //     },
-        //         (data: any) => {
-        //             setChanMessages(data);
-        //         }
-        //     );
-        // }
-	}, [props.chanMessages]);
 
 	return (
 		<div className='chat-messages-wrapper'>
-		{props.chanMessages && props.chanMessages.map((message, index) => (
-			<div key={index} className="display-message">
-				<div className='message-name-date'><p className='message-name'>{message?.sender.username}</p><p className='message-date'>{message?.sentAt.toString()}</p></div>
-				<p className='message'>{message?.message}</p>
-			</div>
-		))}
+
+            {props.allPrivateConvMessages && props.allPrivateConvMessages.filter(message => {
+                  if ((props.chan_id ===  message.receiverId && message.senderId === props.user_me.id) || (props.chan_id ===  message.senderId && message.receiverId === props.user_me.id))
+                    return true;
+                  return false
+                })
+                .map((message, index) => (
+                    <div key={index} className="display-message">
+                        <div className='message-name-date'><p className='message-name'>{message?.sender.username}</p><p className='message-date'>{message?.sentAt.toString()}</p></div>
+                        <p className='message'>{message?.message}</p>
+                    </div>
+                ))
+              }
 	</div>
 	);
 };
