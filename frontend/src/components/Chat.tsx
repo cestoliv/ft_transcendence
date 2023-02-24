@@ -42,7 +42,7 @@ export default function Chat(props: ChatProps) {
 				},
 				(data: any) => {
 					setMessage('');
-					props.messages.push(data);
+					props.messages.unshift(data);
 				},
 			);
 		}

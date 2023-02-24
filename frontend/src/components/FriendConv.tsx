@@ -12,6 +12,7 @@ import FriendConvMessages from './FriendConvMessages'
 type FriendConvProps = {
 	user_me : IUser,
 	activeConvId : number,
+	allPrivateConvMessages : IUserMessage[];
 };
 
 export default function FriendConv(props: FriendConvProps) {
@@ -21,7 +22,6 @@ export default function FriendConv(props: FriendConvProps) {
 	const [passWord, setPassWord] = useState<string>('');
 	const [message, setMessage] = useState<string>('');
 	const [talkTo, setTalkto] = useState<IUser>();
-	const [chanMessages, setChanMessages] = useState<IUserMessage[]>([]);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'password-input')
@@ -45,17 +45,15 @@ export default function FriendConv(props: FriendConvProps) {
 						alert(data.messages);
                     else
 					{
-						setChanMessages((prevMessages) => [data, ...prevMessages]);
+						props.allPrivateConvMessages.unshift(data);
 						setMessage('');
 					}
 				},
 			);
 		}
     };
-
 	useEffect(() => {
 		console.log("FriendConv useEffect");
-		console.log(props.activeConvId);
 		socket.emit(
             'users_get',
             {
@@ -68,16 +66,6 @@ export default function FriendConv(props: FriendConvProps) {
 					setTalkto(data);
             },
         );
-		{
-            socket.emit('users_getMessages', {
-                id: props.activeConvId,
-                before: new Date().toISOString(),
-            },
-                (data: any) => {
-                    setChanMessages(data);
-                }
-            );
-        }
 	}, [props.activeConvId]);
 
 	return (
@@ -85,7 +73,7 @@ export default function FriendConv(props: FriendConvProps) {
 			<div className="chat-nav" id='chat-nav'>
 				<span>{talkTo?.username}</span>
 			</div>
-			<FriendConvMessages user_me={props.user_me} chan_id={props.activeConvId} chanMessages={chanMessages}/>
+			<FriendConvMessages user_me={props.user_me} allPrivateConvMessages={props.allPrivateConvMessages} chan_id={props.activeConvId}/>
 			<form className="write-message" onSubmit={submitMessage}>
 					<input
 						value={message}

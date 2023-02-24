@@ -252,7 +252,7 @@ export default function Friends(props: FriendsProps) {
 	socket.on('channels_message', (data: any) => {
 		console.log('Socket channels_message:');
 		console.log(data);
-		setAllChanMessages((prevMessages) => [...prevMessages, data]);
+		setAllChanMessages((prevMessages) => [data, ...prevMessages]);
 	});
 
 	  useEffect(() => {
@@ -282,6 +282,33 @@ export default function Friends(props: FriendsProps) {
 		});
 	  }, []);
 
+	  	socket.off('users_message'); // Unbind previous event
+		socket.on('users_message', (data: any) => {
+			console.log('Socket users_message:');
+			console.log(data.message);
+			setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
+		});
+
+	  useEffect(() => {
+		console.log("AllPrivateConvMessages UseEffect");
+		// Récupérer la liste des channels joints
+		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
+		  // Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
+		  data.friends.forEach((friend: any) => {
+			// console.log(channel);
+			socket.emit('users_getMessages', { id: friend.id, before: new Date().toISOString() }, (messages: any) => {
+			  if (messages.message) {
+				alert(messages.errors);
+			  } else {
+				// Ajouter les messages du channel à "allChanMessages"
+				messages.forEach((message: any) => {
+					setAllPrivateConvMessages((prevMessages) => [...prevMessages, message]);
+				})
+			  }
+			});
+		  });
+		});
+	  }, []);
 
 	  useEffect(() => {
 		console.log("ChansList UseEffect");
@@ -416,7 +443,7 @@ export default function Friends(props: FriendsProps) {
 					<Chat user_me={user} activeConvId={activeConvId} messages={allChanMessages}/>
 				) : null}
 				{activeConvId != -1 && user && chanConv == 2 ? (
-					<FriendConv user_me={user} activeConvId={activeConvId}/>
+					<FriendConv user_me={user} allPrivateConvMessages={allPrivateConvMessages} activeConvId={activeConvId}/>
 				) : null}
 			</div>
 			<div className="infos-conv">

@@ -43,7 +43,7 @@ export const ChatMessages = (props: ChatMessagesProps) => {
                     return true;
                   return false
                 })
-                .reverse().map((message, index) => (
+                .map((message, index) => (
                     <div key={index} className="display-message">
                         <div className='message-name-date'><p className='message-name'>{message?.sender.username}</p><p className='message-date'>{message?.sentAt.toString()}</p></div>
                         <p className='message'>{message?.message}</p>
