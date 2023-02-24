@@ -103,8 +103,8 @@ function App() {
 				<Route path="/friends" element={<Friends user_me={user} messages={allChanMessages}/>} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
 				<Route path="/stats" element={<Stats user_me={user} />} />
+				<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 				<Route path="/searchGame" element={<SearchGame user_me={user}/>} />
-				<Route path="/profile/:userId" element={<OtherUserProfile />} />
 				<Route path="/404" element={<NoUserFound />} />
 				<Route path="/settings" element={<Settings user_me={user}/>} />
 				<Route path="/pong" element={<Pong user={user} auth={auth} />} />
