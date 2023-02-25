@@ -239,6 +239,7 @@ export class LocalGame {
 		this.startAt = new Date();
 		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
 		this.players.forEach((player) => {
+			console.log('Sending game start to', player.socket.user.username);
 			player.socket.emit('games_start', this.getInfo());
 		});
 		setTimeout(() => {
@@ -253,6 +254,15 @@ export class LocalGame {
 
 	async end(winner: User | null = null) {
 		if (this.state === 'ended') return;
+		if (this.state === 'waiting') {
+			this.state = 'ended';
+			this.winner = null;
+			this.players.forEach((player) => {
+				player.socket.leave(`game_${this.id}`);
+			});
+			this.gamesService.games.delete(this.id);
+			return;
+		}
 		this.state = 'ended';
 
 		this.winner = {
