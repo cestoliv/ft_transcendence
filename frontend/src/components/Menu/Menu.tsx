@@ -9,10 +9,18 @@ export default function Menu() {
 			<ul>
 				<li>
 					<NavLink
+						to="/pong"
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
+					>
+						<span>Pong</span>
+					</NavLink>
+				</li>
+				<li>
+					<NavLink
 						to="/home"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<span className="e-icons e-large e-home"></span>
+						<img src="https://github.com/cadgerfeast/pixel-icons/raw/master/png-128/home.png" />
 					</NavLink>
 				</li>
 				<li>
@@ -20,7 +28,7 @@ export default function Menu() {
 						to="/friends"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<span className="e-icons e-large e-people"></span>
+						<img src="https://cdn-icons-png.flaticon.com/512/465/465253.png" />
 					</NavLink>
 				</li>
 				<li>
@@ -28,7 +36,7 @@ export default function Menu() {
 						to="/searchGame"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<span className="e-icons e-large e-play"></span>
+						<img src="https://github.com/cadgerfeast/pixel-icons/raw/master/png-128/chevron-right.png" />
 					</NavLink>
 				</li>
 				<li>
@@ -36,7 +44,7 @@ export default function Menu() {
 						to="/stats"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<span className="e-icons e-large e-change-chart-type"></span>
+						<img src="https://cdn-icons-png.flaticon.com/512/465/465269.png" />
 					</NavLink>
 				</li>
 				<li>
@@ -44,15 +52,10 @@ export default function Menu() {
 						to="/settings"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<span className="e-icons e-large e-settings"></span>
-					</NavLink>
-				</li>
-				<li>
-					<NavLink
-						to="/pong"
-						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
-					>
-						<span>Pong</span>
+						<img
+							style={{ filter: 'invert(1)' }}
+							src="https://cdn-icons-png.flaticon.com/512/7734/7734280.png"
+						/>
 					</NavLink>
 				</li>
 			</ul>

@@ -107,6 +107,17 @@ export class GamesGateway extends BaseGateway {
 			.catch((err) => exceptionToObj(err));
 	}
 
+	@SubscribeMessage('games_quitMatchmaking')
+	async quitMatchmaking(
+		client: SocketWithUser,
+	): Promise<boolean | WSResponse> {
+		// Quit Matchmaking
+		return this.gamesService
+			.leaveMatchmaking(client) 
+			.then((res) => res)
+			.catch((err) => exceptionToObj(err));
+	}			
+
 	@SubscribeMessage('games_playerMove')
 	async move(
 		client: SocketWithUser,

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import './index.css';
+import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Socket } from 'socket.io-client';
@@ -16,11 +16,11 @@ declare global {
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-		<BrowserRouter>
-			<AuthProvider>
-				<App />
-			</AuthProvider>
-		</BrowserRouter>
+	<BrowserRouter>
+		<AuthProvider>
+			<App />
+		</AuthProvider>
+	</BrowserRouter>,
 );
 
 // If you want to start measuring performance in your app, pass a function
