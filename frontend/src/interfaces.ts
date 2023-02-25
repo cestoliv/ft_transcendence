@@ -1,3 +1,5 @@
+import { SetCookie, RemoveCookie } from './types';
+
 export interface IUser {
 	id: number;
 	id42: number;
@@ -6,20 +8,19 @@ export interface IUser {
 	wins: number;
 	loses: number;
 	scores: IScore[];
-	invitedFriends: IUserFriend[],
-	friendOf: IUserFriend[],
-	friends: IUser[],
+	invitedFriends: IUserFriend[];
+	friendOf: IUserFriend[];
+	friends: IUser[];
 }
 
-export interface IScore
-{
+export interface IScore {
 	me: number;
 	op: number;
 	op_name: string;
 }
 
 export interface IUserMessage {
-	id: number,
+	id: number;
 
 	senderId: number;
 	sender: IUser;
@@ -95,4 +96,16 @@ export interface IChannelMessage {
 	message: string;
 
 	sentAt: Date;
+}
+
+export interface ILogin {
+	fetchUser: () => Promise<void>;
+	setCookie: SetCookie;
+	removeCookie: RemoveCookie;
+}
+
+export interface IOtp {
+	fetchUser: () => Promise<void>;
+	setCookie: SetCookie;
+	removeCookie: RemoveCookie;
 }

@@ -32,6 +32,7 @@
 		"@mui/system": "^5.11.7",
 		"@socket.io/component-emitter": "^4.0.0",
 		"@syncfusion/ej2-react-buttons": "^20.4.48",
+		"antd": "^5.2.2",
 		"eslint-plugin-react": "^7.32.2",
 		"react": "^18.2.0",
 		"react-cookie": "^4.1.1",
@@ -41,6 +42,7 @@
 		"react-router-dom": "^6.7.0",
 		"react-scripts": "^5.0.1",
 		"reactjs-popup": "^2.0.5",
+		"sass": "^1.58.3",
 		"socket.io-client": "^4.5.4",
 		"typescript": "^4.9.4",
 		"universal-cookie": "^4.0.4",
@@ -52,9 +54,10 @@
 		"@types/react-dom": "^18.0.10",
 		"@typescript-eslint/eslint-plugin": "^5.49.0",
 		"@typescript-eslint/parser": "^5.49.0",
-		"eslint": "^8.32.0",
+		"eslint": "^8.34.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-config-react-app": "^7.0.1",
+		"eslint-plugin-only-warn": "^1.1.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.3"
 	}

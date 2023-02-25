@@ -1,12 +1,13 @@
-@import './login.css';
-@import './menu.css';
+@import './login.scss';
+@import './otp.scss';
+@import './menu.scss';
 @import './home.css';
 @import './friends.css';
 @import './infosconv.css';
 @import './chat.css';
 @import './friendsList.css';
 @import './chanList.css';
-@import './searchGame.css';
+@import './searchGame.scss';
 @import './stats.css';
 @import './settings.css';
 @import './pong.css';
@@ -17,7 +18,7 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 .background-modal {
-    background-color: #5B9279 !important;
+	background-color: #5b9279 !important;
 }
 
 /* .background-modal input {
@@ -25,9 +26,13 @@
 } */
 
 .pixel-font {
-    font-family: 'VT323', monospace !important;
+	font-family: 'VT323', monospace !important;
 }
 
 .buzz {
-    color: #8FCB9B;
+	color: #8fcb9b;
+}
+
+button {
+	cursor: pointer;
 }

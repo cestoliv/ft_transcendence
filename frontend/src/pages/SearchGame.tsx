@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext } from 'react';
+import { Button } from 'antd';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -18,6 +19,7 @@ import Modal from '@mui/material/Modal';
 import FriendsList from '../components/FriendsList';
 
 import { SocketContext } from '../context/socket';
+import { SearchSettings } from '../components/SearchGame/SearchSettings';
 
 const style = {
 	position: 'absolute' as const,
@@ -25,7 +27,7 @@ const style = {
 	left: '50%',
 	transform: 'translate(-50%, -50%)',
 	width: 400,
-	bgcolor: 'background.paper',
+	//bgcolor: 'background.paper',
 	border: '2px solid #000',
 	boxShadow: 24,
 	p: 4,
@@ -38,29 +40,23 @@ type FriendsProps = {
 export const SearchGame = (props: FriendsProps) => {
 	const socket = useContext(SocketContext);
 
+	// for friendlist component
+	const [chanList, setChanList] = useState<IChannel[]>([]);
+	const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
+	const[friends, setFriends] = useState<IUser[]>([]);
+
+	// Search Filter
+	const [mode, setMode] = useState('classic');
+	const [time, setTime] = useState('1');
+	const [points, setPoints] = useState('5');
+
 	const [redirect, setRedirect] = useState<boolean>(false);
 
 	const [user, setUser] = useState<IUser>();
 
-	const [mode, setMode] = React.useState('');
-	const [time, setTime] = React.useState('');
-	const [points, setPoints] = React.useState('');
-
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
-
-	const handleChangeMode = (event: SelectChangeEvent) => {
-		setMode(event.target.value as string);
-	};
-
-	const handleChangeTime = (event: SelectChangeEvent) => {
-		setTime(event.target.value as string);
-	};
-
-	const handleChangePoints = (event: SelectChangeEvent) => {
-		setPoints(event.target.value as string);
-	};
 
 	const activeConv = (event: any) => {
 		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
@@ -74,30 +70,123 @@ export const SearchGame = (props: FriendsProps) => {
 		setRedirect(true);
 	};
 
-	const renderRedirect = () => {
-		if (redirect) {
-			return <Navigate to="/pong" />;
-		}
+	const createGame = () => {
+		console.log('test');
+		socket.emit(
+			'games_create',
+			{
+				maxDuration: time,
+				maxScore: points,
+				mode: mode,
+				visibility: 'public',
+			},
+			(data: any) => {
+				console.log(data);
+			},
+		);
 	};
 
+	const AddFriend = (username : string) => {
+		socket.emit(
+			'users_inviteFriend',
+			{
+				username : username,
+			},
+			(data: any) => {
+				if (data.messages)
+					alert(data.messages);
+			},
+		);
+    };
+
+	const accept_friend_request = (inviter_id: number): void => {
+        socket.emit(
+            'users_acceptFriend',
+            {
+                id: inviter_id,
+            },
+            (data: any) => {
+                if (data.messages)
+						alert(data.messages);
+                else
+					setFriends((prevFriends) => [...prevFriends, data.inviter]);
+            },
+        );
+		const indexToUpdate = friendOf.findIndex(friend => (friend.inviterId === inviter_id && friend.inviteeId === user?.id) || (friend.inviterId === user?.id && friend.inviteeId === inviter_id));
+		if (indexToUpdate !== -1) {
+			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
+			const updatedFriend = { ...friendOf[indexToUpdate], accepted: true };
+		  
+			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
+			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour
+			const updatedFriendOf = [...friendOf];
+			updatedFriendOf[indexToUpdate] = updatedFriend;
+		  
+			// Mettre à jour la liste d'amis en attente d'être acceptés avec la nouvelle liste mise à jour
+			setFriendOf(updatedFriendOf);
+		  }
+    }
+
+	const removeFriend = (user_id : number): void => {
+		socket.emit(
+			'users_removeFriend',
+			{
+				id: user_id,
+			},
+			(data: any) => {
+				if (data.messages)
+					alert(data.messages);
+				else
+					setFriends(prevList => prevList.filter(user => user.id !== user_id));
+			},
+		);
+	}
+
 	useEffect(() => {
-		socket.emit('users_get',
-		{
-			id : props.user_me.id,
-		},
-		(data: any) => {
-			setUser(data);
+		socket.emit(
+			'users_get',
+			{
+				id: props.user_me.id,
+			},
+			(data: any) => {
+				setUser(data);
+			},
+		);
+	});
+
+	useEffect(() => {
+		console.log("ChansList UseEffect");
+		socket.emit('channels_listJoined', {}, (data: any) => {
+			setChanList(data);
 		});
-	},);
+	}, []);
+
+	useEffect(() => {
+		console.log("FriendsList useEffect");
+		socket.emit(
+            'users_get',
+            {
+                id: props.user_me.id,
+            },
+            (data: any) => {
+                if (data.messages)
+						alert(data.messages);
+                else
+				{
+					setFriendOf(data.friendOf);
+					setFriends(data.friends);
+				}
+            },
+        );
+	}, []);
 
 	return (
 		<div className="searchGame-wrapper">
-			{user && <FriendsList user_me={user} activeConv={activeConv} />}
+			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend} />}
 			<div className="searchRandomPlayer">
-				<button className="searchRandomPlayer-button" onClick={handleOpen}>
+				<button className="searchButton" onClick={createGame}>
 					Search a game
 				</button>
-				{renderRedirect()}
 				<Modal
 					open={open}
 					onClose={handleClose}
@@ -111,7 +200,8 @@ export const SearchGame = (props: FriendsProps) => {
 					</Box>
 				</Modal>
 			</div>
-			<div className="searchGame-settings">
+			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} />
+			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
@@ -164,7 +254,7 @@ export const SearchGame = (props: FriendsProps) => {
 						</FormControl>
 					</Box>
 				</div>
-			</div>
+			</div> */}
 		</div>
 	);
 };
