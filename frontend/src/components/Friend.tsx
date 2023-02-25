@@ -115,7 +115,7 @@ export const Friend = (props: FriendProps) => {
 							return false
 						})
 						.map((chan) => (
-							<PrivateChanJoined chan={chan} userToInviteId={props.user.id} />
+							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} />
 						))}
 				</Box>
 			</Modal>

@@ -18,7 +18,6 @@ import { SocketContext } from '../context/socket';
 
   type FriendsProps = {
 	user_me : IUser,
-	messages : IChannelMessage[],
 };
 
 export default function Friends(props: FriendsProps) {
@@ -65,6 +64,12 @@ export default function Friends(props: FriendsProps) {
 		if (event.target.name === 'join-chan-name') setJoinChanName(event.target.value);
 		if (event.target.name === 'join-chan-mdp') setJoinChanMdp(event.target.value);
 	};
+
+	useEffect(() => {
+		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
+			setUser(data);
+		  });
+	}, []);
 
 	const createChan = (event: any): void => {
 		event?.preventDefault();
@@ -186,6 +191,19 @@ export default function Friends(props: FriendsProps) {
 					setFriends((prevFriends) => [...prevFriends, data.inviter]);
             },
         );
+		const indexToUpdate = friendOf.findIndex(friend => (friend.inviterId === inviter_id && friend.inviteeId === user?.id) || (friend.inviterId === user?.id && friend.inviteeId === inviter_id));
+		if (indexToUpdate !== -1) {
+			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
+			const updatedFriend = { ...friendOf[indexToUpdate], accepted: true };
+		  
+			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
+			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour
+			const updatedFriendOf = [...friendOf];
+			updatedFriendOf[indexToUpdate] = updatedFriend;
+		  
+			// Mettre à jour la liste d'amis en attente d'être acceptés avec la nouvelle liste mise à jour
+			setFriendOf(updatedFriendOf);
+		  }
     }
 
 	const removeFriend = (user_id : number): void => {
@@ -246,7 +264,7 @@ export default function Friends(props: FriendsProps) {
 	});
 
 	  useEffect(() => {
-		console.log("Friends UseEffect");
+		console.log("channels_listJoined UseEffect");
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
 		  // Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
@@ -266,11 +284,7 @@ export default function Friends(props: FriendsProps) {
 			});
 		  });
 		});
-	  
-		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-		  setUser(data);
-		});
-	  }, []);
+	  }, [chanList]);
 
 	  	socket.off('users_message'); // Unbind previous event
 		socket.on('users_message', (data: any) => {
@@ -278,7 +292,6 @@ export default function Friends(props: FriendsProps) {
 			console.log(data.message);
 			setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
 		});
-
 	  useEffect(() => {
 		console.log("AllPrivateConvMessages UseEffect");
 		// Récupérer la liste des channels joints
@@ -298,7 +311,7 @@ export default function Friends(props: FriendsProps) {
 			});
 		  });
 		});
-	  }, []);
+	  }, [friends]);
 
 	  useEffect(() => {
 		console.log("ChansList UseEffect");

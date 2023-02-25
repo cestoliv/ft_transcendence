@@ -10,7 +10,7 @@ import Home from './pages/Home';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
 import OtherUserProfile from './pages/OtherUserProfile';
-import Pong from './pages/P5Pong';
+// import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
@@ -25,7 +25,6 @@ function App() {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
-	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	const fetchUser = async () => {
 		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
@@ -102,7 +101,7 @@ function App() {
 						<Route path="/profile/:userId" element={<OtherUserProfile />} />
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} />} />
-						<Route path="/pong" element={<Pong />} />
+						{/* <Route path="/pong" element={<Pong />} /> */}
 					</Route>
 				</Routes>
 			</SocketContext.Provider>
