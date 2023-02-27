@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext } from 'react';
+import { Button } from 'antd';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
@@ -18,6 +19,7 @@ import Modal from '@mui/material/Modal';
 import FriendsList from '../components/FriendsList';
 
 import { SocketContext } from '../context/socket';
+import { SearchSettings } from '../components/SearchGame/SearchSettings';
 
 const style = {
 	position: 'absolute' as const,
@@ -25,7 +27,7 @@ const style = {
 	left: '50%',
 	transform: 'translate(-50%, -50%)',
 	width: 400,
-	bgcolor: 'background.paper',
+	//bgcolor: 'background.paper',
 	border: '2px solid #000',
 	boxShadow: 24,
 	p: 4,
@@ -38,29 +40,18 @@ type FriendsProps = {
 export const SearchGame = (props: FriendsProps) => {
 	const socket = useContext(SocketContext);
 
+	// Search Filter
+	const [mode, setMode] = useState('classic');
+	const [time, setTime] = useState('1');
+	const [points, setPoints] = useState('5');
+
 	const [redirect, setRedirect] = useState<boolean>(false);
 
 	const [user, setUser] = useState<IUser>();
 
-	const [mode, setMode] = React.useState('');
-	const [time, setTime] = React.useState('');
-	const [points, setPoints] = React.useState('');
-
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
-
-	const handleChangeMode = (event: SelectChangeEvent) => {
-		setMode(event.target.value as string);
-	};
-
-	const handleChangeTime = (event: SelectChangeEvent) => {
-		setTime(event.target.value as string);
-	};
-
-	const handleChangePoints = (event: SelectChangeEvent) => {
-		setPoints(event.target.value as string);
-	};
 
 	const activeConv = (event: any) => {
 		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
@@ -74,30 +65,41 @@ export const SearchGame = (props: FriendsProps) => {
 		setRedirect(true);
 	};
 
-	const renderRedirect = () => {
-		if (redirect) {
-			return <Navigate to="/pong" />;
-		}
+	const createGame = () => {
+		console.log('test');
+		socket.emit(
+			'games_create',
+			{
+				maxDuration: time,
+				maxScore: points,
+				mode: mode,
+				visibility: 'public',
+			},
+			(data: any) => {
+				console.log(data);
+			},
+		);
 	};
 
 	useEffect(() => {
-		socket.emit('users_get',
-		{
-			id : props.user_me.id,
-		},
-		(data: any) => {
-			setUser(data);
-		});
-	},);
+		socket.emit(
+			'users_get',
+			{
+				id: props.user_me.id,
+			},
+			(data: any) => {
+				setUser(data);
+			},
+		);
+	});
 
 	return (
 		<div className="searchGame-wrapper">
 			{user && <FriendsList user_me={user} activeConv={activeConv} />}
 			<div className="searchRandomPlayer">
-				<button className="searchRandomPlayer-button" onClick={handleOpen}>
+				<button className="searchButton" onClick={createGame}>
 					Search a game
 				</button>
-				{renderRedirect()}
 				<Modal
 					open={open}
 					onClose={handleClose}
@@ -111,7 +113,8 @@ export const SearchGame = (props: FriendsProps) => {
 					</Box>
 				</Modal>
 			</div>
-			<div className="searchGame-settings">
+			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} />
+			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>
 						<FormControl fullWidth>
@@ -164,7 +167,7 @@ export const SearchGame = (props: FriendsProps) => {
 						</FormControl>
 					</Box>
 				</div>
-			</div>
+			</div> */}
 		</div>
 	);
 };

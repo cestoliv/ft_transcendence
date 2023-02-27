@@ -6,6 +6,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
+import { AuthProvider } from './context/AuthProvider';
 
 declare global {
 	interface Window {
@@ -16,7 +17,9 @@ declare global {
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
 		<BrowserRouter>
-			<App />
+			<AuthProvider>
+				<App />
+			</AuthProvider>
 		</BrowserRouter>
 );
 
