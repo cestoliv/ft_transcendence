@@ -68,6 +68,7 @@ services:
     volumes:
       # Lots of lines, but we don't want node_modules to be mounted
       - ./backend/src:/transcendence/src
+      - ./backend/uploads:/transcendence/uploads
       - ./backend/.eslintrc.js:/transcendence/.eslintrc.js
       - ./backend/nest-cli.json:/transcendence/nest-cli.json
       - ./backend/package-lock.json:/transcendence/package-lock.json

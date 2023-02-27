@@ -1,37 +1,16 @@
-import React, { ChangeEvent, useEffect, useContext } from 'react';
-import { Button } from 'antd';
+import React, { useEffect, useContext } from 'react';
+import { message } from 'antd';
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import Popup from 'reactjs-popup';
+import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import Box from '@mui/material/Box';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-
-import { IChannel, IUser, IUserFriend } from '../interfaces';
-
-import Modal from '@mui/material/Modal';
+import { IUser } from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
 
 import { SocketContext } from '../context/socket';
 import { SearchSettings } from '../components/SearchGame/SearchSettings';
-
-const style = {
-	position: 'absolute' as const,
-	top: '50%',
-	left: '50%',
-	transform: 'translate(-50%, -50%)',
-	width: 400,
-	//bgcolor: 'background.paper',
-	border: '2px solid #000',
-	boxShadow: 24,
-	p: 4,
-};
 
 type FriendsProps = {
 	user_me: IUser;
@@ -39,6 +18,7 @@ type FriendsProps = {
 
 export const SearchGame = (props: FriendsProps) => {
 	const socket = useContext(SocketContext);
+	const navigate = useNavigate();
 
 	// for friendlist component
 	const [chanList, setChanList] = useState<IChannel[]>([]);
@@ -50,13 +30,10 @@ export const SearchGame = (props: FriendsProps) => {
 	const [time, setTime] = useState('1');
 	const [points, setPoints] = useState('5');
 
-	const [redirect, setRedirect] = useState<boolean>(false);
+	const [gameInfo, setGameInfo] = useState<any>(null);
+	const [inMatchmaking, setInMatchmaking] = useState<boolean>(false);
 
 	const [user, setUser] = useState<IUser>();
-
-	const [open, setOpen] = React.useState(false);
-	const handleOpen = () => setOpen(true);
-	const handleClose = () => setOpen(false);
 
 	const activeConv = (event: any) => {
 		let active_elem = document.getElementsByClassName('active-conv-bg')[0];
@@ -66,25 +43,81 @@ export const SearchGame = (props: FriendsProps) => {
 		active_elem = element;
 	};
 
-	const handleRedirect = (event: any): void => {
-		setRedirect(true);
-	};
-
 	const createGame = () => {
-		console.log('test');
+		if (gameInfo) {
+			message.error('You are already in a game');
+			return;
+		}
 		socket.emit(
 			'games_create',
 			{
-				maxDuration: time,
-				maxScore: points,
+				maxDuration: parseInt(time),
+				maxScore: parseInt(points),
 				mode: mode,
 				visibility: 'public',
 			},
 			(data: any) => {
 				console.log(data);
+				if (data?.statusCode) {
+					message.error(data.message);
+					return;
+				}
+				message.success('Game created');
+				setGameInfo(data);
 			},
 		);
 	};
+
+	const joinMatchmaking = () => {
+		socket.emit('games_joinMatchmaking', (data: any) => {
+			console.log(data);
+			console.log(gameInfo);
+			setInMatchmaking(data);
+		});
+	};
+
+	const quitGame = () => {
+		console.log(gameInfo.id);
+		socket.emit(
+			'games_quit',
+			{
+				id: gameInfo.id,
+			},
+			(data: any) => {
+				console.log(data);
+				if (data?.statusCode) {
+					message.error(data.message);
+					return;
+				}
+				setGameInfo(null);
+			},
+		);
+	};
+
+	const quitMatchmaking = () => {
+		socket.emit('games_quitMatchmaking', (data: any) => {
+			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.message);
+				return;
+			}
+			setInMatchmaking(data);
+		});
+	};
+
+	const handleQuit = () => {
+		if (gameInfo) {
+			quitGame();
+		} else if (inMatchmaking) {
+			quitMatchmaking();
+		}
+	};
+
+	socket.off();
+	socket.on('games_start', (data: any) => {
+		navigate(`/pong/${data.id}`);
+		console.log(data);
+	});
 
 	const AddFriend = (username : string) => {
 		socket.emit(
@@ -152,7 +185,11 @@ export const SearchGame = (props: FriendsProps) => {
 				setUser(data);
 			},
 		);
-	});
+	}, []);
+
+	useEffect(() => {
+		console.log(mode);
+	}, [mode]);
 
 	useEffect(() => {
 		console.log("ChansList UseEffect");
@@ -184,10 +221,56 @@ export const SearchGame = (props: FriendsProps) => {
 		<div className="searchGame-wrapper">
 			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend} />}
 			<div className="searchRandomPlayer">
-				<button className="searchButton" onClick={createGame}>
-					Search a game
-				</button>
-				<Modal
+				{gameInfo || inMatchmaking ? (
+					<div className="loading-wrapper">
+						{/* <div className="blobs">
+							<div className="blob-center"></div>
+							<div className="blob"></div>
+							<div className="blob"></div>
+							<div className="blob"></div>
+							<div className="blob"></div>
+							<div className="blob"></div>
+							<div className="blob"></div>
+						</div>
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+							<defs>
+								<filter id="goo">
+									<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+									<feColorMatrix
+										in="blur"
+										mode="matrix"
+										values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+										result="goo"
+									/>
+									<feBlend in="SourceGraphic" in2="goo" />
+								</filter>
+							</defs>
+						</svg>
+						<p>Waiting for players ...</p> */}
+						<p className="loading">
+							<span>w</span>
+							<span>a</span>
+							<span>i</span>
+							<span>t</span>
+							<span>i</span>
+							<span>n</span>
+							<span>g</span>
+						</p>
+						<button className="quit nes-btn" onClick={handleQuit}>
+							Quit
+						</button>
+					</div>
+				) : (
+					<div className="button-wrapper">
+						<button className="searchButton nes-btn" onClick={createGame}>
+							Create a game
+						</button>
+						<button className="searchButton nes-btn" onClick={joinMatchmaking}>
+							Search a game
+						</button>
+					</div>
+				)}
+				{/* <Modal
 					open={open}
 					onClose={handleClose}
 					aria-labelledby="modal-modal-title"
@@ -198,7 +281,7 @@ export const SearchGame = (props: FriendsProps) => {
 							redirect
 						</button>
 					</Box>
-				</Modal>
+				</Modal> */}
 			</div>
 			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} />
 			{/* <div className="searchGame-settings">

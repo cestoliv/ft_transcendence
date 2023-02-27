@@ -41,6 +41,9 @@ export class AuthController {
 				httpOnly: false,
 				sameSite: 'strict',
 			});
+			return response.code(200).send({
+				bearer: bearer,
+			});
 			return response
 				.code(303)
 				.redirect(this.configService.get('FRONTEND_URL'));
@@ -75,6 +78,7 @@ export class AuthController {
 				id42: null,
 				username: username,
 				otp: null,
+				profile_picture_42: null,
 			});
 		} catch (error) {
 			// Catch duplicate username error
@@ -103,7 +107,7 @@ export class AuthController {
 	 * (No guards)
 	 */
 	@Get('/42oauth')
-	async oauthCallback(@Res() response, @Query('code') code: string) {
+	async oauthCallback(@Query('code') code: string, @Res() response) {
 		const bearer = await this.authService.oauthCallback(code);
 
 		response.setCookie('bearer', bearer, {
@@ -135,6 +139,7 @@ export class AuthController {
 	 */
 	@Post('/totp/:otp')
 	async validateTOTP(@Req() request, @Param('otp') otp: string) {
+		console.log(request)
 		return { bearer: await this.authService.validateTOTP(request, otp) };
 	}
 }

@@ -8,7 +8,7 @@
 *{
 	margin: 0;
 	padding: 0;
-	font-family: "PressStart2P", sans-serif;
+	/* font-family: "PressStart2P", sans-serif; */
 }
 
 
@@ -38,8 +38,8 @@
 .rank img{
 	grid-area: rank;
 	object-fit: contain;
-	max-width: 80%;
-	max-height: 80%;
+	width: 80%;
+	height: 80%;
 }
 
 .profil-wrapper{
@@ -49,6 +49,7 @@
 	background-size: 100% 100%;
 }
 .profil{
+	position: relative;
 	margin: 5% 0 5% 0;
 	height: 80%;
 	width: 100%;
@@ -81,9 +82,75 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
+	align-content: space-around;
 	height: 100%;
 	width: 100%;
 	font-size: 1rem;
+}
+
+.addfriend {
+	display: none;
+}
+
+.addfiendlabel {
+	position: absolute;
+	size: 100% 100%;
+	top: 10%;
+	bottom: 10%;
+	left: 10%;
+	height: 25px;
+	width: 25px;
+	background-image: url(../png/addfriend.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	border-radius: 50%;
+	display: inline-block;
+	align-items: center;
+	justify-content: space-around;
+	align-content: space-around;
+}
+
+.addfiendlabel:hover {
+	cursor: pointer;
+}
+
+#myCheckbox:checked + .addfiendlabel {
+	background-image: url(../png/removefriend.png);
+	background-repeat: no-repeat;
+	background-size: 100%;
+	border-radius: 50%;
+}
+
+.block {
+	display: none;
+}
+
+.blocklabel {
+	position: absolute;
+	top: 10%;
+	bottom: 90%;
+	left: 85%;
+	height: 25px;
+	width: 25px;
+	background-image: url(../png/block.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	border-radius: 50%;
+	display: inline-block;
+	align-items: center;
+	justify-content: space-around;
+	align-content: space-around;
+}
+
+.blocklabel:hover {
+	cursor: pointer;
+}
+
+#myblockCheckbox:checked + .blocklabel {
+	background-image: url(../png/unblock.png);
+	background-repeat: no-repeat;
+	background-size: 100%;
+	border-radius: 50%;
 }
 
 .stats-wrapper {
@@ -96,6 +163,7 @@
 	max-height: 100%;
 	display: flex;
 	justify-content: center;
+	align-content: space-around;
 	align-items: center;
 }
 
@@ -120,19 +188,22 @@
 .stats h1{
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-around;
 }
 
 .stats-item {
 	display: flex;
 	justify-content:space-around;
+	align-content: space-around;
 	align-items: center;
 	flex-direction: column;
 	border-top: 1px solid black;
 	width: 100%;
 	height: 100%;
 }
-
+.stats-item:hover {
+	background-color:grey
+}
 .historic-wrapper {
 	grid-area: hist;
 	background-image: url("../png/reverse_stat_background.png");
@@ -149,6 +220,7 @@
 .historic-wrapper .historic {
 	display: flex;
 	flex-direction: column;
+	align-content: space-around;
 	justify-content: space-around;
 	align-items:center;
 	height: 80%;
@@ -156,12 +228,14 @@
 }
 
 .historic h1 {
-	height: 5%;
+	flex-wrap: wrap;
+	height: 10%;
 	width: 100%;
 	display: flex;
 	align-items: center;
+	align-content: space-around;
 	justify-content: space-around;
-	border-bottom: 1px solid black;
+	padding-bottom: 2%;
 }
 
 .games{
@@ -172,8 +246,13 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-around;
+	align-content: space-around;
 	align-items: center;
 	height: 10%;
 	width: 100%;
-	border-bottom: 1px solid black;
+	border-top: 1px solid black;
+}
+
+.historic-item:hover{
+	background-color:grey
 }

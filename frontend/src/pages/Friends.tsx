@@ -292,7 +292,6 @@ export default function Friends(props: FriendsProps) {
 			console.log(data.message);
 			setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
 		});
-
 	  useEffect(() => {
 		console.log("AllPrivateConvMessages UseEffect");
 		// Récupérer la liste des channels joints

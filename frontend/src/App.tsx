@@ -10,7 +10,7 @@ import Home from './pages/Home';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
 import OtherUserProfile from './pages/OtherUserProfile';
-// import Pong from './pages/P5Pong';
+import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
@@ -18,6 +18,7 @@ import { IAuth, IUser } from './interfaces';
 import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
+import NotFound from './pages/NotFound';
 
 function App() {
 	const socket = useContext(SocketContext);
@@ -38,7 +39,7 @@ function App() {
 		if (response.ok) {
 			setUser(data);
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
-				setAuth({ bearer: cookies.bearer, otp_ok: true });
+				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
 
 			// Connect to socket
 			socket.connect();
@@ -77,16 +78,26 @@ function App() {
 		}
 	}, [auth]);
 
-	if (auth.bearer != null && userLoading) return <div>Loading...</div>;
+	if (auth.bearer != null && userLoading)
+		return (
+			<p className="loading">
+				<span>l</span>
+				<span>o</span>
+				<span>a</span>
+				<span>d</span>
+				<span>i</span>
+				<span>n</span>
+				<span>g</span>
+			</p>
+		);
 
 	return (
 		<ConfigProvider
 			theme={{
 				algorithm: theme.darkAlgorithm,
-			}}
-		>
+			}}>
 			<SocketContext.Provider value={socket}>
-				<Menu />
+				<Menu setCookie={setCookie} />
 				<Routes>
 					<Route
 						path="/login"
@@ -98,11 +109,12 @@ function App() {
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats" element={<Stats user_me={user} />} />
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
-						<Route path="/profile/:userId" element={<OtherUserProfile />} />
+						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} />} />
-						{/* <Route path="/pong" element={<Pong />} /> */}
+						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</SocketContext.Provider>
 		</ConfigProvider>
