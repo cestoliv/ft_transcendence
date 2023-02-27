@@ -112,9 +112,9 @@ export const ChansOther = (props: ChansOtherProps) => {
                 </Box>
             </Modal>
             {display() && (
-                <div className='chan-list-item'>
-                    <span>{props.chan?.name}</span>
-                    <span className="e-icons e-medium e-plus" onClick={handleJoinClick}></span>
+                <div className='chan-list-item modal-item pixel-font'>
+                    <span className='pixel-font'>{props.chan?.name}</span>
+                    <span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
                 </div>
             )}
 		</div>

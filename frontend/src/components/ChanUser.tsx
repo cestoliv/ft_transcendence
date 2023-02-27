@@ -20,6 +20,8 @@ type ChanUserProps = {
 export const ChanUser = (props: ChanUserProps) => {
     const socket = useContext(SocketContext);
 
+    const [admins, setAdmins] = useState<IUser[]>([]);
+
     const [openChanUserModal, setOpenChanUserModal] = React.useState(false);
 	const OpenChanUserModal = () => setOpenChanUserModal(true);
 	const CloseChanUserModal = () => setOpenChanUserModal(false);
@@ -54,7 +56,12 @@ export const ChanUser = (props: ChanUserProps) => {
                     if (data.messages)
 						alert(data.messages);
                     else
+                    {
+                        socket.emit('users_get', { id: props.member_id }, (data: any) => {
+                            props.chan_admins.push(data);
+                          });
                         CloseChanUserModal();
+                    }
                 },
             );
 		}
@@ -71,7 +78,13 @@ export const ChanUser = (props: ChanUserProps) => {
                     if (data.messages)
 						alert(data.messages);
                     else
+                    {
+                        const index = props.chan_admins.findIndex(admin => admin.id === props.member_id);
+                        if (index !== -1) {
+                            props.chan_admins.splice(index, 1);
+                        }
                         CloseChanUserModal();
+                    }
                 },
             );
 		}
@@ -126,23 +139,12 @@ export const ChanUser = (props: ChanUserProps) => {
         return false;
     }
 
-    // useEffect(() => {
-    //     console.log("hello 26 : ");
-    //     console.log(props.chan_id);
-    //     if (props.chan_admins)
-    //     {
-    //         {props.chan_admins.map(user => (
-    //             console.log(user.username)
-    //         ))};
-    //     }
-	// },);
-
 	return (
-		<div className="ChanUser-wrapper">
-            {amIAdmin() && (
+		<div className="ChanUser-wrapper list-item discord-background-three">
+            {amIAdmin() && props.user_me_id != props.member_id && (
                 <h3 onClick={OpenChanUserModal}>{props.username}</h3>
             )}
-            {!amIAdmin() && (
+            {!amIAdmin() || props.user_me_id === props.member_id  && (
                 <h3>{props.username}</h3>
             )}
             <Modal
@@ -153,14 +155,14 @@ export const ChanUser = (props: ChanUserProps) => {
             >
                 <Box className="chan-user-modal background-modal">
                     {!isAdmin() && (
-                        <button name='button-add-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Set Admin</button>
+                        <button name='button-add-admin' className='infosConv-modal-buttons pixel-font discord-blue' onClick={setAdmin}>Set Admin</button>
                     )}
                     {isAdmin() && (
-                        <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font' onClick={setAdmin}>Remove Admin</button>
+                        <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font discord-blue' onClick={setAdmin}>Remove Admin</button>
                     )}
-                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font' onClick={banUser}>Ban</button>
-                    <button>Kick</button>
-                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font' onClick={muteUser}>Mute</button>
+                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={banUser}>Ban</button>
+                    <button className='discord-blue'>Kick</button>
+                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={muteUser}>Mute</button>
                 </Box>
             </Modal>
 		</div>

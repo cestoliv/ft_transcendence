@@ -67,7 +67,7 @@ export const FriendsList = (props: PersonListProps) => {
 				))}
 			</div>
 			<div className="add-accept-friend">
-				<button className="en-attente-button" onClick={OpenListFriendRequest}>En attente</button>
+				<button className="en-attente-button discord-blue" onClick={OpenListFriendRequest}>En attente</button>
 				<Modal open={OpenLFriendRequest} onClose={CloseListFriendRequest} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
 					<Box className="friend-request-modal background-modal">
 						{props.friendOf?.filter(friend => {
