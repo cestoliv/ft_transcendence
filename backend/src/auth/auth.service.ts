@@ -55,7 +55,7 @@ export class AuthService {
 		} catch (error) {
 			throw new Error('Invalid token');
 		}
-		return this.usersService.findOne(payload.id, true);
+		return this.usersService.findOne(payload.id, { withTotp: true });
 	}
 
 	async oauthCallback(code: string): Promise<string> {
@@ -93,14 +93,26 @@ export class AuthService {
 		}
 
 		// Create user if not exists
-		let user = await this.usersService.findOneBy42Id(userData.id, true);
+		let user = await this.usersService.findOneBy42Id(userData.id, {
+			withTotp: true,
+			with42ProfilePicture: true,
+		});
 		if (!user) {
 			// TODO: If username already exists, add a number to it
 			user = await this.usersService.create({
 				id42: userData.id,
 				username: userData.login,
 				otp: null,
+				profile_picture_42: userData.image.link,
 			});
+			await this.usersService.set42ProfilePicture(user);
+		}
+
+		// Update 42 user profile picture if changed
+		if (user.profile_picture_42 !== userData.image.link) {
+			console.log('Updating profile picture');
+			user.profile_picture_42 = userData.image.link;
+			await this.usersService.save(user);
 		}
 
 		const totp_enabled = user.otp != null && user.otp != '' ? true : false;
@@ -115,7 +127,9 @@ export class AuthService {
 
 	async noOauthCallback(username: string): Promise<string> {
 		// Get user info
-		const user = await this.usersService.findOneByUsername(username, true);
+		const user = await this.usersService.findOneByUsername(username, {
+			withTotp: true,
+		});
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
@@ -150,7 +164,9 @@ export class AuthService {
 		}
 
 		// Get user and check TOTP
-		const user = await this.usersService.findOne(userPayload['id'], true);
+		const user = await this.usersService.findOne(userPayload['id'], {
+			withTotp: true,
+		});
 
 		const isTotpValid = authenticator.check(otp, user.otp);
 

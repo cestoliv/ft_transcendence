@@ -95,8 +95,7 @@ function App() {
 		<ConfigProvider
 			theme={{
 				algorithm: theme.darkAlgorithm,
-			}}
-		>
+			}}>
 			<SocketContext.Provider value={socket}>
 				<Menu setCookie={setCookie} />
 				<Routes>
@@ -110,7 +109,7 @@ function App() {
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats" element={<Stats user_me={user} />} />
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
-						<Route path="/profile/:userId" element={<OtherUserProfile />} />
+						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />

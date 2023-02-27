@@ -8,9 +8,11 @@ export interface IUser {
 	wins: number;
 	loses: number;
 	scores: IScore[];
+	picture: string;
 	invitedFriends: IUserFriend[];
 	friendOf: IUserFriend[];
 	friends: IUser[];
+	blocked: IUser[]
 }
 
 export interface IScore {

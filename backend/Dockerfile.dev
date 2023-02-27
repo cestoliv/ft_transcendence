@@ -1,7 +1,7 @@
 FROM node:alpine
 
 # Install dependencies
-#RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ pkgconfig pixman pixman-dev cairo-dev pango-dev
 RUN npm install -g @nestjs/cli
 
 # Copy streaks sources
