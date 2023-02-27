@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Modal } from 'antd';
 import Sketch from 'react-p5';
@@ -360,6 +360,13 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	// 		ball.y = data.y * (canvasSize.height / 256);
 	// 	}
 	// });
+
+	useEffect(() => {
+		socket.emit('games_info', { id: gameId }, (data: any) => {
+			console.log('games_info', data);
+			setGameInfo(data);
+		});
+	}, []);
 
 	socket.off('games_score');
 	socket.on('games_score', (data: any) => {

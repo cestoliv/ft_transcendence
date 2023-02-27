@@ -93,6 +93,12 @@ export class GamesService {
 		return game.invite(inviter.user, invitee);
 	}
 
+	async info(id: string) {
+		const game = this.games.get(id);
+		if (!game) throw new NotFoundException('Game not found');
+		return game.getInfo();
+	}
+	
 	async joinMatchmaking(user: SocketWithUser) {
 		this.queue.push(user);
 		return true;

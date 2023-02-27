@@ -17,10 +17,13 @@
 		font-size: 20px;
 	}
 	li {
-		a {
-			img {
-				height: 30px;
-			}
+		img {
+			height: 30px;
+		}
+	}
+	.logout {
+		img {
+			filter: invert(1);
 		}
 	}
 }
