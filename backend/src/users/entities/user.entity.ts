@@ -5,9 +5,13 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { BannedUser } from './user-banned.entity';
 import { UserFriend } from './user-friend.entity';
 import { MutedUser } from './user-muted.entity';
+
+// Get config service
+const configService = new ConfigService();
 
 @Entity()
 export class User {
@@ -60,7 +64,9 @@ export class User {
 
 	@AfterLoad()
 	getProfilePicture() {
-		this.profile_picture = `/api/v1/users/profile-picture/${this.id}`;
+		this.profile_picture = `${configService.get(
+			'API_URL',
+		)}/users/profile-picture/${this.id}`;
 	}
 
 	// 42 Profile picture URL

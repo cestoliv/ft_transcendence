@@ -17,6 +17,9 @@
 - **Users**
 	+ **Rest API**
 		* [Get informations about yourself](#get-my-profile)
+		* [Upload a profile picture](#upload-profile-picture)
+		* [Generate a profile picture](#generate-a-profile-picture)
+		* [Use the 42 intra profile picture](#use-42-intra-profile-picture)
 	+ **Websocket API**
 		* [Get a user](#get-user)
 		* [Update a user](#update-user)
@@ -133,7 +136,7 @@ If the given TOTP is correct, return a new bearer token that can be used in the 
 	{
 		statusCode: 401,
 		error: 'Unauthorized',
-		error: 'Invalid token'
+		messages: 'Invalid token'
 				| 'Invalid TOTP',
 	}
 	```
@@ -151,8 +154,80 @@ GET /api/v1/users/me
 	{
 		statusCode: 401,
 		error: 'Unauthorized',
-		error: string
+		messages: string
 				| 'TOTP not validated, go to /api/v1/auth/totp',
+	}
+	```
+
+## Upload profile picture
+
+```
+POST /api/v1/users/profile-picture
+```
+
+For frontend implementation, see: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#uploading_a_file
+
+### Return
+- The user profile ([User](#user))
+- `401 Unauthorized` as described before
+-   ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad Request',
+		messages: 'No file uploaded' |
+					'File type not supported' |
+					'Error while uploading the file',
+	}
+	```
+
+## Generate a profile picture
+
+```
+GET /api/v1/users/profile-picture/generate
+```
+
+### Return
+- The user profile ([User](#user))
+- `401 Unauthorized` as described before
+-   ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad Request',
+		messages: 'Error while uploading the file',
+	}
+	```
+
+## Use 42 intra profile picture
+
+```
+GET /api/v1/users/profile-picture/fetch42
+```
+
+### Return
+- The user profile ([User](#user))
+- `401 Unauthorized` as described before
+-   ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad Request',
+		messages: 'You need to be logged in with 42 to use this feature' |
+					'Error while uploading the file',
+	}
+	```
+
+## Get profile picture
+
+```
+GET /api/v1/users/profile-picture/:user_id
+```
+
+### Return
+- The profile picture image
+-   ```typescript
+	{
+		statusCode: 404,
+		error: 'Not found',
+		messages: 'No profile picture found',
 	}
 	```
 
@@ -1216,6 +1291,7 @@ Send game information 3 seconds before the start of the game.
 	invitedFriends: UserFriends[],
 	friendOf: UserFriend[],
 	friends: User[],
+	profile_picture: string,
 }
 ```
 

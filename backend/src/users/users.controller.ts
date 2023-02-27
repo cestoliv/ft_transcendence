@@ -44,11 +44,13 @@ export class UsersController {
 		const data = await request.file();
 		if (!data || !data.file)
 			throw new BadRequestException('No file uploaded');
-		let user = await this.usersService.findOne(request.user.id);
-		if (!user) throw new BadRequestException('User not found');
 
-		user = await this.usersService.updateProfilePicture(user, data.file);
-		return response.send(user);
+		return response.send(
+			await this.usersService.updateProfilePicture(
+				request.user,
+				data.file,
+			),
+		);
 	}
 
 	/*
@@ -58,10 +60,9 @@ export class UsersController {
 	@Get('/profile-picture/generate')
 	@UseGuards(JwtAuthGuard)
 	async generateProfilePicture(@Res() response, @Req() request) {
-		let user = await this.usersService.findOne(request.user.id);
-		if (!user) throw new BadRequestException('User not found');
-		user = await this.usersService.generateAvatar(user);
-		return response.send(user);
+		return response.send(
+			await this.usersService.generateAvatar(request.user),
+		);
 	}
 
 	/*
@@ -74,7 +75,7 @@ export class UsersController {
 		let user = await this.usersService.findOne(request.user.id, {
 			with42ProfilePicture: true,
 		});
-		if (!user) throw new BadRequestException('User not found');
+		if (!user) throw new NotFoundException('User not found');
 
 		user = await this.usersService.set42ProfilePicture(user);
 		return response.send(user);

@@ -367,7 +367,6 @@ export class UsersService {
 								),
 							);
 						else {
-							console.log(err);
 							reject(
 								new BadRequestException(
 									'Error while uploading the file',
