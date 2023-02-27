@@ -14,7 +14,6 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
 
 @Controller('/api/v1/auth')
 export class AuthController {
@@ -72,29 +71,9 @@ export class AuthController {
 			});
 		}
 
-		let user: User;
-		try {
-			user = await this.usersService.create({
-				id42: null,
-				username: username,
-				otp: null,
-				profile_picture_42: null,
-			});
-		} catch (error) {
-			// Catch duplicate username error
-			if (error.code === '23505') {
-				return response.code(409).send({
-					error: 'Username already taken',
-				});
-			}
-		}
-		const totp_settings = await this.usersService.enableTotp(user);
-
-		return response.code(201).send({
-			user: user,
-			secret: totp_settings.secret,
-			url: totp_settings.url,
-		});
+		return response
+			.code(201)
+			.send(await this.authService.register(username));
 	}
 
 	/*

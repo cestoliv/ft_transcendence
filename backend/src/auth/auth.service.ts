@@ -1,8 +1,10 @@
 import {
 	BadRequestException,
+	ConflictException,
 	forwardRef,
 	Inject,
 	Injectable,
+	InternalServerErrorException,
 	NotFoundException,
 	Req,
 	UnauthorizedException,
@@ -21,16 +23,6 @@ export class AuthService {
 		private readonly configService: ConfigService,
 		private readonly jwtService: JwtService,
 	) {}
-
-	// async validateToken(token: string): Promise<any> {
-	// 	const payload = this.jwtService.verify(token);
-	// 	if (!payload) return false;
-
-	// 	const user = await this.usersService.findOne(payload.id, true);
-	// 	if (!user) return false;
-
-	// 	return user;
-	// }
 
 	async signToken(data: {
 		totp_enabled: boolean;
@@ -75,7 +67,6 @@ export class AuthService {
 
 		const data = await res.json();
 		if (!res.ok || !data.access_token || !data.refresh_token) {
-			// TODO: Handle error
 			throw new BadRequestException(data);
 		}
 
@@ -88,7 +79,6 @@ export class AuthService {
 
 		const userData = await userRes.json();
 		if (!userRes.ok || !userData) {
-			// TODO: Handle error
 			throw new BadRequestException(userData);
 		}
 
@@ -98,14 +88,22 @@ export class AuthService {
 			with42ProfilePicture: true,
 		});
 		if (!user) {
-			// TODO: If username already exists, add a number to it
+			// Find a unique username
+			let newUsername = userData.login;
+			let suffix = 1;
+			while (await this.usersService.findOneByUsername(newUsername)) {
+				newUsername = `${userData.login}${suffix}`;
+				suffix++;
+			}
 			user = await this.usersService.create({
 				id42: userData.id,
-				username: userData.login,
+				username: newUsername,
 				otp: null,
 				profile_picture_42: userData.image.link,
 			});
-			await this.usersService.set42ProfilePicture(user);
+			await this.usersService.set42ProfilePicture(user).catch(() => {
+				// Ignore error
+			});
 		}
 
 		// Update 42 user profile picture if changed
@@ -181,5 +179,40 @@ export class AuthService {
 			totp_validated: true,
 			user,
 		});
+	}
+
+	async register(username: string): Promise<{
+		user: User;
+		secret: string;
+		url: string;
+	}> {
+		let user: User;
+		try {
+			user = await this.usersService.create({
+				id42: null,
+				username: username,
+				otp: null,
+				profile_picture_42: null,
+			});
+		} catch (error) {
+			// Catch duplicate username error
+			if (error.code === '23505')
+				throw new ConflictException('Username already taken');
+			else
+				throw new InternalServerErrorException(
+					'An error occured while creating user',
+				);
+		}
+		user = await this.usersService.generateAvatar(user).catch(() => {
+			// Ignore error
+			return user;
+		});
+		const totp_settings = await this.usersService.enableTotp(user);
+
+		return {
+			user: user,
+			secret: totp_settings.secret,
+			url: totp_settings.url,
+		};
 	}
 }
