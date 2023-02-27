@@ -48,6 +48,7 @@ export class UsersService {
 		user.id42 = createUserDto.id42;
 		user.username = createUserDto.username;
 		user.otp = createUserDto.otp;
+		user.profile_picture_42 = createUserDto.profile_picture_42;
 
 		return this.usersRepository.save(user);
 	}

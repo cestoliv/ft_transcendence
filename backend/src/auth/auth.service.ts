@@ -22,16 +22,6 @@ export class AuthService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	// async validateToken(token: string): Promise<any> {
-	// 	const payload = this.jwtService.verify(token);
-	// 	if (!payload) return false;
-
-	// 	const user = await this.usersService.findOne(payload.id, true);
-	// 	if (!user) return false;
-
-	// 	return user;
-	// }
-
 	async signToken(data: {
 		totp_enabled: boolean;
 		totp_validated: boolean;
@@ -75,7 +65,6 @@ export class AuthService {
 
 		const data = await res.json();
 		if (!res.ok || !data.access_token || !data.refresh_token) {
-			// TODO: Handle error
 			throw new BadRequestException(data);
 		}
 
@@ -88,7 +77,6 @@ export class AuthService {
 
 		const userData = await userRes.json();
 		if (!userRes.ok || !userData) {
-			// TODO: Handle error
 			throw new BadRequestException(userData);
 		}
 
@@ -98,10 +86,16 @@ export class AuthService {
 			with42ProfilePicture: true,
 		});
 		if (!user) {
-			// TODO: If username already exists, add a number to it
+			// Find a unique username
+			let newUsername = userData.login;
+			let suffix = 1;
+			while (await this.usersService.findOneByUsername(newUsername)) {
+				newUsername = `${userData.login}${suffix}`;
+				suffix++;
+			}
 			user = await this.usersService.create({
 				id42: userData.id,
-				username: userData.login,
+				username: newUsername,
 				otp: null,
 				profile_picture_42: userData.image.link,
 			});
