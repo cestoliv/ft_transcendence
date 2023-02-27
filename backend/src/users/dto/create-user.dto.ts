@@ -19,4 +19,8 @@ export class CreateUserDto {
 	@IsString()
 	@IsOptional()
 	otp: string;
+
+	@IsString()
+	@IsOptional()
+	profile_picture_42: string;
 }

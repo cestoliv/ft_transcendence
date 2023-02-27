@@ -5,13 +5,27 @@ import {
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import fastifyCookie from '@fastify/cookie';
+import fmp from '@fastify/multipart';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
+	const fastifyAdapter = new FastifyAdapter();
+	// Enable Multipart
+	fastifyAdapter.register(fmp, {
+		limits: {
+			fieldNameSize: 100, // Max field name size in bytes
+			fieldSize: 1000000, // Max field value size in bytes
+			fields: 10, // Max number of non-file fields
+			fileSize: 10000000, // For multipart forms, the max file size
+			files: 1, // Max number of file fields
+			headerPairs: 2000, // Max number of header key=>value pairs
+		},
+	});
+
 	const app = await NestFactory.create<NestFastifyApplication>(
 		AppModule,
-		new FastifyAdapter(),
+		fastifyAdapter,
 	);
 	const config = app.get<ConfigService>(ConfigService);
 

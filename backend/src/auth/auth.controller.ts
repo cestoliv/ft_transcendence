@@ -75,6 +75,7 @@ export class AuthController {
 				id42: null,
 				username: username,
 				otp: null,
+				profile_picture_42: null,
 			});
 		} catch (error) {
 			// Catch duplicate username error
@@ -103,7 +104,7 @@ export class AuthController {
 	 * (No guards)
 	 */
 	@Get('/42oauth')
-	async oauthCallback(@Res() response, @Query('code') code: string) {
+	async oauthCallback(@Query('code') code: string, @Res() response) {
 		const bearer = await this.authService.oauthCallback(code);
 
 		response.setCookie('bearer', bearer, {
