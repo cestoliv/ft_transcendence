@@ -74,10 +74,10 @@ export const Friend = (props: FriendProps) => {
 		<div
 			data-id={props.user.id}
 			data-conv-type="friend-conv"
-			className="wrapper-active-conv"
+			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<Link to={`/profile/${props.user.id}`}>{props.user.username}</Link>
+			<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
 			<div className="friendsList-settings">
 				{/* {props.states === 'connected' && (
 					<span className="e-icons e-medium e-play"></span>
@@ -85,7 +85,7 @@ export const Friend = (props: FriendProps) => {
 				{props.states === 'ingame' && (
 					<span className="e-icons e-medium e-radio-button"></span>
 				)} */}
-				<span className="e-icons e-medium e-menu" onClick={OpenFriendActionModal}></span>
+				<span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span>
 				<Modal
 					open={openFActionModal}
 					onClose={CloseFriendActionModal}
@@ -93,12 +93,12 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button>Inviter à jouer</button>
-						<button>Regarder la partie</button>
-						<button onClick={OpenChanListModal}>Inviter channel</button>
-						<button onClick={muteFriend}>Mute</button>
-						<button onClick={banFriend}>Ban</button>
-						<button onClick={removeFriendClick}>Suprrimer</button>
+						<button className='discord-blue'>Inviter à jouer</button>
+						<button className='discord-blue'>Regarder la partie</button>
+						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
+						<button className='discord-blue' onClick={muteFriend}>Mute</button>
+						<button className='discord-blue' onClick={banFriend}>Ban</button>
+						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
             </Box>
           </Modal>
 			</div>

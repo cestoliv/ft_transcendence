@@ -33,9 +33,9 @@ export default function InfosConv(props: InfosConvProps) {
 	}, [props.activeConvId]);
 
 	return (
-		<div className="i-conv-wrapper">
+		<div className="i-conv-wrapper discord-background-three">
 			{channel && (
-				<div className="chan_user_wrapper">
+				<div className="chan_user_wrapper discord-background-three">
 					{channel.members.map(member => (
 						<ChanUser key={member.id} username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins} user_me_id={props.user_me.id}/>
 					))}

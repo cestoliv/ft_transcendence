@@ -69,9 +69,9 @@ export default function FriendConv(props: FriendConvProps) {
 	}, [props.activeConvId]);
 
 	return (
-		<div className="chat-wrapper">
+		<div className="chat-wrapper discord-black-three">
 			<div className="chat-nav" id='chat-nav'>
-				<span>{talkTo?.username}</span>
+				<span className='pixel-font'>{talkTo?.username}</span>
 			</div>
 			<FriendConvMessages user_me={props.user_me} allPrivateConvMessages={props.allPrivateConvMessages} chan_id={props.activeConvId}/>
 			<form className="write-message" onSubmit={submitMessage}>

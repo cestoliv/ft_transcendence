@@ -36,8 +36,8 @@ export const ChansBan = (props: ChansBanProps) => {
 	return (
 		<div className="ChansBan-item-wrapper">			
 				{isBan() && (
-					<div className='chan-list-item'>
-                        <span>{props.chan?.name}</span>
+					<div className='chan-list-item modal-item'>
+                        <span className='pixel-font'>{props.chan?.name}</span>
                     </div>
 				)}
 		</div>
