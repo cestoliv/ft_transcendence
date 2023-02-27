@@ -8,39 +8,31 @@ import { IChannel, IUser, IUserFriend, IChannelMessage } from '../interfaces';
 type ChanProps = {
 	chan_name: string;
 	chan_id: string;
-	chanList: IChannel[];
+    chanList : IChannel[],
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
-	leaveChan: (chan_id: number) => void;
+    leaveChan: (chan_id: number) => void;
 };
 
 export const Chan = (props: ChanProps) => {
-	const [chanId, setchanId] = useState<number>(1);
+    let [chanId, setchanId] = useState<number>(1);
 
-	const handleLeaveClick = () => {
-		props.leaveChan(parseInt(props.chan_id)); // ici, nous supposons que l'ID du canal est 'myChannelId'
-	};
+    const handleLeaveClick = () => {
+        props.leaveChan(parseInt(props.chan_id)); // ici, nous supposons que l'ID du canal est 'myChannelId'
+    };
 
-	useEffect(() => {
-		let x;
+    useEffect(() => {
+        let x;
 
-		const idchan = props.chan_id;
-		x = +idchan;
-		setchanId(x);
+        let idchan = props.chan_id;
+        x = +idchan;
+        setchanId(x);
 	}, []);
 
 	return (
-		<div
-			id={props.chan_id}
-			data-id={props.chan_id}
-			data-conv-type="chan-conv"
-			className="wrapper-active-conv"
-			onClick={props.activeConv}
-		>
-			<span className="wrapper-active-conv-span" onClick={props.activeConv}>
-				{props.chan_name}
-			</span>
-			<span className="e-icons e-medium e-close" onClick={handleLeaveClick}></span>
-		</div>
+        <div id={props.chan_id} data-id={props.chan_id} data-conv-type='chan-conv' className="wrapper-active-conv list-item" onClick={props.activeConv}>
+            <span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.chan_name}</span>
+            <span className="e-icons e-medium e-close modal-e-close" onClick={handleLeaveClick}></span>
+        </div>
 	);
 };
 

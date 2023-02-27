@@ -221,7 +221,7 @@ export default function Friends(props: FriendsProps) {
 		let newId;
 		let element;
 
-		if (event.target.classList != 'wrapper-active-conv' && event.target.classList != 'wrapper-active-conv-span')
+		if (event.target.classList != 'wrapper-active-conv list-item' && event.target.classList != 'wrapper-active-conv-span')
 			return;
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
@@ -394,7 +394,7 @@ export default function Friends(props: FriendsProps) {
 							<form className="create-channel-form">
 								<label>
 									<input
-										className="pixel-font"
+										className='pixel-font modal-item'
 										type="text"
 										name="create-chan-name"
 										placeholder="Name"
@@ -407,14 +407,14 @@ export default function Friends(props: FriendsProps) {
 										type="text"
 										name="create-chan-mdp"
 										placeholder="Mot de passe"
-										className="mdp-channel-form-label pixel-font"
+										className="mdp-channel-form-label pixel-font modal-item"
 										onChange={handleChange}
 									/>
 								</label>
 								<button
 									name="button-create-chan"
 									type="submit"
-									className="pixel-font"
+									className="pixel-font discord-blue"
 									onClick={createChan}
 								>
 									Create
@@ -432,7 +432,7 @@ export default function Friends(props: FriendsProps) {
 							<form className="join-channel-form">
 								<label>
 									<input
-										className="pixel-font"
+										className='pixel-font modal-item'
 										type="text"
 										name="join-chan-name"
 										placeholder="Code"
@@ -442,7 +442,7 @@ export default function Friends(props: FriendsProps) {
 								</label>
 								<label>
 									<input
-										className="pixel-font"
+										className='pixel-font modal-item'
 										type="text"
 										name="join-chan-mdp"
 										placeholder="Mot de passe"
@@ -453,7 +453,7 @@ export default function Friends(props: FriendsProps) {
 								<button
 									name="button-join-chan"
 									type="submit"
-									className="pixe-font"
+									className="pixel-font discord-blue"
 									onClick={createChan}
 								>
 									Join
@@ -463,19 +463,8 @@ export default function Friends(props: FriendsProps) {
 					</Modal>
 				</div>
 			</div>
-			{user && (
-				<FriendsList
-					user_me={user}
-					chanList={chanList}
-					friends={friends}
-					friendOf={friendOf}
-					activeConv={activeConv}
-					AddFriend={AddFriend}
-					accept_friend_request={accept_friend_request}
-					removeFriend={removeFriend}
-				/>
-			)}
-			<div className="chat">
+			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend}/>}
+			<div className="chat discord-black-three">
 				{activeConvId != -1 && user && chanConv == 1 ? (
 					<Chat user_me={user} activeConvId={activeConvId} messages={allChanMessages} />
 				) : null}
@@ -487,7 +476,7 @@ export default function Friends(props: FriendsProps) {
 					/>
 				) : null}
 			</div>
-			<div className="infos-conv">
+			<div className="infos-conv discord-black-three">
 				{activeConvId != -1 && user && chanConv == 1 ? (
 					<InfosConv user_me={user} activeConvId={activeConvId} />
 				) : null}

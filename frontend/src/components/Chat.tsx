@@ -122,12 +122,12 @@ export default function Chat(props: ChatProps) {
 	}, [props.activeConvId]);
 
 	return (
-		<div className="chat-wrapper">
+		<div className="chat-wrapper discord-black-three">
 			<div className="chat-nav" id="chat-nav">
-				<span>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
+				<span className='pixel-font'>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
 				{isOwner() && (
 					<div className="chat-nav-right">
-						<div className="wrapper-settings hidden">
+						<div className="wrapper-settings hidden pixel-font">
 							<Checkbox
 								handleChange={isChecked}
 								isChecked={
@@ -138,12 +138,12 @@ export default function Chat(props: ChatProps) {
 								label="Private"
 							/>
 							<form className="mpd-form" onSubmit={addPassWord}>
-								<label htmlFor="mdp" id="mdp-label">
+								<label htmlFor="mdp" id="mdp-label" className='pixel-font'>
 									mdp :
 								</label>
 								<input
-									className="change-password-input"
-									name="password-input"
+									className='change-password-input pixel-font'
+									name='password-input'
 									type="text"
 									id="mdp"
 									value={passWord}
