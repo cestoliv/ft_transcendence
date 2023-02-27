@@ -1,8 +1,10 @@
 import {
 	BadRequestException,
+	ConflictException,
 	forwardRef,
 	Inject,
 	Injectable,
+	InternalServerErrorException,
 	NotFoundException,
 	Req,
 	UnauthorizedException,
@@ -99,7 +101,9 @@ export class AuthService {
 				otp: null,
 				profile_picture_42: userData.image.link,
 			});
-			await this.usersService.set42ProfilePicture(user);
+			await this.usersService.set42ProfilePicture(user).catch(() => {
+				// Ignore error
+			});
 		}
 
 		// Update 42 user profile picture if changed
@@ -175,5 +179,40 @@ export class AuthService {
 			totp_validated: true,
 			user,
 		});
+	}
+
+	async register(username: string): Promise<{
+		user: User;
+		secret: string;
+		url: string;
+	}> {
+		let user: User;
+		try {
+			user = await this.usersService.create({
+				id42: null,
+				username: username,
+				otp: null,
+				profile_picture_42: null,
+			});
+		} catch (error) {
+			// Catch duplicate username error
+			if (error.code === '23505')
+				throw new ConflictException('Username already taken');
+			else
+				throw new InternalServerErrorException(
+					'An error occured while creating user',
+				);
+		}
+		user = await this.usersService.generateAvatar(user).catch(() => {
+			// Ignore error
+			return user;
+		});
+		const totp_settings = await this.usersService.enableTotp(user);
+
+		return {
+			user: user,
+			secret: totp_settings.secret,
+			url: totp_settings.url,
+		};
 	}
 }
