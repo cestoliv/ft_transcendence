@@ -12,10 +12,10 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
 type FriendProps = {
-	user: IUser,
-	chanList : IChannel[],
+	user: IUser;
+	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
-	removeFriend : (user_id : number) => void;
+	removeFriend: (user_id: number) => void;
 };
 
 export const Friend = (props: FriendProps) => {
@@ -33,35 +33,33 @@ export const Friend = (props: FriendProps) => {
 
 	const removeFriendClick = (event: any): void => {
 		props.removeFriend(props.user.id);
-	}
+	};
 
 	const muteFriend = (event: any): void => {
 		socket.emit(
 			'users_mute',
 			{
 				id: props.user.id,
-				until : new Date().toISOString(),
+				until: new Date().toISOString(),
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-	}
+	};
 
 	const banFriend = (event: any): void => {
 		socket.emit(
 			'users_ban',
 			{
 				id: props.user.id,
-				until : new Date().toISOString(),
+				until: new Date().toISOString(),
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-	}
+	};
 
 	// useEffect(() => {
 	// 	console.log("Friend useEffect");
@@ -99,20 +97,20 @@ export const Friend = (props: FriendProps) => {
 						<button onClick={muteFriend}>Mute</button>
 						<button onClick={banFriend}>Ban</button>
 						<button onClick={removeFriendClick}>Suprrimer</button>
-            </Box>
-          </Modal>
+					</Box>
+				</Modal>
 			</div>
 			<Modal
-                open={openChanListModal}
-                onClose={CloseChanListModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box className="chan-user-modal">
-					{props.chanList?.filter(chan => {
-							if (chan.visibility === 'private')
-								return true;
-							return false
+				open={openChanListModal}
+				onClose={CloseChanListModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="chan-user-modal">
+					{props.chanList
+						?.filter((chan) => {
+							if (chan.visibility === 'private') return true;
+							return false;
 						})
 						.map((chan) => (
 							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} />

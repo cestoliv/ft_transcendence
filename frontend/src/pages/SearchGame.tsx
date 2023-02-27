@@ -22,8 +22,8 @@ export const SearchGame = (props: FriendsProps) => {
 
 	// for friendlist component
 	const [chanList, setChanList] = useState<IChannel[]>([]);
-	const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
-	const[friends, setFriends] = useState<IUser[]>([]);
+	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
+	const [friends, setFriends] = useState<IUser[]>([]);
 
 	// Search Filter
 	const [mode, setMode] = useState('classic');
@@ -119,61 +119,63 @@ export const SearchGame = (props: FriendsProps) => {
 		console.log(data);
 	});
 
-	const AddFriend = (username : string) => {
+	const AddFriend = (username: string) => {
 		socket.emit(
 			'users_inviteFriend',
 			{
-				username : username,
+				username: username,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-    };
+	};
 
 	const accept_friend_request = (inviter_id: number): void => {
-        socket.emit(
-            'users_acceptFriend',
-            {
-                id: inviter_id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-					setFriends((prevFriends) => [...prevFriends, data.inviter]);
-            },
-        );
-		const indexToUpdate = friendOf.findIndex(friend => (friend.inviterId === inviter_id && friend.inviteeId === user?.id) || (friend.inviterId === user?.id && friend.inviteeId === inviter_id));
+		socket.emit(
+			'users_acceptFriend',
+			{
+				id: inviter_id,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
+			},
+		);
+		const indexToUpdate = friendOf.findIndex(
+			(friend) =>
+				(friend.inviterId === inviter_id && friend.inviteeId === user?.id) ||
+				(friend.inviterId === user?.id && friend.inviteeId === inviter_id),
+		);
 		if (indexToUpdate !== -1) {
 			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
-			const updatedFriend = { ...friendOf[indexToUpdate], accepted: true };
-		  
+			const updatedFriend = {
+				...friendOf[indexToUpdate],
+				accepted: true,
+			};
+
 			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
 			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour
 			const updatedFriendOf = [...friendOf];
 			updatedFriendOf[indexToUpdate] = updatedFriend;
-		  
+
 			// Mettre à jour la liste d'amis en attente d'être acceptés avec la nouvelle liste mise à jour
 			setFriendOf(updatedFriendOf);
-		  }
-    }
+		}
+	};
 
-	const removeFriend = (user_id : number): void => {
+	const removeFriend = (user_id: number): void => {
 		socket.emit(
 			'users_removeFriend',
 			{
 				id: user_id,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
-				else
-					setFriends(prevList => prevList.filter(user => user.id !== user_id));
+				if (data.messages) alert(data.messages);
+				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
 			},
 		);
-	}
+	};
 
 	useEffect(() => {
 		socket.emit(
@@ -192,34 +194,43 @@ export const SearchGame = (props: FriendsProps) => {
 	}, [mode]);
 
 	useEffect(() => {
-		console.log("ChansList UseEffect");
+		console.log('ChansList UseEffect');
 		socket.emit('channels_listJoined', {}, (data: any) => {
 			setChanList(data);
 		});
 	}, []);
 
 	useEffect(() => {
-		console.log("FriendsList useEffect");
+		console.log('FriendsList useEffect');
 		socket.emit(
-            'users_get',
-            {
-                id: props.user_me.id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-				{
+			'users_get',
+			{
+				id: props.user_me.id,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else {
 					setFriendOf(data.friendOf);
 					setFriends(data.friends);
 				}
-            },
-        );
+			},
+		);
 	}, []);
 
 	return (
 		<div className="searchGame-wrapper">
-			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend} />}
+			{user && (
+				<FriendsList
+					user_me={user}
+					chanList={chanList}
+					friends={friends}
+					friendOf={friendOf}
+					activeConv={activeConv}
+					AddFriend={AddFriend}
+					accept_friend_request={accept_friend_request}
+					removeFriend={removeFriend}
+				/>
+			)}
 			<div className="searchRandomPlayer">
 				{gameInfo || inMatchmaking ? (
 					<div className="loading-wrapper">

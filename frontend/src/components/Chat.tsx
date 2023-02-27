@@ -10,9 +10,9 @@ import { IChannel, IUser, IChannelMessage } from '../interfaces';
 import ChatMessages from './ChatMessages';
 
 type ChatProps = {
-	user_me : IUser,
-	activeConvId : number,
-	messages : IChannelMessage[],
+	user_me: IUser;
+	activeConvId: number;
+	messages: IChannelMessage[];
 };
 
 export default function Chat(props: ChatProps) {
@@ -117,7 +117,7 @@ export default function Chat(props: ChatProps) {
 	};
 
 	useEffect(() => {
-		console.log("Chat useEffect");
+		console.log('Chat useEffect');
 		fetchData();
 	}, [props.activeConvId]);
 
@@ -142,8 +142,8 @@ export default function Chat(props: ChatProps) {
 									mdp :
 								</label>
 								<input
-									className='change-password-input'
-									name='password-input'
+									className="change-password-input"
+									name="password-input"
 									type="text"
 									id="mdp"
 									value={passWord}
@@ -155,7 +155,7 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages}/>
+			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages} />
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
 					value={message}

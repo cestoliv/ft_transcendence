@@ -20,7 +20,7 @@ export default function InfosConv(props: InfosConvProps) {
 	const [channel, setChannel] = useState<IChannel | null>(null);
 
 	useEffect(() => {
-		console.log("InfosConv useEffect");
+		console.log('InfosConv useEffect');
 		socket.emit(
 			'channels_get',
 			{
@@ -36,8 +36,15 @@ export default function InfosConv(props: InfosConvProps) {
 		<div className="i-conv-wrapper">
 			{channel && (
 				<div className="chan_user_wrapper">
-					{channel.members.map(member => (
-						<ChanUser key={member.id} username={member.username} member_id={member.id} chan_id={channel.id} chan_admins={channel.admins} user_me_id={props.user_me.id}/>
+					{channel.members.map((member) => (
+						<ChanUser
+							key={member.id}
+							username={member.username}
+							member_id={member.id}
+							chan_id={channel.id}
+							chan_admins={channel.admins}
+							user_me_id={props.user_me.id}
+						/>
 					))}
 				</div>
 			)}

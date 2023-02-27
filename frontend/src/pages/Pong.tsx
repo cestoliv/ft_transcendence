@@ -168,13 +168,13 @@ const Pong: React.FC = () => {
 		let animationId: any;
 
 		const gameLoop = () => {
-		  // ...code pour mettre à jour la position de la balle...
-		  if (rightScore == 2 || leftScore == 2) {
-			setGameEnd(true);
-			setOpen(true);
-			return () => {
-				window.cancelAnimationFrame(animationId);
-			  };
+			// ...code pour mettre à jour la position de la balle...
+			if (rightScore == 2 || leftScore == 2) {
+				setGameEnd(true);
+				setOpen(true);
+				return () => {
+					window.cancelAnimationFrame(animationId);
+				};
 			}
 			//collide right
 			if (
@@ -218,10 +218,7 @@ const Pong: React.FC = () => {
 				}
 			}
 			// Rebounds on top and bottom
-			if (
-				ballY + ballSpeedY + 5 > canvasHeight ||
-				ballY + ballSpeedY + 5 < 0
-			) {
+			if (ballY + ballSpeedY + 5 > canvasHeight || ballY + ballSpeedY + 5 < 0) {
 				setBallSpeedY(ballSpeedY * -1);
 			}
 			// goal
@@ -239,12 +236,12 @@ const Pong: React.FC = () => {
 			// new position
 			setBallX(ballX + ballSpeedX);
 			setBallY(ballY + ballSpeedY);
-			};
+		};
 
-			if (gameStarted && !gameEnd) {
-				animationId = window.requestAnimationFrame(gameLoop);
-			}
-	  }, [gameStarted, gameEnd, rightRacketY, leftRacketY, ballX, ballY, ballSpeedX, ballSpeedY]);
+		if (gameStarted && !gameEnd) {
+			animationId = window.requestAnimationFrame(gameLoop);
+		}
+	}, [gameStarted, gameEnd, rightRacketY, leftRacketY, ballX, ballY, ballSpeedX, ballSpeedY]);
 
 	// useEffect(() => {
 	// 	if (gameStarted && !gameEnd) {
@@ -259,7 +256,7 @@ const Pong: React.FC = () => {
 	// }, [gameStarted, ballX, ballY, ballSpeedX, ballSpeedY, racketHeight]);
 
 	const handleKeyDown = (event: KeyboardEvent) => {
-		console.log("5");
+		console.log('5');
 		switch (event.keyCode) {
 			case 38:
 				setRightRacketY((prevY) => Math.max(0, prevY - 20));
@@ -279,7 +276,7 @@ const Pong: React.FC = () => {
 	};
 
 	useEffect(() => {
-		console.log("3");
+		console.log('3');
 		window.addEventListener('keydown', handleKeyDown);
 
 		return () => {
@@ -294,7 +291,7 @@ const Pong: React.FC = () => {
 	};
 
 	useEffect(() => {
-		console.log("4");
+		console.log('4');
 		window.addEventListener('keypress', handleKeyPress);
 		return () => {
 			window.removeEventListener('keypress', handleKeyPress);

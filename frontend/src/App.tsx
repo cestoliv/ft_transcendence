@@ -94,7 +94,8 @@ function App() {
 		<ConfigProvider
 			theme={{
 				algorithm: theme.darkAlgorithm,
-			}}>
+			}}
+		>
 			<SocketContext.Provider value={socket}>
 				<Menu />
 				<Routes>

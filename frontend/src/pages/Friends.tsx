@@ -16,8 +16,8 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-  type FriendsProps = {
-	user_me : IUser,
+type FriendsProps = {
+	user_me: IUser;
 };
 
 export default function Friends(props: FriendsProps) {
@@ -30,8 +30,8 @@ export default function Friends(props: FriendsProps) {
 	const [allPrivateConvMessages, setAllPrivateConvMessages] = useState<IUserMessage[]>([]);
 
 	// FriendsList
-	const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
-	const[friends, setFriends] = useState<IUser[]>([]);
+	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
+	const [friends, setFriends] = useState<IUser[]>([]);
 
 	const [activeConvId, setActivConvId] = useState<number>(-1);
 	const [chanConv, setChanConv] = useState<number>(-1);
@@ -68,7 +68,7 @@ export default function Friends(props: FriendsProps) {
 	useEffect(() => {
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
 			setUser(data);
-		  });
+		});
 	}, []);
 
 	const createChan = (event: any): void => {
@@ -82,10 +82,8 @@ export default function Friends(props: FriendsProps) {
 					visibility: chanMdp === '' ? 'public' : 'password-protected',
 				},
 				(data: any) => {
-					if (data.messages)
-						alert(data.messages);
-					else
-						setChanList((prevChanList) => [...prevChanList, data]);
+					if (data.messages) alert(data.messages);
+					else setChanList((prevChanList) => [...prevChanList, data]);
 				},
 			);
 			setChanName('');
@@ -100,10 +98,8 @@ export default function Friends(props: FriendsProps) {
 					password: joinChanMdp,
 				},
 				(data: any) => {
-					if (data.messages)
-						alert(data.messages);
-					else
-						setChanList((prevChanList) => [...prevChanList, data]);
+					if (data.messages) alert(data.messages);
+					else setChanList((prevChanList) => [...prevChanList, data]);
 				},
 			);
 			setJoinChanName('');
@@ -114,112 +110,112 @@ export default function Friends(props: FriendsProps) {
 
 	const leaveChan = (chan_id: number): void => {
 		socket.emit(
-		  'channels_leave',
-		  {
-			id: chan_id,
-		  },
-		  (data: any) => {
-			if (data.messages) {
-			  alert(data.messages);
-			} else {
-			  // Remove the channel with the given chan_id from the chanList array
-			  setChanList(prevList => prevList.filter(chan => chan.id !== chan_id));
-			}
-		  },
+			'channels_leave',
+			{
+				id: chan_id,
+			},
+			(data: any) => {
+				if (data.messages) {
+					alert(data.messages);
+				} else {
+					// Remove the channel with the given chan_id from the chanList array
+					setChanList((prevList) => prevList.filter((chan) => chan.id !== chan_id));
+				}
+			},
 		);
-	  };
+	};
 
-	  const chanListJoin = (chan_code: string | undefined): void => {
+	const chanListJoin = (chan_code: string | undefined): void => {
 		socket.emit(
 			'channels_join',
 			{
 				code: chan_code,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
-				else
-					setChanList((prevChanList) => [...prevChanList, data]);
+				if (data.messages) alert(data.messages);
+				else setChanList((prevChanList) => [...prevChanList, data]);
 			},
 		);
-	  };
+	};
 
-	  const chanListJoinPassWord = (chan_code: string | undefined, psswrd: string): Promise<any> => {
+	const chanListJoinPassWord = (chan_code: string | undefined, psswrd: string): Promise<any> => {
 		return new Promise((resolve, reject) => {
-		  socket.emit(
-			'channels_join',
-			{
-			  code: chan_code,
-			  password: psswrd,
-			},
-			(data: any) => {
-			  if (data.messages) {
-				alert(data.messages);
-				reject(new Error(data.messages));
-			  } else {
-				setChanList((prevChanList) => [...prevChanList, data]);
-				resolve(data);
-			  }
-			},
-		  );
+			socket.emit(
+				'channels_join',
+				{
+					code: chan_code,
+					password: psswrd,
+				},
+				(data: any) => {
+					if (data.messages) {
+						alert(data.messages);
+						reject(new Error(data.messages));
+					} else {
+						setChanList((prevChanList) => [...prevChanList, data]);
+						resolve(data);
+					}
+				},
+			);
 		});
-	  };
+	};
 
-	  const AddFriend = (username : string) => {
+	const AddFriend = (username: string) => {
 		socket.emit(
 			'users_inviteFriend',
 			{
-				username : username,
+				username: username,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-    };
+	};
 
 	const accept_friend_request = (inviter_id: number): void => {
-        socket.emit(
-            'users_acceptFriend',
-            {
-                id: inviter_id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-					setFriends((prevFriends) => [...prevFriends, data.inviter]);
-            },
-        );
-		const indexToUpdate = friendOf.findIndex(friend => (friend.inviterId === inviter_id && friend.inviteeId === user?.id) || (friend.inviterId === user?.id && friend.inviteeId === inviter_id));
+		socket.emit(
+			'users_acceptFriend',
+			{
+				id: inviter_id,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
+			},
+		);
+		const indexToUpdate = friendOf.findIndex(
+			(friend) =>
+				(friend.inviterId === inviter_id && friend.inviteeId === user?.id) ||
+				(friend.inviterId === user?.id && friend.inviteeId === inviter_id),
+		);
 		if (indexToUpdate !== -1) {
 			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
-			const updatedFriend = { ...friendOf[indexToUpdate], accepted: true };
-		  
+			const updatedFriend = {
+				...friendOf[indexToUpdate],
+				accepted: true,
+			};
+
 			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
 			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour
 			const updatedFriendOf = [...friendOf];
 			updatedFriendOf[indexToUpdate] = updatedFriend;
-		  
+
 			// Mettre à jour la liste d'amis en attente d'être acceptés avec la nouvelle liste mise à jour
 			setFriendOf(updatedFriendOf);
-		  }
-    }
+		}
+	};
 
-	const removeFriend = (user_id : number): void => {
+	const removeFriend = (user_id: number): void => {
 		socket.emit(
 			'users_removeFriend',
 			{
 				id: user_id,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
-				else
-					setFriends(prevList => prevList.filter(user => user.id !== user_id));
+				if (data.messages) alert(data.messages);
+				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
 			},
 		);
-	}
+	};
 
 	const activeConv = (event: any) => {
 		let newId;
@@ -242,18 +238,18 @@ export default function Friends(props: FriendsProps) {
 
 	const OpenConvs = (event: any): void => {
 		if (event.target.name === 'open-chan-joined-button') {
-			var sidenav = document.getElementById("chan-list");
-			sidenav?.classList.add("active-chan-list");
+			var sidenav = document.getElementById('chan-list');
+			sidenav?.classList.add('active-chan-list');
 		}
 		if (event.target.name === 'open-friend-list-button') {
-			var sidenav = document.getElementById("priv-conv-list");
-			sidenav?.classList.add("active-friend-list");
+			var sidenav = document.getElementById('priv-conv-list');
+			sidenav?.classList.add('active-friend-list');
 		}
-		var button1 = document.getElementById("open-chan-joined-button");
-		var button2 = document.getElementById("open-friend-list-button");
+		const button1 = document.getElementById('open-chan-joined-button');
+		const button2 = document.getElementById('open-friend-list-button');
 
-		button1?.classList.add("hidden-button");
-		button2?.classList.add("hidden-button");
+		button1?.classList.add('hidden-button');
+		button2?.classList.add('hidden-button');
 	};
 
 	socket.off('channels_message'); // Unbind previous event
@@ -263,90 +259,110 @@ export default function Friends(props: FriendsProps) {
 		setAllChanMessages((prevMessages) => [data, ...prevMessages]);
 	});
 
-	  useEffect(() => {
-		console.log("channels_listJoined UseEffect");
+	useEffect(() => {
+		console.log('channels_listJoined UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
-		  // Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
-		  data.forEach((channel: any) => {
-			// console.log(channel);
-			socket.emit('channels_messages', { id: channel.id, before: new Date().toISOString() }, (messages: any) => {
-			  if (messages.message) {
-				alert(messages.errors);
-			  } else {
-				// Ajouter les messages du channel à "allChanMessages"
-				messages.forEach((message: any) => {
-					// console.log(message);
-					setAllChanMessages((prevMessages) => [...prevMessages, message]);
-				})
-				// setAllChanMessages((prevMessages) => [...prevMessages, ...messages]);
-			  }
+			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
+			data.forEach((channel: any) => {
+				// console.log(channel);
+				socket.emit(
+					'channels_messages',
+					{ id: channel.id, before: new Date().toISOString() },
+					(messages: any) => {
+						if (messages.message) {
+							alert(messages.errors);
+						} else {
+							// Ajouter les messages du channel à "allChanMessages"
+							messages.forEach((message: any) => {
+								// console.log(message);
+								setAllChanMessages((prevMessages) => [...prevMessages, message]);
+							});
+							// setAllChanMessages((prevMessages) => [...prevMessages, ...messages]);
+						}
+					},
+				);
 			});
-		  });
 		});
-	  }, [chanList]);
+	}, [chanList]);
 
-	  	socket.off('users_message'); // Unbind previous event
-		socket.on('users_message', (data: any) => {
-			console.log('Socket users_message:');
-			console.log(data.message);
-			setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
-		});
-	  useEffect(() => {
-		console.log("AllPrivateConvMessages UseEffect");
+	socket.off('users_message'); // Unbind previous event
+	socket.on('users_message', (data: any) => {
+		console.log('Socket users_message:');
+		console.log(data.message);
+		setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
+	});
+	useEffect(() => {
+		console.log('AllPrivateConvMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-		  // Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
-		  data.friends.forEach((friend: any) => {
-			// console.log(channel);
-			socket.emit('users_getMessages', { id: friend.id, before: new Date().toISOString() }, (messages: any) => {
-			  if (messages.message) {
-				alert(messages.errors);
-			  } else {
-				// Ajouter les messages du channel à "allChanMessages"
-				messages.forEach((message: any) => {
-					setAllPrivateConvMessages((prevMessages) => [...prevMessages, message]);
-				})
-			  }
+			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
+			data.friends.forEach((friend: any) => {
+				// console.log(channel);
+				socket.emit(
+					'users_getMessages',
+					{ id: friend.id, before: new Date().toISOString() },
+					(messages: any) => {
+						if (messages.message) {
+							alert(messages.errors);
+						} else {
+							// Ajouter les messages du channel à "allChanMessages"
+							messages.forEach((message: any) => {
+								setAllPrivateConvMessages((prevMessages) => [...prevMessages, message]);
+							});
+						}
+					},
+				);
 			});
-		  });
 		});
-	  }, [friends]);
+	}, [friends]);
 
-	  useEffect(() => {
-		console.log("ChansList UseEffect");
+	useEffect(() => {
+		console.log('ChansList UseEffect');
 		socket.emit('channels_listJoined', {}, (data: any) => {
 			setChanList(data);
 		});
 	}, []);
 
 	useEffect(() => {
-		console.log("FriendsList useEffect");
+		console.log('FriendsList useEffect');
 		socket.emit(
-            'users_get',
-            {
-                id: props.user_me.id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-				{
+			'users_get',
+			{
+				id: props.user_me.id,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else {
 					setFriendOf(data.friendOf);
 					setFriends(data.friends);
 				}
-            },
-        );
+			},
+		);
 	}, []);
 
 	return (
 		<div className="friends-wrapper">
 			<div className="burger-menu">
-				<button className='open-chan-joined-button' id='open-chan-joined-button' name='open-chan-joined-button' onClick={OpenConvs}>Channels</button>
-				<button className='open-friend-list-button' id='open-friend-list-button' name='open-friend-list-button' onClick={OpenConvs}>Friends</button>
+				<button
+					className="open-chan-joined-button"
+					id="open-chan-joined-button"
+					name="open-chan-joined-button"
+					onClick={OpenConvs}
+				>
+					Channels
+				</button>
+				<button
+					className="open-friend-list-button"
+					id="open-friend-list-button"
+					name="open-friend-list-button"
+					onClick={OpenConvs}
+				>
+					Friends
+				</button>
 			</div>
-			<div className="chan-list" id='chan-list'>
-				<ChanList activeConv={activeConv} chanList={chanList} leaveChan={leaveChan}/>
+			<div className="chan-list" id="chan-list">
+				<ChanList activeConv={activeConv} chanList={chanList} leaveChan={leaveChan} />
 				<div className="chan-list-buttons">
 					<button onClick={OpenCreateChanModal}>Create chan</button>
 					<button onClick={OpenJoinChanModal}>Join chan</button>
@@ -358,7 +374,14 @@ export default function Friends(props: FriendsProps) {
 						aria-describedby="modal-modal-description"
 					>
 						<Box className="list-chan-modal background-modal pixel-font">
-							{ user && <AllChan user_me={user} chanList={chanList} chanListJoin={chanListJoin} chanListJoinPassWord={chanListJoinPassWord}/> }
+							{user && (
+								<AllChan
+									user_me={user}
+									chanList={chanList}
+									chanListJoin={chanListJoin}
+									chanListJoinPassWord={chanListJoinPassWord}
+								/>
+							)}
 						</Box>
 					</Modal>
 					<Modal
@@ -371,7 +394,7 @@ export default function Friends(props: FriendsProps) {
 							<form className="create-channel-form">
 								<label>
 									<input
-										className='pixel-font'
+										className="pixel-font"
 										type="text"
 										name="create-chan-name"
 										placeholder="Name"
@@ -384,7 +407,7 @@ export default function Friends(props: FriendsProps) {
 										type="text"
 										name="create-chan-mdp"
 										placeholder="Mot de passe"
-											className="mdp-channel-form-label pixel-font"
+										className="mdp-channel-form-label pixel-font"
 										onChange={handleChange}
 									/>
 								</label>
@@ -409,7 +432,7 @@ export default function Friends(props: FriendsProps) {
 							<form className="join-channel-form">
 								<label>
 									<input
-										className='pixel-font'
+										className="pixel-font"
 										type="text"
 										name="join-chan-name"
 										placeholder="Code"
@@ -419,7 +442,7 @@ export default function Friends(props: FriendsProps) {
 								</label>
 								<label>
 									<input
-										className='pixel-font'
+										className="pixel-font"
 										type="text"
 										name="join-chan-mdp"
 										placeholder="Mot de passe"
@@ -440,19 +463,34 @@ export default function Friends(props: FriendsProps) {
 					</Modal>
 				</div>
 			</div>
-			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend}/>}
+			{user && (
+				<FriendsList
+					user_me={user}
+					chanList={chanList}
+					friends={friends}
+					friendOf={friendOf}
+					activeConv={activeConv}
+					AddFriend={AddFriend}
+					accept_friend_request={accept_friend_request}
+					removeFriend={removeFriend}
+				/>
+			)}
 			<div className="chat">
 				{activeConvId != -1 && user && chanConv == 1 ? (
-					<Chat user_me={user} activeConvId={activeConvId} messages={allChanMessages}/>
+					<Chat user_me={user} activeConvId={activeConvId} messages={allChanMessages} />
 				) : null}
 				{activeConvId != -1 && user && chanConv == 2 ? (
-					<FriendConv user_me={user} allPrivateConvMessages={allPrivateConvMessages} activeConvId={activeConvId}/>
+					<FriendConv
+						user_me={user}
+						allPrivateConvMessages={allPrivateConvMessages}
+						activeConvId={activeConvId}
+					/>
 				) : null}
 			</div>
 			<div className="infos-conv">
 				{activeConvId != -1 && user && chanConv == 1 ? (
-						<InfosConv user_me={user} activeConvId={activeConvId} />
-					) : null}
+					<InfosConv user_me={user} activeConvId={activeConvId} />
+				) : null}
 			</div>
 		</div>
 	);

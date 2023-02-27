@@ -10,11 +10,10 @@ import { SocketContext } from '../context/socket';
 import Checkbox from '@mui/material/Checkbox';
 
 type SettingsProps = {
-	user_me : IUser,
+	user_me: IUser;
 };
 
 export const Settings = (props: SettingsProps) => {
-
 	const socket = useContext(SocketContext);
 
 	const [username, setUsername] = useState<string>('');
@@ -40,8 +39,7 @@ export const Settings = (props: SettingsProps) => {
 				username: username,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
 	};
