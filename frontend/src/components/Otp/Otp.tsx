@@ -37,8 +37,9 @@ const Otp = (props: IOtp) => {
 				sameSite: 'strict',
 				domain: process.env.REACT_APP_COOKIE_DOMAIN,
 			});
-			setAuth({ bearer: data.bearer, otp_ok: true });
-			navigate('/', { replace: true });
+			setAuth({ bearer: data.bearer, otp_ok: true, user: data.user });
+			window.location.assign('/');
+			// navigate('/', { replace: true });
 		} else if (response.status === 401 && data.message === 'Invalid TOTP') {
 			// User need to enter a TOTP
 			setFormError('Invalid TOTP');

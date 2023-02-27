@@ -41,6 +41,9 @@ export class AuthController {
 				httpOnly: false,
 				sameSite: 'strict',
 			});
+			return response.code(200).send({
+				bearer: bearer,
+			});
 			return response
 				.code(303)
 				.redirect(this.configService.get('FRONTEND_URL'));
@@ -136,6 +139,7 @@ export class AuthController {
 	 */
 	@Post('/totp/:otp')
 	async validateTOTP(@Req() request, @Param('otp') otp: string) {
+		console.log(request)
 		return { bearer: await this.authService.validateTOTP(request, otp) };
 	}
 }

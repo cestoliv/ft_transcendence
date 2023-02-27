@@ -18,6 +18,7 @@ import { IAuth, IUser } from './interfaces';
 import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
+import NotFound from './pages/NotFound';
 
 function App() {
 	const socket = useContext(SocketContext);
@@ -38,7 +39,7 @@ function App() {
 		if (response.ok) {
 			setUser(data);
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
-				setAuth({ bearer: cookies.bearer, otp_ok: true });
+				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
 
 			// Connect to socket
 			socket.connect();
@@ -97,7 +98,7 @@ function App() {
 			}}
 		>
 			<SocketContext.Provider value={socket}>
-				<Menu />
+				<Menu setCookie={setCookie} />
 				<Routes>
 					<Route
 						path="/login"
@@ -114,6 +115,7 @@ function App() {
 						<Route path="/settings" element={<Settings user_me={user} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</SocketContext.Provider>
 		</ConfigProvider>

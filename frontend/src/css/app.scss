@@ -14,11 +14,27 @@
 @import './chanuser.css';
 @import './friendrequests.css';
 @import './privatechanjoined.css';
-
+@import './notFound.scss';
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
+.activeLink .e-icons{
+	color: #7289da;
+}
+
 .background-modal {
-	background-color: #5b9279 !important;
+	background-color: #131313 !important;
+}
+
+.modal-item {
+	background-color: #222222;
+}
+
+.modal-e-plus:hover {
+	color: #4E6AD0;
+}
+
+.modal-e-close:hover {
+	color: #4E6AD0;
 }
 
 /* .background-modal input {
@@ -27,6 +43,39 @@
 
 .pixel-font {
 	font-family: 'VT323', monospace !important;
+}
+
+.discord-black-one {
+	background-color: #1e2124 !important;
+}
+
+.discord-black-two {
+	background-color: #282b30 !important;
+}
+
+.discord-black-three {
+	background-color: #36393e !important;
+}
+
+.discord-black-four {
+	background-color: #424549 !important;
+}
+
+.discord-blue {
+	background-color: #7289da !important;
+}
+
+.discord-blue:hover {
+	background-color: #4E6AD0 !important;
+}
+
+.list-item {
+	margin-bottom: 3px;
+}
+
+.list-item:hover {
+	cursor: pointer;
+	background : #424549 !important;
 }
 
 .buzz {

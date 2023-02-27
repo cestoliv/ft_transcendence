@@ -1,13 +1,10 @@
 .ChanUser-wrapper {
     width: 100%;
     text-align: center;
-    background-color: #4C60A9;
-    border-bottom: 1px solid black;
 }
 
-.ChanUser-wrapper:hover {
-    cursor: pointer;
-    background-color: #39487F;
+.ChanUser-wrapper h3{
+    padding: 5px 0px;
 }
 
 .chan-user-modal {
@@ -16,7 +13,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 200px;
+    width: 150px;
     background-color: rgb(52, 63, 62);
     border-radius: 20px;
     box-Shadow: 24;
