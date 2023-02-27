@@ -98,6 +98,11 @@ export class GamesService {
 		return true;
 	}
 
+	async leaveMatchmaking(user: SocketWithUser) {
+		this.queue = this.queue.filter((socket) => socket !== user);
+		return false;
+	}
+
 	@Interval(1000 / 60)
 	loop(): void {
 		this.games.forEach((game) => {

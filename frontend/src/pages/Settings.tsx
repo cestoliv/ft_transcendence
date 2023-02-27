@@ -31,7 +31,6 @@ export const Settings = (props: SettingsProps) => {
 	};
 
 	const changeSettings = (event: any): void => {
-		console.log("buzz");
 		console.log(username);
 		event?.preventDefault();
 		socket.emit(

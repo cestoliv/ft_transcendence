@@ -25,7 +25,6 @@ function App() {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
-	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	const fetchUser = async () => {
 		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
@@ -78,7 +77,18 @@ function App() {
 		}
 	}, [auth]);
 
-	if (auth.bearer != null && userLoading) return <div>Loading...</div>;
+	if (auth.bearer != null && userLoading)
+		return (
+			<p className="loading">
+				<span>l</span>
+				<span>o</span>
+				<span>a</span>
+				<span>d</span>
+				<span>i</span>
+				<span>n</span>
+				<span>g</span>
+			</p>
+		);
 
 	return (
 		<ConfigProvider
@@ -101,7 +111,7 @@ function App() {
 						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} />} />
-						<Route path="/pong" element={<Pong />} />
+						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
 				</Routes>
 			</SocketContext.Provider>

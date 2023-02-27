@@ -2,6 +2,7 @@ import '../../css/app.scss';
 import { Button, Modal, Input, ConfigProvider, theme, Divider, message } from 'antd';
 import { ILogin } from '../../interfaces';
 import { UserOutlined } from '@ant-design/icons';
+import { QRCodeCanvas } from 'qrcode.react';
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import Otp from '../Otp/Otp';
@@ -11,6 +12,8 @@ const Login = (props: ILogin) => {
 	const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 	const [username, setUsername] = useState('');
 	const [newUsername, setNewUsername] = useState('');
+	const [totpCode, setTotpCode] = useState();
+	const [totpUrl, setTotpUrl] = useState();
 	const { auth } = useAuth();
 	console.log(auth);
 
@@ -42,6 +45,8 @@ const Login = (props: ILogin) => {
 		const data = await response.json();
 		if (response.status === 201) {
 			message.success('Account created, you can now log in');
+			setTotpCode(data.secret);
+			setTotpUrl(data.url);
 			setNewUsername('');
 		} else {
 			message.error(data.message);
@@ -78,16 +83,20 @@ const Login = (props: ILogin) => {
 			<div className="login-wrapper">
 				<h1>Log In</h1>
 				<div className="button-wrapper">
-					<Button onClick={handle42Login} className="login-42">
+					<div onClick={handle42Login} className="login-42 nes-btn">
 						<img
 							src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/2048px-42_Logo.svg.png"
 							alt="42 Logo"
 						/>
 						With 42
-					</Button>
-					<Button onClick={showLoginModal}>With username</Button>
+					</div>
+					<button onClick={showLoginModal} className="nes-btn">
+						With username
+					</button>
 					<Divider />
-					<Button onClick={showRegisterModal}>Create account</Button>
+					<button onClick={showRegisterModal} className="nes-btn">
+						Create account
+					</button>
 				</div>
 				<Modal
 					title="Login with username"
@@ -112,6 +121,14 @@ const Login = (props: ILogin) => {
 						onChange={(e) => setNewUsername(e.target.value)}
 						prefix={<UserOutlined />}
 					/>
+					{totpCode && (
+						<div className="info-2fa">
+							<p className="title">Scan this QR Code : </p>
+							<QRCodeCanvas value={totpUrl} />
+							<p>Or enter this code in your 2FA App :</p>
+							<p className="code">{totpCode}</p>
+						</div>
+					)}
 				</Modal>
 			</div>
 		</ConfigProvider>

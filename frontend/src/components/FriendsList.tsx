@@ -54,24 +54,9 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove("hidden-button");
 	};
 
-	// useEffect(() => {
-	// 	console.log("FriendsList useEffect");
-    //     // socket.emit(
-    //     //     'users_get',
-    //     //     {
-    //     //         id: props.user_me.id,
-    //     //     },
-    //     //     (data: any) => {
-    //     //         if (data.messages)
-	// 	// 			alert(data.messages);
-    //     //         else
-	// 	// 		{
-	// 	// 			setFriendOf(data.friendOf);
-	// 	// 			setFriends(data.friends);
-	// 	// 		}
-    //     //     },
-    //     // );
-	// },[props.friends]);
+	useEffect(() => {
+		console.log("FriendsList useEffect");
+	},[props.friends]);
 
 	return (
 		<div className="priv-conv-list" id='priv-conv-list'>
@@ -85,9 +70,15 @@ export const FriendsList = (props: PersonListProps) => {
 				<button className="en-attente-button" onClick={OpenListFriendRequest}>En attente</button>
 				<Modal open={OpenLFriendRequest} onClose={CloseListFriendRequest} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
 					<Box className="friend-request-modal background-modal">
-						{props.friendOf && props.friendOf.map((friend_request) => (
-							<FriendRequests friend_request={friend_request} accept_friend_request={props.accept_friend_request}/>
-						))}
+						{props.friendOf?.filter(friend => {
+							if (friend.accepted === false)
+								return true;
+							return false
+							})
+							.map(friend_request => (
+								<FriendRequests key={friend_request.inviterId} friend_request={friend_request} accept_friend_request={props.accept_friend_request}/>
+							))
+						}
 					</Box>
 				</Modal>
 				<form className="add-friend-form" onSubmit={handleAddFriendSubmit}>
