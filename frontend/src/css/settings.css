@@ -10,68 +10,98 @@
     background-color: #30343F;;
     border-radius: 30px;
     width: 20%;
-    height: 50%;
-}
-
-.change-settings-form {
+    height: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 40px 20px;
+    align-items: center;
+    padding: 20px 0px;
 }
 
-.change-settings-form div {
-    margin-bottom: 20px;
+.settings > * {
+    margin-bottom: 5px;
 }
 
-.form-name {
-    display: flex;
-    justify-content: start;
+.settings h3 {
+    margin-bottom: 10px !important;
 }
 
-.form-name label {
-    width: 25%;
+.profilPicture-button {
+    width: 70%;
+    background: white;
+    padding: 10px 5px;
+    font-size: 10px;
+    box-shadow: inset -4px -4px lightgray;
 }
 
-.form-name input {
-    background-color: #191b22;
-    color: white;
-    padding: 5px;
-    border-radius: 10px;
+.profilPicture-button:hover {
+    box-shadow: inset -6px -6px lightgray;
 }
 
-.form-lastname {
-    display: flex;
-    justify-content: start;
+.form-file-profil-picture {
+    width: 70%;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
-.form-lastname label {
-    width: 25%;
+.form-file-profil-picture-submit-button {
+    width: 100%;
+    padding: 8px;
+    box-shadow: inset -4px -4px lightgray;
+    font-size: 10px;
 }
 
-.form-lastname input {
-    background-color: #191b22;
-    color: white;
-    padding: 5px;
-    border-radius: 10px;
-}
-
-.googl-auth-div {
-    display: flex;
-    justify-content: start;
-}
-
-.change-settings-form-submit-button {
-    border-radius: 20px;
-    padding: 10px;
-    width: 100px;
-    align-self: center;
-    background-color: #191b22;
-    color: white;
-}
-
-.change-settings-form-submit-button:hover {
-    background-color: black;
-    border-color: #191b22;
+.form-file-profil-picture-submit-button:hover {
     cursor: pointer;
+    box-shadow: inset -6px -6px lightgray;
+}
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.inputfile + label {
+    font-size: 10px;
+    color: black;
+    background-color: white;
+    padding: 10px 5px;
+    border: 1px solid black;
+    display: block;
+    text-align: center;
+    box-shadow: inset -4px -4px lightgray;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+    cursor: pointer;
+    box-shadow: inset -6px -6px lightgray;
+}
+
+.inputfile + label {
+	cursor: pointer; /* "hand" cursor */
+}
+
+.inputfile:focus + label {
+	outline: 1px dotted #000;
+	outline: -webkit-focus-ring-color auto 5px;
+}
+
+.form-change-name {
+    background-color: red;
+    background-color: green;
+    width: 70%;
+}
+
+.input-change-name {
+    width: 100%;
+    padding: 8px 5px;
+    font-size: 10px;
 }

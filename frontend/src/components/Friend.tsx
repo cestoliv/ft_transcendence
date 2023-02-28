@@ -92,7 +92,10 @@ export const Friend = (props: FriendProps) => {
 			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
+			<div className="avatar_username">
+				<img className='avatar' src={props.user.profile_picture} alt="" />
+				<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
+			</div>
 			<div className="friendsList-settings">
 				{/* {props.states === 'connected' && (
 					<span className="e-icons e-medium e-play"></span>
@@ -108,12 +111,12 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button onClick={inviteFriend}>Inviter à jouer</button>
-						<button>Regarder la partie</button>
-						<button onClick={OpenChanListModal}>Inviter channel</button>
-						<button onClick={muteFriend}>Mute</button>
-						<button onClick={banFriend}>Ban</button>
-						<button onClick={removeFriendClick}>Suprrimer</button>
+						<button className='discord-blue' onClick={inviteFriend}>Inviter à jouer</button>
+						<button className='discord-blue'>Regarder la partie</button>
+						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
+						<button className='discord-blue' onClick={muteFriend}>Mute</button>
+						<button className='discord-blue' onClick={banFriend}>Ban</button>
+						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
 					</Box>
 				</Modal>
 			</div>

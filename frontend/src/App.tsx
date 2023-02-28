@@ -96,6 +96,7 @@ function App() {
 	});
 
 	useEffect(() => {
+		console.log("buzz");
 		console.log(auth);
 		if (auth.bearer != null) {
 			fetchUser();
@@ -136,7 +137,7 @@ function App() {
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
-						<Route path="/settings" element={<Settings user_me={user} />} />
+						<Route path="/settings" element={<Settings user_me={user} auth={auth}/>} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />
