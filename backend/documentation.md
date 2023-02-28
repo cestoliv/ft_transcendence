@@ -754,6 +754,7 @@ message: `users_update`
 payload: {
 	id: number, // User id
 	username: string, // Optionnal new username
+	displayName: string, // Optionnal new username
 }
 ```
 
@@ -1286,8 +1287,9 @@ Send game information 3 seconds before the start of the game.
 ```typescript
 {
 	id: number,
-	id42: number, // -1 for non-42 users
+	id42: number, // null for non-42 users
 	username: string,
+	displayName: string,
 	invitedFriends: UserFriends[],
 	friendOf: UserFriend[],
 	friends: User[],

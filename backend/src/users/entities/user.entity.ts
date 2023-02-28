@@ -24,6 +24,9 @@ export class User {
 	@Column({ unique: true })
 	username: string;
 
+	@Column()
+	displayName: string;
+
 	@Column({ nullable: true, select: false })
 	otp: string;
 
