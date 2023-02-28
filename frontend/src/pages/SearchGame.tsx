@@ -114,7 +114,7 @@ export const SearchGame = (props: FriendsProps) => {
 		}
 	};
 
-	socket.off();
+	socket.off('games_start');
 	socket.on('games_start', (data: any) => {
 		navigate(`/pong/${data.id}`);
 		console.log(data);

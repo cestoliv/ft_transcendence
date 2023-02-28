@@ -171,6 +171,12 @@ const Login = (props: ILogin) => {
 						onChange={(e) => setUsername(e.target.value)}
 						prefix={<UserOutlined />}
 					/>
+					<Input
+						placeholder="Enter your OTP code"
+						onChange={(e) => setOtpCode(e.target.value)}
+						prefix={<UserOutlined />}
+					/>
+					<Button onClick={handleOtp}>Valid OTP</Button>
 				</Modal>
 				<Modal
 					title="Create account with username"
@@ -198,13 +204,13 @@ const Login = (props: ILogin) => {
 						<p className="code">{totpCode}</p>
 					</div>
 				</Modal>
-				<Modal title="Enter your OTP code" open={isOtpModalOpen} onOk={handleOtp} onCancel={handleCancelOtp}>
+				{/* <Modal title="Enter your OTP code" open={isOtpModalOpen} onOk={handleOtp} onCancel={handleCancelOtp}>
 					<Input
 						placeholder="Enter your OTP code"
 						onChange={(e) => setOtpCode(e.target.value)}
 						prefix={<UserOutlined />}
 					/>
-				</Modal>
+				</Modal> */}
 			</div>
 		</ConfigProvider>
 	);

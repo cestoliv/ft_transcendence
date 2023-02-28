@@ -70,6 +70,11 @@ export const Friend = (props: FriendProps) => {
 		}
 		socket.emit('games_invite', { id: props.gameInfo.id, user_id: props.user.id }, (data: any) => {
 			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.messages);
+				return;
+			}
+			message.success('Invitation sent');
 		});
 	};
 

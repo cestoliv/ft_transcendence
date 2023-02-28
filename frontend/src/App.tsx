@@ -72,7 +72,7 @@ function App() {
 		}
 	});
 
-	const joinGame = (gameInfo) => {
+	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
 			console.log('games_join', data);
 			if (data?.statusCode) {

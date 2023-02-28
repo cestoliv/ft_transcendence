@@ -187,16 +187,18 @@ export class LocalGame {
 	}
 
 	async invite(inviter: User, invitee: User) {
+		// Check that creator doesn't invite himself
+		if (this.players[0].socket.user.id === invitee.id)
+			throw new ForbiddenException('You cannot invite yourself');
 		// Check that inviter is the creator
 		if (this.players[0].socket.user.id !== inviter.id)
 			throw new ForbiddenException('Only the creator can invite');
 		// Check if game is waiting for players and is not full
 		if (this.state !== 'waiting' || this.players.length >= 2)
 			throw new ForbiddenException('Game is already full');
-		// Check if user is online
+			// Check if user is online
 		if (!this.connectedClientsService.has(invitee.id))
 			throw new ForbiddenException('User is offline');
-
 		// Check if game is private and user is not invited
 		if (
 			this.options.visibility === 'private' &&
