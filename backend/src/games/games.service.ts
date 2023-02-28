@@ -98,7 +98,7 @@ export class GamesService {
 		if (!game) throw new NotFoundException('Game not found');
 		return game.getInfo();
 	}
-	
+
 	async joinMatchmaking(user: SocketWithUser) {
 		this.queue.push(user);
 		return true;

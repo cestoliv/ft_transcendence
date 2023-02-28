@@ -8,8 +8,8 @@ import { ChannelMutedUser } from './entities/channel-muted.entity';
 import { ChannelBannedUser } from './entities/channel-banned.entity';
 import { ChannelInvitedUser } from './entities/channel-invited.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
-import { ConnectedClientsService } from 'src/base.gateway';
 import { GamesModule } from 'src/games/games.module';
+import { AppModule } from 'src/app.module';
 
 @Module({
 	imports: [
@@ -22,8 +22,9 @@ import { GamesModule } from 'src/games/games.module';
 		]),
 		forwardRef(() => UsersModule),
 		forwardRef(() => GamesModule),
+		forwardRef(() => AppModule),
 	],
-	providers: [ChannelsGateway, ChannelsService, ConnectedClientsService],
+	providers: [ChannelsGateway, ChannelsService],
 	exports: [ChannelsService],
 })
 export class ChannelsModule {}
