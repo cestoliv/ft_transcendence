@@ -1,12 +1,17 @@
 import React from 'react';
 
 type SearchSettingsProps = {
+	setVisibility: React.Dispatch<React.SetStateAction<string>>;
 	setMode: React.Dispatch<React.SetStateAction<string>>;
 	setTime: React.Dispatch<React.SetStateAction<string>>;
 	setPoints: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const SearchSettings = ({ setMode, setTime, setPoints }: SearchSettingsProps) => {
+export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: SearchSettingsProps) => {
+	const visibilityOptions = [
+		{ value: 'public', label: 'Public' },
+		{ value: 'private', label: 'Private' },
+	];
 	const modeOptions = [
 		{ value: 'classic', label: 'Classic' },
 		{ value: 'hardcore', label: 'Hardcore' },
@@ -24,6 +29,22 @@ export const SearchSettings = ({ setMode, setTime, setPoints }: SearchSettingsPr
 	];
 	return (
 		<div className="searchGame-settings">
+			<label htmlFor="visibility_select">Visibility</label>
+			<div className="nes-select is-dark">
+				<select
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setVisibility(e.target.value)}
+					required
+					id="visibility_select"
+				>
+					{visibilityOptions.map((option) => {
+						return (
+							<option key={option.value} value={option.value}>
+								{option.label}
+							</option>
+						);
+					})}
+				</select>
+			</div>
 			<label htmlFor="mode_select">Mode</label>
 			<div className="nes-select is-dark">
 				<select

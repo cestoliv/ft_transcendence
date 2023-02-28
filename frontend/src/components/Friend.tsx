@@ -10,12 +10,14 @@ import { IChannel, IUser } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { message } from 'antd';
 
 type FriendProps = {
-	user: IUser,
-	chanList : IChannel[],
+	user: IUser;
+	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
-	removeFriend : (user_id : number) => void;
+	removeFriend: (user_id: number) => void;
+	gameInfo: any;
 };
 
 export const Friend = (props: FriendProps) => {
@@ -33,35 +35,43 @@ export const Friend = (props: FriendProps) => {
 
 	const removeFriendClick = (event: any): void => {
 		props.removeFriend(props.user.id);
-	}
+	};
 
 	const muteFriend = (event: any): void => {
 		socket.emit(
 			'users_mute',
 			{
 				id: props.user.id,
-				until : new Date().toISOString(),
+				until: new Date().toISOString(),
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-	}
+	};
 
 	const banFriend = (event: any): void => {
 		socket.emit(
 			'users_ban',
 			{
 				id: props.user.id,
-				until : new Date().toISOString(),
+				until: new Date().toISOString(),
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 			},
 		);
-	}
+	};
+
+	const inviteFriend = () => {
+		if (!props.gameInfo) {
+			message.error('No game created');
+			return;
+		}
+		socket.emit('games_invite', { id: props.gameInfo.id, user_id: props.user.id }, (data: any) => {
+			console.log(data);
+		});
+	};
 
 	// useEffect(() => {
 	// 	console.log("Friend useEffect");
@@ -93,26 +103,26 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button>Inviter à jouer</button>
+						<button onClick={inviteFriend}>Inviter à jouer</button>
 						<button>Regarder la partie</button>
 						<button onClick={OpenChanListModal}>Inviter channel</button>
 						<button onClick={muteFriend}>Mute</button>
 						<button onClick={banFriend}>Ban</button>
 						<button onClick={removeFriendClick}>Suprrimer</button>
-            </Box>
-          </Modal>
+					</Box>
+				</Modal>
 			</div>
 			<Modal
-                open={openChanListModal}
-                onClose={CloseChanListModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box className="chan-user-modal">
-					{props.chanList?.filter(chan => {
-							if (chan.visibility === 'private')
-								return true;
-							return false
+				open={openChanListModal}
+				onClose={CloseChanListModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="chan-user-modal">
+					{props.chanList
+						?.filter((chan) => {
+							if (chan.visibility === 'private') return true;
+							return false;
 						})
 						.map((chan) => (
 							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} />
