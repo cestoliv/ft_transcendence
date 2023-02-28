@@ -16,6 +16,7 @@ export const Stats = (props: StatsProps) => {
 	const [user, setUser] = useState<IUser>();
 	const [is_friend, setIs_friend] = useState(false);
 	const [is_block, setIs_block] = useState(false);
+	const [rerender,setRerender] = useState(false);
 	const displayScores: IScore[] = [
 		{ me: 2, op: 1, op_name: 'NOOB' },
 		{ me: 2, op: 1, op_name: 'NOOB' },
@@ -33,10 +34,8 @@ export const Stats = (props: StatsProps) => {
 		let currentId: number;
 		if (params.userId) {
 			currentId = parseInt(params.userId);
-			console.log('OtherUserProfile');
 		} else {
 			currentId = props.user_me.id;
-			console.log("ici c'est les stats");
 		}
 		console.log('Stat');
 		socket.emit(
@@ -45,19 +44,20 @@ export const Stats = (props: StatsProps) => {
 				id: currentId,
 			},
 			(data: any) => {
-				data.elo = 600;
+				data.elo = 2001;
 				data.wins = 8;
 				data.loses = 3;
 				setUser(data);
 				if (user && user.id !== props.user_me.id) {
 					setIs_friend(searchFriendById(user.id));
 					setIs_block(searchblockedById(user.id));
+					console.log('Stat1');
 				}
-				console.log('Stat1');
 			},
 		);
-	}, []);
+	}, [rerender]);
 	if (!user) {
+		setTimeout(() => {  setRerender(!rerender); }, 5000);
 		return (
 			<div className="loading-wapper">
 				<div>Loading...</div>
@@ -73,13 +73,13 @@ export const Stats = (props: StatsProps) => {
 	};
 	const defineRank = () => {
 		const current_elo: number = user.elo;
-		if (current_elo <= 1000) {
+		if (current_elo < 1000) {
 			return 'Fer';
-		} else if (current_elo <= 1500) {
+		} else if (current_elo < 1500) {
 			return 'Argent';
-		} else if (current_elo <= 1750) {
+		} else if (current_elo < 1750) {
 			return 'gold';
-		} else if (current_elo <= 2000) {
+		} else if (current_elo < 2000) {
 			return 'Platine';
 		} else if (current_elo) {
 			return 'Diamant';
@@ -89,28 +89,28 @@ export const Stats = (props: StatsProps) => {
 	};
 	const displayRank = () => {
 		const current_elo: number = user.elo;
-		if (current_elo <= 1000)
+		if (current_elo < 1000)
 			return (
 				<img
 					src="https://i.pinimg.com/originals/f5/a5/9d/f5a59d542851a7dcb3d0eae1851af735.png"
 					alt="marche po"
 				/>
 			);
-		else if (current_elo <= 1500)
+		else if (current_elo < 1500)
 			return (
 				<img
 					src="https://www.jeuxvideo.lol/wp-content/uploads/2015/10/silver_1-510061efab32cd096791a8d62bf63b39-1.png"
 					alt="marche po"
 				/>
 			);
-		else if (current_elo <= 1750)
+		else if (current_elo < 1750)
 			return (
 				<img
 					src="https://i.pinimg.com/originals/d7/58/1b/d7581b2a1033309523d20c9d1a1f4589.png"
 					alt="marche po"
 				/>
 			);
-		else if (current_elo <= 2000)
+		else if (current_elo < 2000)
 			return (
 				<img
 					src="https://i.pinimg.com/originals/d7/47/1e/d7471e2ef48175986e9b75b566f61408.png"
@@ -196,8 +196,8 @@ export const Stats = (props: StatsProps) => {
 								<image
 									clipPath="url(#circle)"
 									href={
-										user.picture
-											? user.picture
+										user.profile_picture
+											? user.profile_picture
 											: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Trollface_non-free.png'
 									}
 									x="0"
@@ -234,7 +234,7 @@ export const Stats = (props: StatsProps) => {
 						</div>
 						<div className="stats-item">
 							<span>Winrate</span>
-							<span className="score">{percentWinrate()} %</span>
+							<span className="score">{percentWinrate()}%</span>
 						</div>
 						<div className="stats-item">
 							<span>Rank</span>
@@ -258,8 +258,8 @@ export const Stats = (props: StatsProps) => {
 							<image
 								clipPath="url(#circle)"
 								href={
-									user.picture
-										? user.picture
+									user.profile_picture
+										? user.profile_picture
 										: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Trollface_non-free.png'
 								}
 								x="0"
@@ -312,7 +312,7 @@ export const Stats = (props: StatsProps) => {
 					</div>
 					<div className="stats-item">
 						<span>Winrate</span>
-						<span className="score">{percentWinrate()} %</span>
+						<span className="score">{percentWinrate()}%</span>
 					</div>
 					<div className="stats-item">
 						<span>Rank</span>
