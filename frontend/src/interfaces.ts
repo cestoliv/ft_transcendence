@@ -8,7 +8,7 @@ export interface IUser {
 	wins: number;
 	loses: number;
 	scores: IScore[];
-	picture: string;
+	profile_picture: string;
 	invitedFriends: IUserFriend[];
 	friendOf: IUserFriend[];
 	friends: IUser[];

@@ -61,12 +61,9 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
-	// useEffect(() => {
-	// 	console.log("Friend useEffect");
-	// 	socket.emit('channels_listJoined', {}, (data: any) => {
-	// 		setChanListJoined(data);
-	// 	});
-	// }, []);
+	useEffect(() => {
+		console.log(props.user.profile_picture);
+	}, []);
 
 	return (
 		<div
@@ -75,7 +72,10 @@ export const Friend = (props: FriendProps) => {
 			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
+			<div className="avatar_username">
+				<img className='avatar' src={props.user.profile_picture} alt="" />
+				<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
+			</div>
 			<div className="friendsList-settings">
 				{/* {props.states === 'connected' && (
 					<span className="e-icons e-medium e-play"></span>
@@ -97,8 +97,8 @@ export const Friend = (props: FriendProps) => {
 						<button className='discord-blue' onClick={muteFriend}>Mute</button>
 						<button className='discord-blue' onClick={banFriend}>Ban</button>
 						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
-            </Box>
-          </Modal>
+					</Box>
+				</Modal>
 			</div>
 			<Modal
 				open={openChanListModal}

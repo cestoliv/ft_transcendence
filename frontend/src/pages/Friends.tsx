@@ -67,6 +67,7 @@ export default function Friends(props: FriendsProps) {
 
 	useEffect(() => {
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
+			console.log(data);
 			setUser(data);
 		});
 	}, []);
