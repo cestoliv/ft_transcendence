@@ -19,6 +19,7 @@ import { UserMessage } from './users/entities/user.message.entity';
 import { GamesModule } from './games/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Game } from './games/entities/game.entity';
+import { ConnectedClientsService } from './base.gateway';
 
 @Module({
 	imports: [
@@ -59,6 +60,7 @@ import { Game } from './games/entities/game.entity';
 		GamesModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, ConnectedClientsService],
+	exports: [ConnectedClientsService],
 })
 export class AppModule {}

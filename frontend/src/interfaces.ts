@@ -12,7 +12,7 @@ export interface IUser {
 	invitedFriends: IUserFriend[];
 	friendOf: IUserFriend[];
 	friends: IUser[];
-	blocked: IUser[]
+	blocked: IUser[];
 }
 
 export interface IScore {

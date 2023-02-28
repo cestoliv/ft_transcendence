@@ -47,7 +47,9 @@ export class UsersService {
 		const user = new User();
 		user.id42 = createUserDto.id42;
 		user.username = createUserDto.username;
+		user.displayName = createUserDto.displayName || 'Unnamed';
 		user.otp = createUserDto.otp;
+		user.profile_picture_42 = createUserDto.profile_picture_42;
 
 		return this.usersRepository.save(user);
 	}
@@ -110,6 +112,7 @@ export class UsersService {
 			throw new ForbiddenException('You can only update your own user');
 
 		user.username = updateUserDto.username;
+		user.displayName = updateUserDto.displayName;
 		user.otp = updateUserDto.otp;
 
 		return this.save(user)

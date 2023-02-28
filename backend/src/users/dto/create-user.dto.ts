@@ -11,10 +11,14 @@ export class CreateUserDto {
 	@IsNumber()
 	id42: number;
 
-	@IsString()
+	@IsOptional()
 	@MaxLength(255)
 	@IsNotEmpty()
 	username: string;
+
+	@IsString()
+	@IsNotEmpty()
+	displayName: string;
 
 	@IsString()
 	@IsOptional()

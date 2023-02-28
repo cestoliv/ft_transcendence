@@ -113,10 +113,10 @@ export class GamesGateway extends BaseGateway {
 	): Promise<boolean | WSResponse> {
 		// Quit Matchmaking
 		return this.gamesService
-			.leaveMatchmaking(client) 
+			.leaveMatchmaking(client)
 			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
-	}			
+	}
 
 	@SubscribeMessage('games_playerMove')
 	async move(
@@ -176,14 +176,13 @@ export class GamesGateway extends BaseGateway {
 	@SubscribeMessage('games_info')
 	async info(
 		client: SocketWithUser,
-		payload: any,	
+		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
-		if (payload.id === undefined)
-			errors.push('Game id is not specified');
+		if (payload.id === undefined) errors.push('Game id is not specified');
 
 		if (errors.length != 0)
 			return {

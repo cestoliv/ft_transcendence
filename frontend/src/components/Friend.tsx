@@ -89,10 +89,10 @@ export const Friend = (props: FriendProps) => {
 		<div
 			data-id={props.user.id}
 			data-conv-type="friend-conv"
-			className="wrapper-active-conv"
+			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<Link to={`/profile/${props.user.id}`}>{props.user.username}</Link>
+			<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
 			<div className="friendsList-settings">
 				{/* {props.states === 'connected' && (
 					<span className="e-icons e-medium e-play"></span>
@@ -100,7 +100,7 @@ export const Friend = (props: FriendProps) => {
 				{props.states === 'ingame' && (
 					<span className="e-icons e-medium e-radio-button"></span>
 				)} */}
-				<span className="e-icons e-medium e-menu" onClick={OpenFriendActionModal}></span>
+				<span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span>
 				<Modal
 					open={openFActionModal}
 					onClose={CloseFriendActionModal}

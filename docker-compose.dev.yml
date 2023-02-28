@@ -56,7 +56,7 @@ services:
       REACT_APP_API_URL: ${API_URL}
       REACT_APP_SOCKET_URL: ${SOCKET_URL}
       REACT_APP_COOKIE_DOMAIN: ${COOKIE_DOMAIN}
-      ESLINT_NO_DEV_ERRORS: true
+      ESLINT_NO_DEV_ERRORS: 1
     networks:
       - nginx
 

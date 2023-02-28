@@ -193,7 +193,10 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		setIsModalOpen(false);
 	};
 
-	const [gameScore, setGameScore] = React.useState<{ you: number; opponent: number }>({
+	const [gameScore, setGameScore] = React.useState<{
+		you: number;
+		opponent: number;
+	}>({
 		you: 0,
 		opponent: 0,
 	});
@@ -265,6 +268,7 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 							<p className="me">
 								<span className="score">{endGameInfo.score}</span>
 								{auth.user?.username}
+
 							</p>
 						</div>
 					</div>

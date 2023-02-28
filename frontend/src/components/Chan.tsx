@@ -29,9 +29,9 @@ export const Chan = (props: ChanProps) => {
 	}, []);
 
 	return (
-        <div id={props.chan_id} data-id={props.chan_id} data-conv-type='chan-conv' className="wrapper-active-conv" onClick={props.activeConv}>
-            <span className="wrapper-active-conv-span" onClick={props.activeConv}>{props.chan_name}</span>
-            <span className="e-icons e-medium e-close" onClick={handleLeaveClick}></span>
+        <div id={props.chan_id} data-id={props.chan_id} data-conv-type='chan-conv' className="wrapper-active-conv list-item" onClick={props.activeConv}>
+            <span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.chan_name}</span>
+            <span className="e-icons e-medium e-close modal-e-close" onClick={handleLeaveClick}></span>
         </div>
 	);
 };

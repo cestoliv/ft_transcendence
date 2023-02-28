@@ -150,7 +150,10 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 		if (indexToUpdate !== -1) {
 			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
-			const updatedFriend = { ...friendOf[indexToUpdate], accepted: true };
+			const updatedFriend = {
+				...friendOf[indexToUpdate],
+				accepted: true,
+			};
 
 			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
 			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour

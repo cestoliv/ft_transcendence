@@ -7,11 +7,7 @@ const RequireAuth = () => {
 
 	console.log(auth);
 
-	return auth?.bearer && auth?.otp_ok ? (
-		<Outlet />
-	) : (
-		<Navigate to="/login" replace />
-	);
+	return auth?.bearer && auth?.otp_ok ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default RequireAuth;

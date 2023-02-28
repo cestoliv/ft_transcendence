@@ -10,9 +10,9 @@ import { IChannel, IUser, IChannelMessage } from '../interfaces';
 import ChatMessages from './ChatMessages';
 
 type ChatProps = {
-	user_me : IUser,
-	activeConvId : number,
-	messages : IChannelMessage[],
+	user_me: IUser;
+	activeConvId: number;
+	messages: IChannelMessage[];
 };
 
 export default function Chat(props: ChatProps) {
@@ -117,17 +117,17 @@ export default function Chat(props: ChatProps) {
 	};
 
 	useEffect(() => {
-		console.log("Chat useEffect");
+		console.log('Chat useEffect');
 		fetchData();
 	}, [props.activeConvId]);
 
 	return (
-		<div className="chat-wrapper">
+		<div className="chat-wrapper discord-black-three">
 			<div className="chat-nav" id="chat-nav">
-				<span>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
+				<span className='pixel-font'>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
 				{isOwner() && (
 					<div className="chat-nav-right">
-						<div className="wrapper-settings hidden">
+						<div className="wrapper-settings hidden pixel-font">
 							<Checkbox
 								handleChange={isChecked}
 								isChecked={
@@ -138,11 +138,11 @@ export default function Chat(props: ChatProps) {
 								label="Private"
 							/>
 							<form className="mpd-form" onSubmit={addPassWord}>
-								<label htmlFor="mdp" id="mdp-label">
+								<label htmlFor="mdp" id="mdp-label" className='pixel-font'>
 									mdp :
 								</label>
 								<input
-									className='change-password-input'
+									className='change-password-input pixel-font'
 									name='password-input'
 									type="text"
 									id="mdp"
@@ -155,7 +155,7 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages}/>
+			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages} />
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
 					value={message}

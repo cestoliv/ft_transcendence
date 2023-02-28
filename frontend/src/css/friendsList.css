@@ -15,6 +15,10 @@
     justify-content: space-between;
 }
 
+.friend-list-item-username {
+    color: white;
+}
+
 .add-accept-friend {
     display: flex;
     flex-direction: column;
@@ -64,7 +68,7 @@
 }
 
 .add-friend-form-input {
-    background-color: #6477B9;
+    background-color: #7289da;
     border: none;
     border-radius: 5px;
     font-family: 'VT323', monospace;
@@ -79,7 +83,7 @@
 }
 
 .add-friend-form-input:focus {
-    background-color: #6477B9;
+    background-color: #4E6AD0;
     outline: none;
 }
 
