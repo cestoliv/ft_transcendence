@@ -26,6 +26,7 @@ export const SearchGame = (props: FriendsProps) => {
 	const [friends, setFriends] = useState<IUser[]>([]);
 
 	// Search Filter
+	const [visibility, setVisibility] = useState('public');
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
 	const [points, setPoints] = useState('5');
@@ -54,7 +55,7 @@ export const SearchGame = (props: FriendsProps) => {
 				maxDuration: parseInt(time),
 				maxScore: parseInt(points),
 				mode: mode,
-				visibility: 'public',
+				visibility: visibility,
 			},
 			(data: any) => {
 				console.log(data);
@@ -113,7 +114,7 @@ export const SearchGame = (props: FriendsProps) => {
 		}
 	};
 
-	socket.off();
+	socket.off('games_start');
 	socket.on('games_start', (data: any) => {
 		navigate(`/pong/${data.id}`);
 		console.log(data);
@@ -229,35 +230,12 @@ export const SearchGame = (props: FriendsProps) => {
 					AddFriend={AddFriend}
 					accept_friend_request={accept_friend_request}
 					removeFriend={removeFriend}
+					gameInfo={gameInfo}
 				/>
 			)}
 			<div className="searchRandomPlayer">
 				{gameInfo || inMatchmaking ? (
 					<div className="loading-wrapper">
-						{/* <div className="blobs">
-							<div className="blob-center"></div>
-							<div className="blob"></div>
-							<div className="blob"></div>
-							<div className="blob"></div>
-							<div className="blob"></div>
-							<div className="blob"></div>
-							<div className="blob"></div>
-						</div>
-						<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-							<defs>
-								<filter id="goo">
-									<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-									<feColorMatrix
-										in="blur"
-										mode="matrix"
-										values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
-										result="goo"
-									/>
-									<feBlend in="SourceGraphic" in2="goo" />
-								</filter>
-							</defs>
-						</svg>
-						<p>Waiting for players ...</p> */}
 						<p className="loading">
 							<span>w</span>
 							<span>a</span>
@@ -294,7 +272,7 @@ export const SearchGame = (props: FriendsProps) => {
 					</Box>
 				</Modal> */}
 			</div>
-			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} />
+			<SearchSettings setVisibility={setVisibility} setMode={setMode} setTime={setTime} setPoints={setPoints} />
 			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>

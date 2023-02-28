@@ -19,6 +19,7 @@ type PersonListProps = {
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
 	removeFriend: (user_id: number) => void;
+	gameInfo: any;
 };
 
 export const FriendsList = (props: PersonListProps) => {
@@ -72,6 +73,7 @@ export const FriendsList = (props: PersonListProps) => {
 							chanList={props.chanList}
 							activeConv={props.activeConv}
 							removeFriend={props.removeFriend}
+							gameInfo={props.gameInfo}
 						/>
 					))}
 			</div>

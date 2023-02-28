@@ -10,12 +10,14 @@ import { IChannel, IUser } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { message } from 'antd';
 
 type FriendProps = {
 	user: IUser;
 	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	removeFriend: (user_id: number) => void;
+	gameInfo: any;
 };
 
 export const Friend = (props: FriendProps) => {
@@ -61,6 +63,21 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
+	const inviteFriend = () => {
+		if (!props.gameInfo) {
+			message.error('No game created');
+			return;
+		}
+		socket.emit('games_invite', { id: props.gameInfo.id, user_id: props.user.id }, (data: any) => {
+			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.messages);
+				return;
+			}
+			message.success('Invitation sent');
+		});
+	};
+
 	// useEffect(() => {
 	// 	console.log("Friend useEffect");
 	// 	socket.emit('channels_listJoined', {}, (data: any) => {
@@ -91,14 +108,14 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button className='discord-blue'>Inviter à jouer</button>
-						<button className='discord-blue'>Regarder la partie</button>
-						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
-						<button className='discord-blue' onClick={muteFriend}>Mute</button>
-						<button className='discord-blue' onClick={banFriend}>Ban</button>
-						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
-            </Box>
-          </Modal>
+						<button onClick={inviteFriend}>Inviter à jouer</button>
+						<button>Regarder la partie</button>
+						<button onClick={OpenChanListModal}>Inviter channel</button>
+						<button onClick={muteFriend}>Mute</button>
+						<button onClick={banFriend}>Ban</button>
+						<button onClick={removeFriendClick}>Suprrimer</button>
+					</Box>
+				</Modal>
 			</div>
 			<Modal
 				open={openChanListModal}
