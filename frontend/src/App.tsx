@@ -1,8 +1,8 @@
 import '../src/css/app.scss';
 import React, { useContext, useEffect } from 'react';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider, message, theme } from 'antd';
 import { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import Login from './components/Login/Login';
 import Menu from './components/Menu/Menu';
@@ -21,6 +21,7 @@ import useAuth from './hooks/useAuth';
 import NotFound from './pages/NotFound';
 
 function App() {
+	const navigate = useNavigate();
 	const socket = useContext(SocketContext);
 	const { auth, setAuth } = useAuth();
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
@@ -69,6 +70,29 @@ function App() {
 			// User is not connected
 			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
 		}
+	});
+
+	const joinGame = (gameInfo: any) => {
+		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
+			console.log('games_join', data);
+			if (data?.statusCode) {
+				message.error(data.message);
+			} else {
+				navigate(`/pong/${gameInfo.id}`);
+			}
+		});
+	};
+
+	socket.off();
+	socket.on('game_invitation', (data: any) => {
+		console.log('game_invitation', data);
+		message.success(
+			<div>
+				<p>You receive an invitation from {data.players[0].user.username}</p>
+				<button onClick={() => joinGame(data)}>Join</button>
+			</div>,
+			20,
+		);
 	});
 
 	useEffect(() => {

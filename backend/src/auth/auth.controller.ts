@@ -118,7 +118,6 @@ export class AuthController {
 	 */
 	@Post('/totp/:otp')
 	async validateTOTP(@Req() request, @Param('otp') otp: string) {
-		console.log(request)
 		return { bearer: await this.authService.validateTOTP(request, otp) };
 	}
 }

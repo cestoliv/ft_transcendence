@@ -10,12 +10,14 @@ import { IChannel, IUser } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { message } from 'antd';
 
 type FriendProps = {
 	user: IUser;
 	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	removeFriend: (user_id: number) => void;
+	gameInfo: any;
 };
 
 export const Friend = (props: FriendProps) => {
@@ -61,9 +63,27 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
-	useEffect(() => {
-		console.log(props.user.profile_picture);
-	}, []);
+	const inviteFriend = () => {
+		if (!props.gameInfo) {
+			message.error('No game created');
+			return;
+		}
+		socket.emit('games_invite', { id: props.gameInfo.id, user_id: props.user.id }, (data: any) => {
+			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.messages);
+				return;
+			}
+			message.success('Invitation sent');
+		});
+	};
+
+	// useEffect(() => {
+	// 	console.log("Friend useEffect");
+	// 	socket.emit('channels_listJoined', {}, (data: any) => {
+	// 		setChanListJoined(data);
+	// 	});
+	// }, []);
 
 	return (
 		<div
@@ -91,7 +111,7 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button className='discord-blue'>Inviter à jouer</button>
+						<button className='discord-blue' onClick={inviteFriend}>Inviter à jouer</button>
 						<button className='discord-blue'>Regarder la partie</button>
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
 						<button className='discord-blue' onClick={muteFriend}>Mute</button>

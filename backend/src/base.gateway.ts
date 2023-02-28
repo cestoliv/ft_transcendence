@@ -48,20 +48,28 @@ export abstract class BaseGateway implements OnGatewayConnection {
 	@WebSocketServer() server: Server;
 
 	async handleConnection(socket: SocketWithUser) {
-		// TODO: fix, fired 3 times, one for each gateway
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
 			socket.user = user;
+
+			if (this.connectedClientsService.has(user.id)) {
+				console.log(
+					`Client already connected: ${user.username} (${socket.id})`,
+				);
+				return;
+			} else
+				console.log(
+					`Client connected: ${user.username} (${socket.id})`,
+				);
+
 			this.connectedClientsService.add(user.id, socket);
-			console.log(`Client connected: ${user.username} (${socket.id})`);
-			// socket.on('disconnect', () => {
-			// 	this.connectedClientsService.remove(socket.id);
-			// });
+
 			// Make the user join all the channels he is in
 			const channels = await this.channelsService.listJoined(user);
 			for (const channel of channels) {
 				socket.join(`channel_${channel.id}`);
 			}
+
 			// Make the join his own channel
 			socket.join(`user_${user.id}`);
 		} catch (error) {
@@ -76,25 +84,37 @@ export abstract class BaseGateway implements OnGatewayConnection {
 	}
 
 	async handleDisconnect(socket: SocketWithUser) {
-		// TODO: fix, fired 3 times, one for each gateway
 		if (!socket.user) return;
+		if (!this.connectedClientsService.has(socket.user.id)) {
+			console.log(
+				`Client already disconnected: ${socket.user.username} (${socket.id})`,
+			);
+			return;
+		} else
+			console.log(
+				`Client disconnected: ${socket.user.username} (${socket.id})`,
+			);
+
 		this.connectedClientsService.delete(socket.user.id);
-		console.log(
-			`Client disconnected: ${socket.user.username} (${socket.id})`,
-		);
+
+		// Leave all the channels he is in
+		const channels = await this.channelsService.listJoined(socket.user);
+		for (const channel of channels) {
+			socket.leave(`channel_${channel.id}`);
+		}
 
 		// Make the user give up all the games he is in
-		console.log('Giving up games');
-		console.log(this.gamesService.games);
 		const games = [...this.gamesService.games].filter((g) => {
 			const game = g[1];
 			return game.players.find(
 				(player) => player.socket.user.id == socket.user.id,
 			);
 		});
-		console.log(games);
 		for (const game of games) {
 			game[1].giveUp(socket);
 		}
+
+		// Leave his own channel
+		socket.leave(`user_${socket.user.id}`);
 	}
 }
