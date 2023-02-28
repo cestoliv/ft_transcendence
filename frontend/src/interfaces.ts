@@ -4,15 +4,17 @@ export interface IUser {
 	id: number;
 	id42: number;
 	username: string;
+	displayName: string,
 	elo: number;
 	wins: number;
 	loses: number;
+	profile_picture: string,
 	scores: IScore[];
-	picture: string;
 	invitedFriends: IUserFriend[];
 	friendOf: IUserFriend[];
 	friends: IUser[];
 	blocked: IUser[];
+	twoFA: boolean;
 }
 
 export interface IScore {
