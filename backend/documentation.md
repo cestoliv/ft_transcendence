@@ -58,6 +58,9 @@
 		* [Join the matchmaking](#join-matchmaking)
 		* [Send new player position](#send-new-player-position)
 		* [Invite a user in a game](#invite-a-player-in-a-game)
+		* [Get a player games history](#get-player-games-history)
+		* [Get a player statistics](#get-player-statistics)
+		* [Get the leadreboards](#get-leaderboards)
 	+ **Websocket Events**
 		+ [Before game start](#game-start)
 		+ [On game end](#game-end)
@@ -1191,6 +1194,71 @@ payload: {
 	}
 	```
 
+### **Get player games history**
+
+#### Input
+```typescript
+message: `games_history`
+payload: {
+	id: string, // User id
+}
+```
+
+#### Return
+- A game array ([Game[]](#game))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['User not found'],
+	}
+	```
+
+### **Get player statistics**
+
+#### Input
+```typescript
+message: `games_userStats`
+payload: {
+	id: string, // User id
+}
+```
+
+#### Return
+- A user stats object ([StatsUser](#statsuser))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['User not found'],
+	}
+	```
+
+### **Get leaderboards**
+
+#### Input
+```typescript
+message: `games_leaderboards`
+payload: empty
+```
+
+#### Return
+- A leaderboards object ([Leaderboards](#leaderboards))
+
 # Websocket Events
 
 ## Users
@@ -1290,6 +1358,7 @@ Send game information 3 seconds before the start of the game.
 	id42: number, // null for non-42 users
 	username: string,
 	displayName: string,
+	elo: number,
 	invitedFriends: UserFriends[],
 	friendOf: UserFriend[],
 	friends: User[],
@@ -1433,6 +1502,22 @@ Send game information 3 seconds before the start of the game.
 }
 ```
 
+## Game
+```typescript
+{
+	id: number,
+	visibility: 'public' | 'private',
+	mode: 'classic' | 'hardcore',
+	maxDuration: 1 | 2 | 3;
+	maxScore: 5 | 10 | 30 | null,
+
+	winner: User,
+	winnerScore: number,
+
+	loser: User,
+	loserScore: number,
+}
+```
 
 ## LocalGameInfo
 ```typescript
@@ -1444,5 +1529,26 @@ Send game information 3 seconds before the start of the game.
 		user: User,
 		score: number,
 	}>,
+}
+```
+
+## StatsUser
+```typescript
+{
+	user: User,
+	stats: {
+		games: number,
+		wins: number,
+		losses: number,
+		winrate: number,
+	},
+}
+```
+
+## Leaderboards
+```typescript
+{
+	elo: User[],
+	mostPlayed: StatsUser[],
 }
 ```

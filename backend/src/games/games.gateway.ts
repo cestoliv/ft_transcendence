@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj } from 'src/utils';
 import { LocalGameInfo } from './game.class';
+import { Game } from './entities/game.entity';
+import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -195,6 +197,65 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.info(payload.id)
 			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_history')
+	async history(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<Game[] | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get game history
+		return this.gamesService
+			.getHistory(payload.id)
+			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_leaderboards')
+	async leaderboard(): Promise<Leaderboards | WSResponse> {
+		// Get leaderboards
+		return this.gamesService
+			.getLeaderboards()
+			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_userStats')
+	async userStats(
+		client: SocketWithUser,
+		payload: any,
+	): Promise<StatsUser | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get user stats
+		return this.gamesService
+			.getUserStats(payload.id)
+			.then((history) => history)
 			.catch((err) => exceptionToObj(err));
 	}
 }
