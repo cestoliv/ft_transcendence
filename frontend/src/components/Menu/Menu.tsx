@@ -15,6 +15,7 @@ export default function Menu(props: { setCookie: SetCookie }) {
 			domain: process.env.REACT_APP_COOKIE_DOMAIN,
 		});
 		message.success('Logged out');
+		window.location.reload();
 	};
 	return (
 		<div className="menu">

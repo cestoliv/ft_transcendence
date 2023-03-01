@@ -153,21 +153,22 @@ export class GamesGateway extends BaseGateway {
 		// Validate payload
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
-			errors.push('Empty payload');
+		errors.push('Empty payload');
 		if (payload.id === undefined)
 			errors.push('Game id pos is not specified');
-		if (payload.user_id === undefined)
+			if (payload.user_id === undefined)
 			errors.push('Id of user to invite is not specified');
-
-		if (errors.length != 0)
+			
+			if (errors.length != 0)
 			return {
 				statusCode: 400,
 				error: 'Bad request',
 				messages: errors,
 			};
 
-		// Invite player
-		return this.gamesService
+			console.log('invite')
+			// Invite player
+			return this.gamesService
 			.invite(payload.id, client, payload.user_id)
 			.then((invitee) => invitee)
 			.catch((err) => exceptionToObj(err));

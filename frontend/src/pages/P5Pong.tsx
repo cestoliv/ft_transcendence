@@ -231,15 +231,21 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	return (
 		<div className="game-wrapper">
 			<div className="game-score">
-				<p className="opponent">
-					{opponentInfo?.user?.username}
+				<div className="opponent">
+					<div className="info">
+						<img src={opponentInfo?.user?.profile_picture} alt='User image' />
+						<p>{opponentInfo?.user?.username}</p>
+					</div>
 					<span className="score">{gameScore.opponent}</span>
-				</p>
+				</div>
 				<span>-</span>
-				<p className="me">
+				<div className="me">
+					<div className="info">
+						<img src={auth.user?.profile_picture} />
+						<p>{auth.user?.username}</p>
+					</div>
 					<span className="score">{gameScore.you}</span>
-					{auth.user?.username}
-				</p>
+				</div>
 			</div>
 			<div className="pong-wrapper" id="game-container">
 				<Canvas gameId={gameId} socket={socket} />

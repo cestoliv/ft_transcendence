@@ -464,7 +464,7 @@ export default function Friends(props: FriendsProps) {
 					</Modal>
 				</div>
 			</div>
-			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend}/>}
+			{user && <FriendsList user_me={user} chanList={chanList} friends={friends} friendOf={friendOf} activeConv={activeConv} AddFriend={AddFriend} accept_friend_request={accept_friend_request} removeFriend={removeFriend} gameInfo={undefined} />}
 			<div className="chat discord-black-three">
 				{activeConvId != -1 && user && chanConv == 1 ? (
 					<Chat user_me={user} activeConvId={activeConvId} messages={allChanMessages} />

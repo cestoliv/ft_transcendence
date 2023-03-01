@@ -24,6 +24,29 @@ export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
 
 	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
+	const [openInviteGameModal, setOpenInviteGameModal] = React.useState(false);
+	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
+	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
+
+	const [mode, setMode] = useState('classic');
+	const [time, setTime] = useState('1');
+	const [points, setPoints] = useState('5');
+
+	const modeOptions = [
+		{ value: 'classic', label: 'Classic' },
+		{ value: 'hardcore', label: 'Hardcore' },
+	];
+	const timeOptions = [
+		{ value: '1', label: '1 min' },
+		{ value: '2', label: '2 min' },
+		{ value: '3', label: '3 min' },
+	];
+	const pointsOptions = [
+		{ value: '5', label: '5 points' },
+		{ value: '10', label: '10 points' },
+		{ value: '30', label: '30 points' },
+		{ value: 'null', label: 'No limit' },
+	];
 
 	const [openFActionModal, setOpenFriendActionModal] = React.useState(false);
 	const OpenFriendActionModal = () => setOpenFriendActionModal(true);
@@ -64,17 +87,21 @@ export const Friend = (props: FriendProps) => {
 	};
 
 	const inviteFriend = () => {
-		if (!props.gameInfo) {
-			message.error('No game created');
-			return;
-		}
-		socket.emit('games_invite', { id: props.gameInfo.id, user_id: props.user.id }, (data: any) => {
+		socket.emit('games_create', { maxDuration: parseInt(time), maxScore: parseInt(points), mode: mode, visibility: 'private' }, (data: any) => {
 			console.log(data);
 			if (data?.statusCode) {
 				message.error(data.messages);
 				return;
 			}
-			message.success('Invitation sent');
+			socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+				console.log(data);
+				if (data?.statusCode) {
+					message.error(data.messages);
+					// TODO: delete game if needed
+					return;
+				}
+				message.success('Invitation sent');
+			});
 		});
 	};
 
@@ -111,13 +138,72 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button className='discord-blue' onClick={inviteFriend}>Inviter à jouer</button>
+						<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
 						<button className='discord-blue'>Regarder la partie</button>
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
 						<button className='discord-blue' onClick={muteFriend}>Mute</button>
 						<button className='discord-blue' onClick={banFriend}>Ban</button>
 						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
 					</Box>
+				</Modal>
+				<Modal
+					open={openInviteGameModal}
+					onClose={CloseInviteGameModal}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<div className="invite-game-modal modal">
+						<p className="title">Invite to play</p>
+						<label htmlFor="mode_select">Mode</label>
+						<div className="nes-select is-dark">
+							<select
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value)}
+								required
+								id="mode_select"
+							>
+								{modeOptions.map((option) => {
+									return (
+										<option key={option.value} value={option.value}>
+											{option.label}
+										</option>
+									);
+								})}
+							</select>
+						</div>
+						<label htmlFor="time-select">Time</label>
+						<div className="nes-select is-dark">
+							<select
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTime(e.target.value)}
+								required
+								id="time_select"
+							>
+								{timeOptions.map((option) => {
+									return (
+										<option key={option.value} value={option.value}>
+											{option.label}
+										</option>
+									);
+								})}
+							</select>
+						</div>
+						<label htmlFor="points_select">Points</label>
+						<div className="nes-select is-dark">
+							<select
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPoints(e.target.value)}
+								required
+								id="points_select"
+							>
+								{pointsOptions.map((option) => {
+									return (
+										<option key={option.value} value={option.value}>
+											{option.label}
+										</option>
+									);
+								})}
+							</select>
+						</div>
+						<button className="nes-btn" onClick={inviteFriend}>Invite</button>
+					</div>
 				</Modal>
 			</div>
 			<Modal
