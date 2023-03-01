@@ -96,10 +96,10 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		this.connectedClientsService.delete(socket.userId);
 
 		// Leave all the channels he is in
-		const channels = await this.channelsService.listJoined(socket.userId);
-		for (const channel of channels) {
-			socket.leave(`channel_${channel.id}`);
-		}
+		// const channels = await this.channelsService.listJoined(socket.userId);
+		// for (const channel of channels) {
+		// 	socket.leave(`channel_${channel.id}`);
+		// }
 
 		// Make the user give up all the games he is in
 		const games = [...this.gamesService.games].filter((g) => {
@@ -113,6 +113,6 @@ export abstract class BaseGateway implements OnGatewayConnection {
 		}
 
 		// Leave his own channel
-		socket.leave(`user_${socket.userId}`);
+		// socket.leave(`user_${socket.userId}`);
 	}
 }

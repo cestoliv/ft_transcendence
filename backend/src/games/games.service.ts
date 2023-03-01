@@ -9,6 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import { ConnectedClientsService } from 'src/base.gateway';
 import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 import { User } from 'src/users/entities/user.entity';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class GamesService {
@@ -26,6 +27,7 @@ export class GamesService {
 		creatorId: number,
 		payload: any,
 		connectedClientsService: ConnectedClientsService,
+		server: Server,
 	) {
 		const options = new GameOptions(
 			payload.maxDuration,
@@ -41,6 +43,7 @@ export class GamesService {
 			options,
 			this,
 			connectedClientsService,
+			server,
 		);
 		this.games.set(id, game);
 		return game.getInfo();

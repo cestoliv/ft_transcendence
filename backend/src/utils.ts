@@ -16,6 +16,15 @@ export function genId(length: number) {
 	return result;
 }
 
+export const isWsResponse = (obj: any): obj is WSResponse => {
+	return (
+		typeof obj === 'object' &&
+		typeof obj.statusCode === 'number' &&
+		typeof obj.error === 'string' &&
+		Array.isArray(obj.messages)
+	);
+};
+
 export function exceptionToObj(exception: HttpException): WSResponse {
 	if (exception instanceof BadRequestException) {
 		return {

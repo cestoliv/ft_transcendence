@@ -61,12 +61,19 @@
 		* [Get a player games history](#get-player-games-history)
 		* [Get a player statistics](#get-player-statistics)
 		* [Get the leadreboards](#get-leaderboards)
+		* [Start watching a game](#start-watching-a-game)
+		* [Stop watching a game](#stop-watching-a-game)
 	+ **Websocket Events**
 		+ [Before game start](#game-start)
 		+ [On game end](#game-end)
 		+ [New opponent position](#new-opponent-position)
 		+ [New score](#new-score-after-a-goal)
 		+ [New ball position](#new-ball-position)
+		+ [Watch - New creator position](#watch---new-creator-position)
+		+ [Watch - New opponent position](#watch---new-opponent-position)
+		+ [Watch - New ball position](#watch---new-ball-position)
+		+ [Watch - New score](#watch---new-score-after-a-goal)
+		+ [Watch - On game end](#watch---game-end)
 
 # REST API
 
@@ -1200,7 +1207,7 @@ payload: {
 ```typescript
 message: `games_history`
 payload: {
-	id: string, // User id
+	id: number, // User id
 }
 ```
 
@@ -1227,7 +1234,7 @@ payload: {
 ```typescript
 message: `games_userStats`
 payload: {
-	id: string, // User id
+	id: number, // User id
 }
 ```
 
@@ -1258,6 +1265,60 @@ payload: empty
 
 #### Return
 - A leaderboards object ([Leaderboards](#leaderboards))
+
+### **Start watching a game**
+
+#### Input
+```typescript
+message: `games_startWatching`
+payload: {
+	id: string, // Game id
+}
+```
+
+#### Return
+- The local game info object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['Game not found'],
+	}
+	```
+
+### **Stop watching a game**
+
+#### Input
+```typescript
+message: `games_stopWatching`
+payload: {
+	id: string, // Game id
+}
+```
+
+#### Return
+- The local game info object ([LocalGameInfo](#localgameinfo))
+- ```typescript
+	{
+		statusCode: 400,
+		error: 'Bad request',
+		messages: string[] // describing malformed payload
+	}
+	```
+- ```typescript
+	{
+		statusCode: 404,
+		message: 'Not Found',
+		messages: ['Game not found'],
+	}
+	```
 
 # Websocket Events
 
@@ -1336,6 +1397,55 @@ Send game information 3 seconds before the start of the game.
 	```typescript
 		x: number,
 		y: number
+	```
+
+### **Watch - New creator position**
+
+- Event name: `games_watch_creatorMove`
+- Data type:
+	```typescript
+		{ y: number }
+	```
+
+### **Watch - New opponent position**
+
+- Event name: `games_watch_opponentMove`
+- Data type:
+	```typescript
+		{ y: number }
+	```
+
+### **Watch - New ball position**
+
+- Event name: `games_watch_ballMove`
+- Data type:
+	```typescript
+		x: number,
+		y: number
+	```
+
+### **Watch - New score (after a goal)**
+
+- Event name: `games_watch_score`
+- Data type:
+	```typescript
+		creator: number, // creator score
+		opponent: number, // opponent score
+	```
+
+### **Watch - Game end**
+
+- Event name: `games_watch_end`
+- Data type:
+	```typescript
+		{
+			winner: {
+				user: User,
+				score: number,
+			},
+			creator_score: number,
+			opponent_score: number,
+		}
 	```
 
 # Objects

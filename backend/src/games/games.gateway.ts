@@ -2,7 +2,7 @@ import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
 import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
-import { exceptionToObj } from 'src/utils';
+import { exceptionToObj, isWsResponse } from 'src/utils';
 import { LocalGameInfo } from './game.class';
 import { Game } from './entities/game.entity';
 import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
@@ -43,7 +43,12 @@ export class GamesGateway extends BaseGateway {
 
 		// Create game
 		return this.gamesService
-			.create(socket.userId, payload, this.connectedClientsService)
+			.create(
+				socket.userId,
+				payload,
+				this.connectedClientsService,
+				this.server,
+			)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
@@ -145,6 +150,64 @@ export class GamesGateway extends BaseGateway {
 			.movePlayer(payload.id, socket.userId, payload.y)
 			.then(() => null)
 			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_startWatching')
+	async startWatching(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('Game id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Start watching
+		const game = await this.gamesService
+			.info(payload.id)
+			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+		if (isWsResponse(game)) return game;
+
+		socket.join(`game_watch_${game.id}`);
+		return game;
+	}
+
+	@SubscribeMessage('games_stopWatching')
+	async stopWatching(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('Game id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Stop watching
+		const game = await this.gamesService
+			.info(payload.id)
+			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+		if (isWsResponse(game)) return game;
+
+		socket.leave(`game_watch_${game.id}`);
+		return game;
 	}
 
 	@SubscribeMessage('games_invite')

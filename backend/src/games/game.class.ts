@@ -3,6 +3,7 @@ import {
 	ForbiddenException,
 	NotFoundException,
 } from '@nestjs/common';
+import { Server } from 'socket.io';
 import { ConnectedClientsService } from 'src/base.gateway';
 import { User } from 'src/users/entities/user.entity';
 import { GamesService } from './games.service';
@@ -84,6 +85,7 @@ function degRad(degrees) {
 export class LocalGame {
 	gamesService: GamesService;
 	connectedClientsService: ConnectedClientsService;
+	server: Server;
 
 	id: string;
 	state: 'waiting' | 'started' | 'ended' | 'saved';
@@ -121,9 +123,11 @@ export class LocalGame {
 		options: GameOptions,
 		gamesService: GamesService,
 		connectedClientsService: ConnectedClientsService,
+		server: Server,
 	) {
 		this.gamesService = gamesService;
 		this.connectedClientsService = connectedClientsService;
+		this.server = server;
 
 		this.id = id;
 		this.state = 'waiting';
@@ -317,6 +321,12 @@ export class LocalGame {
 				score: this.players[1].score,
 				opponent_score: this.players[0].score,
 			});
+		// Send to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_end', {
+			winner: this.winner,
+			creator_score: this.players[0].score,
+			opponent_score: this.players[1].score,
+		});
 
 		// Remove players from room
 		this.players.forEach((player) => {
@@ -372,6 +382,12 @@ export class LocalGame {
 		this.connectedClientsService
 			.get(opponent.user.id)
 			.emit('games_opponentMove', { y });
+
+		// Send new position to watchers
+		let event = 'games_watch_opponentMove';
+		if (playerId === this.players[0].user.id)
+			event = 'games_watch_creatorMove';
+		this.server.to(`game_watch_${this.id}`).emit(event, { y });
 	}
 
 	addScore(player: LocalGamePlayer) {
@@ -388,6 +404,11 @@ export class LocalGame {
 				you: this.players[1].score,
 				opponent: this.players[0].score,
 			});
+		// Send new score to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_score', {
+			creator: this.players[0].score,
+			opponent: this.players[1].score,
+		});
 
 		// Check score
 		if (this.options.maxScore && player.score >= this.options.maxScore)
@@ -465,5 +486,11 @@ export class LocalGame {
 				x: this.ball.x,
 				y: this.ball.y,
 			});
+
+		// Send state to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_ballMove', {
+			x: this.ball.x,
+			y: this.ball.y,
+		});
 	}
 }
