@@ -314,8 +314,28 @@ export class LocalGame {
 
 		// Save game to database
 		this.gamesService.save(this);
-		console.log('Game ended', this.winner);
 
+		// Compute elo
+		if (this.options.visibility === 'public') {
+			this.players.forEach(async (player) => {
+				const opponent = this.players.find(
+					(p) => p.socket.user.id !== player.socket.user.id,
+				);
+				let gameResult: 0 | 0.5 | 1 = 0; // 0 = loss, 0.5 = draw, 1 = win
+				if (this.players[0].score === this.players[1].score)
+					gameResult = 0.5;
+				else if (this.winner.user.id == player.socket.user.id)
+					gameResult = 1;
+
+				await this.gamesService.updateElo(
+					player.socket.user.id,
+					opponent.socket.user.id,
+					gameResult,
+				);
+			});
+		}
+
+		console.log('Game ended', this.winner);
 		// Remove game from games array
 		this.gamesService.games.delete(this.id);
 	}

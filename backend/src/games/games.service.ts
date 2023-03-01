@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { ConnectedClientsService } from 'src/base.gateway';
+import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class GamesService {
@@ -43,6 +45,51 @@ export class GamesService {
 		);
 		this.games.set(id, game);
 		return game.getInfo();
+	}
+
+	async getHistory(userId: number) {
+		const user = await this.usersService.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
+
+		const games = await this.gamesRepository.find({
+			where: [{ winner: { id: user.id } }, { loser: { id: user.id } }],
+		});
+		return games;
+	}
+
+	async getUserStats(userId: number) {
+		const user = await this.usersService.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
+
+		// Get public games (visibility: public)
+		const games = await this.gamesRepository.find({
+			where: [
+				{ winner: { id: user.id }, visibility: 'public' },
+				{ loser: { id: user.id }, visibility: 'public' },
+			],
+		});
+
+		// Stats
+		const player: StatsUser = {
+			user: user,
+			stats: {
+				games: games.length,
+				wins: 0,
+				losses: 0,
+				winrate: 0,
+			},
+		};
+
+		// Compute stats
+		games.forEach((game) => {
+			if (game.winner.id == user.id) player.stats.wins++;
+			else if (game.loser.id == user.id) player.stats.losses++;
+		});
+		player.stats.winrate =
+			(player.stats.wins / (player.stats.wins + player.stats.losses)) *
+			100;
+
+		return player;
 	}
 
 	async join(id: string, joiner: SocketWithUser) {
@@ -138,5 +185,97 @@ export class GamesService {
 			// Remove the user from the queue
 			this.queue = this.queue.filter((user) => user !== socket);
 		}
+	}
+
+	async updateElo(
+		userId: number,
+		opponentId: number,
+		result: 0 | 0.5 | 1,
+	): Promise<User> {
+		const user = await this.usersService.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
+		const opponent = await this.usersService.findOne(opponentId);
+		if (!opponent) throw new NotFoundException('User not found');
+
+		// See: https://fr.wikipedia.org/wiki/Classement_Elo
+
+		const publicGamesCount = await this.gamesRepository.count({
+			where: [{ winner: { id: user.id } }, { loser: { id: user.id } }],
+		});
+
+		let K = 40;
+		if (publicGamesCount > 30) K = 20;
+		if (user.elo > 2400) K = 10;
+
+		const victoryProbability =
+			1 / (1 + 10 ** ((opponent.elo - user.elo) / 400));
+		const newElo = user.elo + K * (result - victoryProbability);
+
+		user.elo = Math.round(newElo);
+		console.log(user);
+		console.log('newElo: ', newElo, 'user.elo: ', user.elo, 'K: ', K);
+		return await this.usersService.save(user);
+	}
+
+	async getLeaderboards(maxUsers = 10): Promise<Leaderboards> {
+		const leaderboards: Leaderboards = {
+			elo: [],
+			mostPlayed: [],
+		};
+		const players = new Map<number, StatsUser>();
+
+		// Winrate leaderboard, sorted by the better ratio of wins/losses in public games
+		const publicGames = await this.gamesRepository.find({
+			where: { visibility: 'public' },
+		});
+		// Get win and loss count for each player
+		publicGames.forEach((game) => {
+			if (!players.has(game.winner.id))
+				players.set(game.winner.id, {
+					user: game.winner,
+					stats: {
+						wins: 0,
+						losses: 0,
+						games: 0,
+						winrate: 0,
+					},
+				});
+			if (!players.has(game.loser.id))
+				players.set(game.loser.id, {
+					user: game.loser,
+					stats: {
+						wins: 0,
+						losses: 0,
+						games: 0,
+						winrate: 0,
+					},
+				});
+
+			players.get(game.winner.id).stats.wins++;
+			players.get(game.loser.id).stats.losses++;
+		});
+		// Append the users to the leaderboard
+		players.forEach((player) => {
+			// Compute stats besed on wins and losses
+			player.stats = {
+				wins: player.stats.wins,
+				losses: player.stats.losses,
+				games: player.stats.wins + player.stats.losses,
+				winrate:
+					(player.stats.wins /
+						(player.stats.wins + player.stats.losses)) *
+					100,
+			};
+
+			leaderboards.elo.push(player.user);
+			leaderboards.mostPlayed.push(player);
+		});
+		// Sort the leaderboard and remove the users that are not in the top
+		leaderboards.elo.sort((a, b) => b.elo - a.elo).splice(maxUsers);
+		leaderboards.mostPlayed
+			.sort((a, b) => b.stats.games - a.stats.games)
+			.splice(maxUsers);
+
+		return leaderboards;
 	}
 }

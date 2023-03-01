@@ -22,7 +22,7 @@ export class Game {
 	@Column()
 	maxDuration: 1 | 2 | 3;
 
-	@Column()
+	@Column({ nullable: true })
 	maxScore: 5 | 10 | 30 | null;
 
 	// Scores

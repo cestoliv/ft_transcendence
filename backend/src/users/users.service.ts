@@ -48,6 +48,7 @@ export class UsersService {
 		user.id42 = createUserDto.id42;
 		user.username = createUserDto.username;
 		user.displayName = createUserDto.displayName || 'Unnamed';
+		user.elo = 1000;
 		user.otp = createUserDto.otp;
 		user.profile_picture_42 = createUserDto.profile_picture_42;
 
@@ -64,7 +65,7 @@ export class UsersService {
 		id: number,
 		{ withTotp = false, with42ProfilePicture = false } = {},
 	) {
-		const select = ['id', 'id42', 'username'];
+		const select = ['id', 'id42', 'username', 'displayName', 'elo'];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
 
@@ -79,7 +80,7 @@ export class UsersService {
 		id42: number,
 		{ withTotp = false, with42ProfilePicture = false } = {},
 	) {
-		const select = ['id', 'id42', 'username'];
+		const select = ['id', 'id42', 'username', 'displayName', 'elo'];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
 
@@ -94,7 +95,7 @@ export class UsersService {
 		username: string,
 		{ withTotp = false, with42ProfilePicture = false } = {},
 	) {
-		const select = ['id', 'id42', 'username'];
+		const select = ['id', 'id42', 'username', 'displayName', 'elo'];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
 
