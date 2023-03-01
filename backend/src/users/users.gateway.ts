@@ -27,7 +27,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_get')
 	async get(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<User | WSResponse> {
 		// Validate payload
@@ -56,7 +56,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_update')
 	async update(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<User | WSResponse> {
 		// Validate payload
@@ -87,7 +87,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to update user
 		return await this.usersService
-			.update(client.user, payload.id, updateUserDto)
+			.update(socket.userId, payload.id, updateUserDto)
 			.then((user) => user)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -97,7 +97,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_inviteFriend')
 	async inviteFriend(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<UserFriend | WSResponse> {
 		// Validate payload
@@ -116,7 +116,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to invite friend
 		return await this.usersService
-			.inviteFriend(client.user, payload.username)
+			.inviteFriend(socket.userId, payload.username)
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -126,7 +126,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_acceptFriend')
 	async acceptFriend(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<UserFriend | WSResponse> {
 		// Validate payload
@@ -144,7 +144,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to accept friend
 		return await this.usersService
-			.acceptFriendship(client.user, payload.id)
+			.acceptFriendship(socket.userId, payload.id)
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -154,7 +154,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_removeFriend')
 	async removeFriend(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<UserFriend | WSResponse> {
 		// Validate payload
@@ -172,7 +172,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to remove friend
 		return await this.usersService
-			.removeFriendship(client.user, payload.id)
+			.removeFriendship(socket.userId, payload.id)
 			.then((userFriend) => userFriend)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -182,7 +182,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_ban')
 	async ban(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<BannedUser | WSResponse> {
 		// Validate payload
@@ -204,7 +204,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to ban user
 		return await this.usersService
-			.ban(client.user, payload.id, until.toJSDate())
+			.ban(socket.userId, payload.id, until.toJSDate())
 			.then((user) => user)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -214,7 +214,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_mute')
 	async mute(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<MutedUser | WSResponse> {
 		// Validate payload
@@ -236,7 +236,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to mute user
 		return await this.usersService
-			.mute(client.user, payload.id, until.toJSDate())
+			.mute(socket.userId, payload.id, until.toJSDate())
 			.then((user) => user)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -246,7 +246,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_sendMessage')
 	async sendMessage(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<UserMessage | WSResponse> {
 		// Validate payload
@@ -266,13 +266,13 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to send message
 		const message = await this.usersService
-			.sendMessage(client.user, payload.id, payload.message)
+			.sendMessage(socket.userId, payload.id, payload.message)
 			.then((message) => message)
 			.catch((error) => exceptionToObj(error));
 		if (!(message instanceof UserMessage)) return message;
 
 		// Send message to the user
-		client
+		socket
 			.to(`user_${payload.id}`)
 			.emit('users_message', { message: message });
 
@@ -285,7 +285,7 @@ export class UsersGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('users_getMessages')
 	async getMessages(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<UserMessage[] | WSResponse> {
 		// Validate payload
@@ -308,7 +308,7 @@ export class UsersGateway extends BaseGateway {
 
 		// Try to get messages
 		return await this.usersService
-			.getMessages(client.user, payload.id, before.toJSDate())
+			.getMessages(socket.userId, payload.id, before.toJSDate())
 			.then((messages) => messages)
 			.catch((error) => exceptionToObj(error));
 	}

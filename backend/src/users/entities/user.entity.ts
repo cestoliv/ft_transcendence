@@ -27,6 +27,9 @@ export class User {
 	@Column()
 	displayName: string;
 
+	@Column()
+	elo: number;
+
 	@Column({ nullable: true, select: false })
 	otp: string;
 

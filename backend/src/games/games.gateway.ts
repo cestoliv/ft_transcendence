@@ -2,8 +2,10 @@ import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
 import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
-import { exceptionToObj } from 'src/utils';
+import { exceptionToObj, isWsResponse } from 'src/utils';
 import { LocalGameInfo } from './game.class';
+import { Game } from './entities/game.entity';
+import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -17,7 +19,7 @@ import { LocalGameInfo } from './game.class';
 export class GamesGateway extends BaseGateway {
 	@SubscribeMessage('games_create')
 	async create(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -41,14 +43,19 @@ export class GamesGateway extends BaseGateway {
 
 		// Create game
 		return this.gamesService
-			.create(client, payload, this.connectedClientsService)
+			.create(
+				socket.userId,
+				payload,
+				this.connectedClientsService,
+				this.server,
+			)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_join')
 	async join(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -66,14 +73,14 @@ export class GamesGateway extends BaseGateway {
 
 		// Join game
 		return this.gamesService
-			.join(payload.id, client)
+			.join(payload.id, socket.userId)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_quit')
 	async quit(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -91,36 +98,36 @@ export class GamesGateway extends BaseGateway {
 
 		// Join game
 		return this.gamesService
-			.quit(payload.id, client)
+			.quit(payload.id, socket.userId)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_joinMatchmaking')
 	async joinMatchmaking(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 	): Promise<boolean | WSResponse> {
 		// Join Matchmaking
 		return this.gamesService
-			.joinMatchmaking(client)
+			.joinMatchmaking(socket.userId)
 			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_quitMatchmaking')
 	async quitMatchmaking(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 	): Promise<boolean | WSResponse> {
 		// Quit Matchmaking
 		return this.gamesService
-			.leaveMatchmaking(client)
+			.leaveMatchmaking(socket.userId)
 			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_playerMove')
 	async move(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<any | WSResponse> {
 		// Validate payload
@@ -140,14 +147,72 @@ export class GamesGateway extends BaseGateway {
 
 		// Move player
 		return this.gamesService
-			.movePlayer(payload.id, client, payload.y)
+			.movePlayer(payload.id, socket.userId, payload.y)
 			.then(() => null)
 			.catch((err) => exceptionToObj(err));
 	}
 
+	@SubscribeMessage('games_startWatching')
+	async startWatching(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('Game id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Start watching
+		const game = await this.gamesService
+			.info(payload.id)
+			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+		if (isWsResponse(game)) return game;
+
+		socket.join(`game_watch_${game.id}`);
+		return game;
+	}
+
+	@SubscribeMessage('games_stopWatching')
+	async stopWatching(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('Game id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Stop watching
+		const game = await this.gamesService
+			.info(payload.id)
+			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+		if (isWsResponse(game)) return game;
+
+		socket.leave(`game_watch_${game.id}`);
+		return game;
+	}
+
 	@SubscribeMessage('games_invite')
 	async invite(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<any | WSResponse> {
 		// Validate payload
@@ -166,17 +231,16 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
-			console.log('invite')
-			// Invite player
-			return this.gamesService
-			.invite(payload.id, client, payload.user_id)
+		// Invite player
+		return this.gamesService
+			.invite(payload.id, socket.userId, payload.user_id)
 			.then((invitee) => invitee)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_info')
 	async info(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -196,6 +260,65 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.info(payload.id)
 			.then((game) => game)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_history')
+	async history(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<Game[] | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get game history
+		return this.gamesService
+			.getHistory(payload.id)
+			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_leaderboards')
+	async leaderboard(): Promise<Leaderboards | WSResponse> {
+		// Get leaderboards
+		return this.gamesService
+			.getLeaderboards()
+			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_userStats')
+	async userStats(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<StatsUser | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get user stats
+		return this.gamesService
+			.getUserStats(payload.id)
+			.then((history) => history)
 			.catch((err) => exceptionToObj(err));
 	}
 }

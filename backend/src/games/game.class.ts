@@ -3,14 +3,13 @@ import {
 	ForbiddenException,
 	NotFoundException,
 } from '@nestjs/common';
+import { Server } from 'socket.io';
 import { ConnectedClientsService } from 'src/base.gateway';
-import { SocketWithUser } from 'src/types';
 import { User } from 'src/users/entities/user.entity';
 import { GamesService } from './games.service';
 
 interface LocalGamePlayer {
-	// TODO: Store only user and get socket from connectedClientsService
-	socket: SocketWithUser;
+	user: User;
 	score: number;
 	paddle: {
 		x: number;
@@ -86,12 +85,13 @@ function degRad(degrees) {
 export class LocalGame {
 	gamesService: GamesService;
 	connectedClientsService: ConnectedClientsService;
+	server: Server;
 
 	id: string;
 	state: 'waiting' | 'started' | 'ended' | 'saved';
 	startAt: Date;
 	players: Array<LocalGamePlayer>;
-	invited: Array<User>;
+	invited: Array<number>; // array of user ids
 	ball: {
 		x: number;
 		y: number;
@@ -119,13 +119,15 @@ export class LocalGame {
 
 	constructor(
 		id: string,
-		creator: SocketWithUser,
+		creatorId: number,
 		options: GameOptions,
 		gamesService: GamesService,
 		connectedClientsService: ConnectedClientsService,
+		server: Server,
 	) {
 		this.gamesService = gamesService;
 		this.connectedClientsService = connectedClientsService;
+		this.server = server;
 
 		this.id = id;
 		this.state = 'waiting';
@@ -143,7 +145,7 @@ export class LocalGame {
 		// Ball
 		this.resetBall();
 
-		this.addPlayer(creator);
+		this.addPlayer(creatorId);
 	}
 
 	getInfo(): LocalGameInfo {
@@ -152,7 +154,7 @@ export class LocalGame {
 			state: this.state,
 			startAt: this.startAt ? this.startAt.getTime() : null,
 			players: this.players.map((player) => ({
-				user: player.socket.user,
+				user: player.user,
 				score: player.score,
 			})),
 		};
@@ -186,51 +188,57 @@ export class LocalGame {
 		this.players[1].paddle.radius = this.options.paddleHeight;
 	}
 
-	async invite(inviter: User, invitee: User) {
+	async invite(inviterId: number, inviteeId: number) {
+		const invitee = await this.gamesService.usersService.findOne(inviteeId);
+		if (!invitee) throw new NotFoundException('User not found');
+
 		// Check that creator doesn't invite himself
-		if (this.players[0].socket.user.id === invitee.id)
+		if (this.players[0].user.id === invitee.id)
 			throw new ForbiddenException('You cannot invite yourself');
 		// Check that inviter is the creator
-		if (this.players[0].socket.user.id !== inviter.id)
+		if (this.players[0].user.id !== inviterId)
 			throw new ForbiddenException('Only the creator can invite');
 		// Check if game is waiting for players and is not full
 		if (this.state !== 'waiting' || this.players.length >= 2)
 			throw new ForbiddenException('Game is already full');
-			// Check if user is online
+		// Check if user is online
 		if (!this.connectedClientsService.has(invitee.id))
 			throw new ForbiddenException('User is offline');
 		// Check if game is private and user is not invited
 		if (
 			this.options.visibility === 'private' &&
-			!this.invited.find((user) => user.id === invitee.id)
+			!this.invited.find((id) => id === invitee.id)
 		)
-			this.invited.push(invitee);
+			this.invited.push(invitee.id);
 
 		// Send notification to invitee
 		console.log('Sending invitation to', invitee.username)
 		this.connectedClientsService
-			.get(invitee.id)
+			.get(inviteeId)
 			.emit('game_invitation', this.getInfo());
 		return invitee;
 	}
 
-	addPlayer(socket: SocketWithUser) {
+	async addPlayer(joinerId: number) {
+		const user = await this.gamesService.usersService.findOne(joinerId);
+		if (!user) throw new NotFoundException('User not found');
+
 		if (this.players.length >= 2) throw new ForbiddenException('Game full');
 		if (
 			this.options.visibility === 'private' &&
-			!this.invited.find((user) => user.id === socket.user.id) &&
+			!this.invited.find((id) => id === user.id) &&
 			this.players.length !== 0 // Creator can join
 		)
 			throw new ForbiddenException('User not invited');
 
 		this.players.push({
-			socket,
+			user,
 			score: 0,
 			paddle: { x: 0, y: 0, radius: 0 },
 		});
 		this.resetPlayers();
 		// Add user to room
-		socket.join(`game_${this.id}`);
+		this.connectedClientsService.get(joinerId).join(`game_${this.id}`);
 
 		if (this.players.length === 2) {
 			this.start();
@@ -242,8 +250,9 @@ export class LocalGame {
 		this.startAt = new Date();
 		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
 		this.players.forEach((player) => {
-			console.log('Sending game start to', player.socket.user.username);
-			player.socket.emit('games_start', this.getInfo());
+			this.connectedClientsService
+				.get(player.user.id)
+				.emit('games_start', this.getInfo());
 		});
 		setTimeout(() => {
 			this.state = 'started';
@@ -261,7 +270,9 @@ export class LocalGame {
 			this.state = 'ended';
 			this.winner = null;
 			this.players.forEach((player) => {
-				player.socket.leave(`game_${this.id}`);
+				this.connectedClientsService
+					.get(player.user.id)
+					.leave(`game_${this.id}`);
 			});
 			this.gamesService.games.delete(this.id);
 			return;
@@ -278,87 +289,126 @@ export class LocalGame {
 			// If winner is null, then we need to check the score
 			this.winner.user =
 				this.players[0].score > this.players[1].score
-					? this.players[0].socket.user
-					: this.players[1].socket.user;
+					? this.players[0].user
+					: this.players[1].user;
 			if (this.players[0].score === this.players[1].score)
 				this.winner = null;
 		}
 
 		// Set winner and loser
 		this.winner.score = this.players.find(
-			(player) => player.socket.user.id === this.winner.user.id,
+			(player) => player.user.id === this.winner.user.id,
 		).score;
 		const loser = this.players.find(
-			(player) => player.socket.user.id !== this.winner.user.id,
+			(player) => player.user.id !== this.winner.user.id,
 		);
 		this.loser = {
-			user: loser.socket.user,
+			user: loser.user,
 			score: loser.score,
 		};
 
 		// Send score to players
-		this.players[0].socket.emit('games_end', {
+		this.connectedClientsService
+			.get(this.players[0].user.id)
+			.emit('games_end', {
+				winner: this.winner,
+				score: this.players[0].score,
+				opponent_score: this.players[1].score,
+			});
+		this.connectedClientsService
+			.get(this.players[1].user.id)
+			.emit('games_end', {
+				winner: this.winner,
+				score: this.players[1].score,
+				opponent_score: this.players[0].score,
+			});
+		// Send to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_end', {
 			winner: this.winner,
-			score: this.players[0].score,
+			creator_score: this.players[0].score,
 			opponent_score: this.players[1].score,
-		});
-		this.players[1].socket.emit('games_end', {
-			winner: this.winner,
-			score: this.players[1].score,
-			opponent_score: this.players[0].score,
 		});
 
 		// Remove players from room
 		this.players.forEach((player) => {
-			player.socket.leave(`game_${this.id}`);
+			this.connectedClientsService
+				.get(player.user.id)
+				.leave(`game_${this.id}`);
 		});
 
 		// Save game to database
 		this.gamesService.save(this);
-		console.log('Game ended', this.winner);
+
+		// Compute elo
+		if (this.options.visibility === 'public') {
+			this.players.forEach(async (player) => {
+				const opponent = this.players.find(
+					(p) => p.user.id !== player.user.id,
+				);
+				let gameResult: 0 | 0.5 | 1 = 0; // 0 = loss, 0.5 = draw, 1 = win
+				if (this.players[0].score === this.players[1].score)
+					gameResult = 0.5;
+				else if (this.winner.user.id == player.user.id) gameResult = 1;
+
+				await this.gamesService.updateElo(
+					player.user.id,
+					opponent.user.id,
+					gameResult,
+				);
+			});
+		}
 
 		// Remove game from games array
 		this.gamesService.games.delete(this.id);
 	}
 
-	giveUp(socket: SocketWithUser) {
+	giveUp(quitterId: number) {
 		if (this.state != 'started') return;
-		const player = this.players.find(
-			(p) => p.socket.user.id === socket.user.id,
-		);
+		const player = this.players.find((p) => p.user.id === quitterId);
 		if (!player) throw new NotFoundException('Player not found');
-		const opponent = this.players.find(
-			(p) => p.socket.user.id !== socket.user.id,
-		);
+		const opponent = this.players.find((p) => p.user.id !== quitterId);
 
 		// End the game with the opponent as winner
-		this.end(opponent.socket.user);
+		this.end(opponent.user);
 	}
 
-	movePlayer(socket: SocketWithUser, y: number) {
+	movePlayer(playerId: number, y: number) {
 		if (this.state != 'started') return;
-		const player = this.players.find(
-			(p) => p.socket.user.id === socket.user.id,
-		);
+		const player = this.players.find((p) => p.user.id === playerId);
 
 		if (!player) throw new NotFoundException('Player not found');
 		player.paddle.y = y;
 		// Send new position to opponent but not to me
-		const opponent = this.players.find(
-			(p) => p.socket.user.id !== socket.user.id,
-		);
-		opponent.socket.emit('games_opponentMove', { y });
+		const opponent = this.players.find((p) => p.user.id !== playerId);
+		this.connectedClientsService
+			.get(opponent.user.id)
+			.emit('games_opponentMove', { y });
+
+		// Send new position to watchers
+		let event = 'games_watch_opponentMove';
+		if (playerId === this.players[0].user.id)
+			event = 'games_watch_creatorMove';
+		this.server.to(`game_watch_${this.id}`).emit(event, { y });
 	}
 
 	addScore(player: LocalGamePlayer) {
 		player.score++;
-		this.players[0].socket.emit('games_score', {
-			you: this.players[0].score,
+		this.connectedClientsService
+			.get(this.players[0].user.id)
+			.emit('games_score', {
+				you: this.players[0].score,
+				opponent: this.players[1].score,
+			});
+		this.connectedClientsService
+			.get(this.players[1].user.id)
+			.emit('games_score', {
+				you: this.players[1].score,
+				opponent: this.players[0].score,
+			});
+		// Send new score to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_score', {
+			creator: this.players[0].score,
 			opponent: this.players[1].score,
-		});
-		this.players[1].socket.emit('games_score', {
-			you: this.players[1].score,
-			opponent: this.players[0].score,
 		});
 
 		// Check score
@@ -425,11 +475,21 @@ export class LocalGame {
 		}
 		this.ball.x += this.ball.speed.x;
 
-		this.players[0].socket.emit('games_ballMove', {
-			x: this.screen.width - this.ball.x,
-			y: this.ball.y,
-		});
-		this.players[1].socket.emit('games_ballMove', {
+		this.connectedClientsService
+			.get(this.players[0].user.id)
+			.emit('games_ballMove', {
+				x: this.screen.width - this.ball.x,
+				y: this.ball.y,
+			});
+		this.connectedClientsService
+			.get(this.players[1].user.id)
+			.emit('games_ballMove', {
+				x: this.ball.x,
+				y: this.ball.y,
+			});
+
+		// Send state to watchers
+		this.server.to(`game_watch_${this.id}`).emit('games_watch_ballMove', {
 			x: this.ball.x,
 			y: this.ball.y,
 		});

@@ -30,7 +30,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_create')
 	async create(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -49,23 +49,23 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Create channel
 		let channel = await this.channelsService
-			.create(client.user, payload)
+			.create(socket.userId, payload)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 		if (!(channel instanceof Channel)) return channel;
 
 		// Join channel
 		channel = await this.channelsService.join(
-			client.user,
+			socket.userId,
 			channel.code,
 			createChannelDto.password,
 		);
-		client.join(`channel_${channel.id}`);
+		socket.join(`channel_${channel.id}`);
 
 		// Add to admins
 		channel = await this.channelsService.addAdmin(
-			client.user,
-			client.user.id,
+			socket.userId,
+			socket.userId,
 			channel.id,
 		);
 		return channel;
@@ -76,11 +76,11 @@ export class ChannelsGateway extends BaseGateway {
 	 * Show joined channels, public channels, and channels the user is invited in.
 	 */
 	@SubscribeMessage('channels_list')
-	async list(client: SocketWithUser): Promise<Channel[]> {
+	async list(socket: SocketWithUser): Promise<Channel[]> {
 		const channels = await this.channelsService.findAll();
 
 		return channels.filter((channel) => {
-			return this.channelsService.canSee(client.user, channel);
+			return this.channelsService.canSee(socket.userId, channel);
 		});
 	}
 
@@ -91,7 +91,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_get')
 	async get(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -118,7 +118,7 @@ export class ChannelsGateway extends BaseGateway {
 			};
 
 		// Check if the user is allowed to see the channel
-		if (this.channelsService.canSee(client.user, channel)) return channel;
+		if (this.channelsService.canSee(socket.userId, channel)) return channel;
 		return {
 			statusCode: 403,
 			error: 'Forbidden',
@@ -127,22 +127,12 @@ export class ChannelsGateway extends BaseGateway {
 	}
 
 	/*
-	 * Remove a channel.
-	 * The client must be the owner of the channel.
-	 */
-	// @SubscribeMessage('channels_remove')
-	// remove(@MessageBody() id: number) {
-	// 	return this.channelsService.remove(id);
-	// }
-
-	/*
 	 * Update the channel.
 	 * The client must be the owner of the channel.
 	 */
-	// @UseInterceptors(NotFoundInterceptor)
 	@SubscribeMessage('channels_update')
 	async update(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -175,7 +165,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to update channel
 		return this.channelsService
-			.update(client.user, payload.id, payload)
+			.update(socket.userId, payload.id, payload)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -187,7 +177,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_join')
 	async join(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -206,12 +196,12 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to join channel
 		const channel = await this.channelsService
-			.join(client.user, payload.code, payload.password)
+			.join(socket.userId, payload.code, payload.password)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 		if (!(channel instanceof Channel)) return channel;
 
-		client.join(`channel_${channel.id}`);
+		socket.join(`channel_${channel.id}`);
 		return channel;
 	}
 
@@ -219,8 +209,8 @@ export class ChannelsGateway extends BaseGateway {
 	 * List channels joined by the client.
 	 */
 	@SubscribeMessage('channels_listJoined')
-	async listJoined(client: SocketWithUser): Promise<Channel[]> {
-		return this.channelsService.listJoined(client.user);
+	async listJoined(socket: SocketWithUser): Promise<Channel[]> {
+		return this.channelsService.listJoined(socket.userId);
 	}
 
 	/*
@@ -228,7 +218,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_leave')
 	async leave(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -246,12 +236,12 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to leave channel
 		const channel = await this.channelsService
-			.leave(client.user, payload.id)
+			.leave(socket.userId, payload.id)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 		if (!(channel instanceof Channel)) return channel;
 
-		client.leave(`channel_${channel.id}`);
+		socket.leave(`channel_${channel.id}`);
 		return channel;
 	}
 
@@ -262,7 +252,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_addAdmin')
 	async addAdmin(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -282,7 +272,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to add admin
 		return this.channelsService
-			.addAdmin(client.user, payload.user_id, payload.id)
+			.addAdmin(socket.userId, payload.user_id, payload.id)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -294,7 +284,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_removeAdmin')
 	async removeAdmin(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | Channel> {
 		// Validate payload
@@ -314,7 +304,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to remove admin
 		return this.channelsService
-			.removeAdmin(client.user, payload.user_id, payload.id)
+			.removeAdmin(socket.userId, payload.user_id, payload.id)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -325,7 +315,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_banUser')
 	async ban(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | ChannelBannedUser> {
 		// Validate payload
@@ -349,20 +339,18 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to ban user
 		const channelBannedUser = await this.channelsService
-			.banUser(client.user, payload.user_id, payload.id, until.toJSDate())
+			.banUser(
+				socket.userId,
+				payload.user_id,
+				payload.id,
+				until.toJSDate(),
+			)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 		if (!(channelBannedUser instanceof ChannelBannedUser))
 			return channelBannedUser;
 
-		// Loop through all connected clients and make user leave the channel
-		this.connectedClientsService.array().forEach((cClient) => {
-			// TODO: check that this new way of getting the socket is working
-			const socket = cClient[1];
-			if (socket.user.id == payload.user_id)
-				socket.leave(`channel_${payload.id}`);
-		});
-
+		socket.leave(`channel_${payload.id}`);
 		return channelBannedUser;
 	}
 
@@ -372,7 +360,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_muteUser')
 	async mute(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | ChannelMutedUser> {
 		// Validate payload
@@ -397,7 +385,7 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to mute user
 		return this.channelsService
 			.muteUser(
-				client.user,
+				socket.userId,
 				payload.user_id,
 				payload.id,
 				until.toJSDate(),
@@ -413,7 +401,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_inviteUser')
 	async inviteUser(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | ChannelInvitedUser> {
 		// Validate payload
@@ -433,7 +421,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to invite user
 		return this.channelsService
-			.inviteUser(client.user, payload.user_id, payload.id)
+			.inviteUser(socket.userId, payload.user_id, payload.id)
 			.then((channel) => channel)
 			.catch((error) => exceptionToObj(error));
 	}
@@ -445,7 +433,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_sendMessage')
 	async sendMessage(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | ChannelMessage> {
 		// Validate payload
@@ -465,13 +453,13 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to send message
 		const message = await this.channelsService
-			.sendMessage(client.user, payload.id, payload.message)
+			.sendMessage(socket.userId, payload.id, payload.message)
 			.then((message) => message)
 			.catch((error) => exceptionToObj(error));
 		if (!(message instanceof ChannelMessage)) return message;
 
 		// Send message to all members of the channel (except the sender)
-		client
+		socket
 			.to(`channel_${message.channelId}`)
 			.emit('channels_message', message);
 
@@ -485,7 +473,7 @@ export class ChannelsGateway extends BaseGateway {
 	 */
 	@SubscribeMessage('channels_messages')
 	async getMessages(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<WSResponse | ChannelMessage[]> {
 		// Validate payload
@@ -508,7 +496,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Try to get messages
 		return this.channelsService
-			.getMessages(client.user, payload.id, before.toJSDate())
+			.getMessages(socket.userId, payload.id, before.toJSDate())
 			.then((messages) => messages)
 			.catch((error) => exceptionToObj(error));
 	}

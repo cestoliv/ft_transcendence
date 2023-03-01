@@ -167,10 +167,20 @@ const Canvas = ({ gameId, socket }) => {
 			ball.y = data.y * (canvasSize.height / 256);
 		}
 	});
-	// socket.off('games_end'); // Unbind previous event
-	// socket.on('games_end', (data: any) => {
-	// 	console.log('games_end', data);
-	// });
+
+	// Watchers events
+	socket.off('games_watch_opponentMove'); // Unbind previous event
+	socket.on('games_watch_opponentMove', (data: any) => {
+		console.log('games_watch_opponentMove', data);
+	});
+	socket.off('games_watch_creatorMove'); // Unbind previous event
+	socket.on('games_watch_creatorMove', (data: any) => {
+		console.log('games_watch_creatorMove', data);
+	});
+	socket.off('games_watch_ballMove'); // Unbind previous event
+	socket.on('games_watch_ballMove', (data: any) => {
+		console.log('games_watch_ballMove', data);
+	});
 
 	return (
 		<div className="canvas-wrapper">
@@ -226,6 +236,16 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 		console.log('games_end', data);
+	});
+
+	// Watchers events
+	socket.off('games_watch_score'); // Unbind previous event
+	socket.on('games_watch_score', (data: any) => {
+		console.log('games_watch_score', data);
+	});
+	socket.off('games_watch_end'); // Unbind previous event
+	socket.on('games_watch_end', (data: any) => {
+		console.log('games_watch_end', data);
 	});
 
 	return (

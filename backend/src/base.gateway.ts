@@ -50,7 +50,7 @@ export abstract class BaseGateway implements OnGatewayConnection {
 	async handleConnection(socket: SocketWithUser) {
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
-			socket.user = user;
+			socket.userId = user.id;
 
 			if (this.connectedClientsService.has(user.id)) {
 				console.log(
@@ -65,7 +65,7 @@ export abstract class BaseGateway implements OnGatewayConnection {
 			this.connectedClientsService.add(user.id, socket);
 
 			// Make the user join all the channels he is in
-			const channels = await this.channelsService.listJoined(user);
+			const channels = await this.channelsService.listJoined(user.id);
 			for (const channel of channels) {
 				socket.join(`channel_${channel.id}`);
 			}
@@ -84,37 +84,35 @@ export abstract class BaseGateway implements OnGatewayConnection {
 	}
 
 	async handleDisconnect(socket: SocketWithUser) {
-		if (!socket.user) return;
-		if (!this.connectedClientsService.has(socket.user.id)) {
+		if (!socket.userId) return;
+		if (!this.connectedClientsService.has(socket.userId)) {
 			console.log(
-				`Client already disconnected: ${socket.user.username} (${socket.id})`,
+				`Client already disconnected: ${socket.userId} (${socket.id})`,
 			);
 			return;
 		} else
-			console.log(
-				`Client disconnected: ${socket.user.username} (${socket.id})`,
-			);
+			console.log(`Client disconnected: ${socket.userId} (${socket.id})`);
 
-		this.connectedClientsService.delete(socket.user.id);
+		this.connectedClientsService.delete(socket.userId);
 
 		// Leave all the channels he is in
-		const channels = await this.channelsService.listJoined(socket.user);
-		for (const channel of channels) {
-			socket.leave(`channel_${channel.id}`);
-		}
+		// const channels = await this.channelsService.listJoined(socket.userId);
+		// for (const channel of channels) {
+		// 	socket.leave(`channel_${channel.id}`);
+		// }
 
 		// Make the user give up all the games he is in
 		const games = [...this.gamesService.games].filter((g) => {
 			const game = g[1];
 			return game.players.find(
-				(player) => player.socket.user.id == socket.user.id,
+				(player) => player.user.id == socket.userId,
 			);
 		});
 		for (const game of games) {
-			game[1].giveUp(socket);
+			game[1].giveUp(socket.userId);
 		}
 
 		// Leave his own channel
-		socket.leave(`user_${socket.user.id}`);
+		// socket.leave(`user_${socket.userId}`);
 	}
 }
