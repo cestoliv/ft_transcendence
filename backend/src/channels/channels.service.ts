@@ -9,7 +9,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { genId } from 'src/utils';
 import { CreateChannelDto } from './dto/create-channel.dto';
@@ -38,7 +37,10 @@ export class ChannelsService {
 		private readonly usersService: UsersService,
 	) {}
 
-	async create(creator: User, createChannelDto: CreateChannelDto) {
+	async create(creatorId: number, createChannelDto: CreateChannelDto) {
+		const creator = await this.usersService.findOne(creatorId);
+		if (!creator) throw new NotFoundException('User not found');
+
 		const channel = new Channel();
 		channel.name = createChannelDto.name;
 		channel.code = genId(6);
@@ -87,23 +89,22 @@ export class ChannelsService {
 		});
 	}
 
-	canSee(user: User, channel: Channel): boolean {
-		if (channel.owner.id === user.id) return true;
-		if (channel.members.find((member) => member.id === user.id))
-			return true;
-		if (channel.invited.find((invited) => invited.user.id === user.id))
+	canSee(userId: number, channel: Channel): boolean {
+		if (channel.owner.id === userId) return true;
+		if (channel.members.find((member) => member.id === userId)) return true;
+		if (channel.invited.find((invited) => invited.user.id === userId))
 			return true;
 		if (channel.visibility !== Visibility.Private) return true;
 	}
 
 	async update(
-		updater: User,
+		updaterId: number,
 		id: number,
 		updateChannelDto: UpdateChannelDto,
 	) {
 		const channel = await this.findOne(id);
 		if (!channel) throw new NotFoundException('Channel not found');
-		if (channel.owner.id !== updater.id)
+		if (channel.owner.id !== updaterId)
 			throw new ForbiddenException(
 				'Only channel owner can update channel',
 			);
@@ -138,10 +139,12 @@ export class ChannelsService {
 	}
 
 	async join(
-		user: User,
+		userId: number,
 		channelCode: string,
 		password: string,
 	): Promise<Channel> {
+		const user = await this.usersService.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
 		const channel = await this.findOneByCode(channelCode, true);
 		if (!channel) throw new NotFoundException('Channel not found');
 
@@ -211,14 +214,14 @@ export class ChannelsService {
 		return await this.save(channel);
 	}
 
-	async listJoined(user: User): Promise<Channel[]> {
+	async listJoined(userId: number): Promise<Channel[]> {
 		const channels = await this.channelsRepository.find({
-			where: { members: { id: user.id } },
+			where: { members: { id: userId } },
 		});
 		return channels;
 	}
 
-	async leave(user: User, channelId: number): Promise<Channel> {
+	async leave(userId: number, channelId: number): Promise<Channel> {
 		const channel = await this.findOne(channelId);
 		if (!channel) throw new NotFoundException('Channel not found');
 
@@ -226,16 +229,16 @@ export class ChannelsService {
 		if (!channel.admins) channel.admins = [];
 		// Remove user from members array
 		channel.members = channel.members.filter(
-			(member) => member.id !== user.id,
+			(member) => member.id !== userId,
 		);
 		// Remove user from admins array
-		channel.admins = channel.admins.filter((admin) => admin.id !== user.id);
+		channel.admins = channel.admins.filter((admin) => admin.id !== userId);
 		// Save channel
 		return await this.save(channel);
 	}
 
 	async addAdmin(
-		user: User,
+		userId: number,
 		adminToAddId: number,
 		channelId: number,
 	): Promise<Channel> {
@@ -245,7 +248,7 @@ export class ChannelsService {
 		if (!adminToAdd) throw new NotFoundException('User not found');
 
 		// Check if user is channel owner
-		if (channel.owner.id !== user.id)
+		if (channel.owner.id !== userId)
 			throw new ForbiddenException('Only channel owner can add admins');
 
 		// Check if adminToAdd is a member
@@ -267,7 +270,7 @@ export class ChannelsService {
 	}
 
 	async removeAdmin(
-		user: User,
+		userId: number,
 		adminToRemoveId: number,
 		channelId: number,
 	): Promise<Channel> {
@@ -277,7 +280,7 @@ export class ChannelsService {
 		if (!adminToRemove) throw new NotFoundException('User not found');
 
 		// Check if user is channel owner
-		if (channel.owner.id !== user.id)
+		if (channel.owner.id !== userId)
 			throw new ForbiddenException(
 				'Only channel owner can remove admins',
 			);
@@ -296,7 +299,7 @@ export class ChannelsService {
 	}
 
 	async banUser(
-		user: User,
+		userId: number,
 		userToBanId: number,
 		channelId: number,
 		until: Date,
@@ -308,7 +311,7 @@ export class ChannelsService {
 
 		// Check that user is channel admin
 		if (!channel.admins) channel.admins = [];
-		if (!channel.admins.find((admin) => admin.id === user.id))
+		if (!channel.admins.find((admin) => admin.id === userId))
 			throw new ForbiddenException('Only channel admins can ban users');
 
 		// Create new banned user (or update existing one)
@@ -318,12 +321,12 @@ export class ChannelsService {
 		newBannedUser.until = until;
 
 		await this.channelBannedUsersRepository.save(newBannedUser);
-		await this.leave(userToBan, channel.id);
+		await this.leave(userToBan.id, channel.id);
 		return newBannedUser;
 	}
 
 	async muteUser(
-		user: User,
+		userId: number,
 		userToMuteId: number,
 		channelId: number,
 		until: Date,
@@ -335,7 +338,7 @@ export class ChannelsService {
 
 		// Check that user is channel admin
 		if (!channel.admins) channel.admins = [];
-		if (!channel.admins.find((admin) => admin.id === user.id))
+		if (!channel.admins.find((admin) => admin.id === userId))
 			throw new ForbiddenException('Only channel admins can mute users');
 
 		// Create new muted user (or update existing one)
@@ -349,7 +352,7 @@ export class ChannelsService {
 	}
 
 	async inviteUser(
-		user: User,
+		userId: number,
 		userToInviteId: number,
 		channelId: number,
 	): Promise<ChannelInvitedUser> {
@@ -360,7 +363,7 @@ export class ChannelsService {
 
 		// Check that user is channel admin
 		if (!channel.admins) channel.admins = [];
-		if (!channel.admins.find((admin) => admin.id === user.id))
+		if (!channel.admins.find((admin) => admin.id === userId))
 			throw new ForbiddenException(
 				'Only channel admins can invite users',
 			);
@@ -378,10 +381,12 @@ export class ChannelsService {
 	}
 
 	async sendMessage(
-		sender: User,
+		senderId: number,
 		channelId: number,
 		message: string,
 	): Promise<ChannelMessage> {
+		const sender = await this.usersService.findOne(senderId);
+		if (!sender) throw new NotFoundException('User not found');
 		const channel = await this.findOne(channelId);
 		if (!channel) throw new NotFoundException('Channel not found');
 
@@ -422,7 +427,7 @@ export class ChannelsService {
 	}
 
 	async getMessages(
-		user: User,
+		userId: number,
 		channelId: number,
 		before: Date,
 	): Promise<ChannelMessage[]> {
@@ -431,7 +436,7 @@ export class ChannelsService {
 
 		// Check if user is a member of the channel
 		if (!channel.members) channel.members = [];
-		if (!channel.members.find((member) => member.id === user.id))
+		if (!channel.members.find((member) => member.id === userId))
 			throw new ForbiddenException(
 				'Only channel members can read messages',
 			);

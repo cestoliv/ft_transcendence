@@ -19,7 +19,7 @@ import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 export class GamesGateway extends BaseGateway {
 	@SubscribeMessage('games_create')
 	async create(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -43,14 +43,14 @@ export class GamesGateway extends BaseGateway {
 
 		// Create game
 		return this.gamesService
-			.create(client, payload, this.connectedClientsService)
+			.create(socket.userId, payload, this.connectedClientsService)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_join')
 	async join(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -68,14 +68,14 @@ export class GamesGateway extends BaseGateway {
 
 		// Join game
 		return this.gamesService
-			.join(payload.id, client)
+			.join(payload.id, socket.userId)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_quit')
 	async quit(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -93,36 +93,36 @@ export class GamesGateway extends BaseGateway {
 
 		// Join game
 		return this.gamesService
-			.quit(payload.id, client)
+			.quit(payload.id, socket.userId)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_joinMatchmaking')
 	async joinMatchmaking(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 	): Promise<boolean | WSResponse> {
 		// Join Matchmaking
 		return this.gamesService
-			.joinMatchmaking(client)
+			.joinMatchmaking(socket.userId)
 			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_quitMatchmaking')
 	async quitMatchmaking(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 	): Promise<boolean | WSResponse> {
 		// Quit Matchmaking
 		return this.gamesService
-			.leaveMatchmaking(client)
+			.leaveMatchmaking(socket.userId)
 			.then((res) => res)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_playerMove')
 	async move(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<any | WSResponse> {
 		// Validate payload
@@ -142,14 +142,14 @@ export class GamesGateway extends BaseGateway {
 
 		// Move player
 		return this.gamesService
-			.movePlayer(payload.id, client, payload.y)
+			.movePlayer(payload.id, socket.userId, payload.y)
 			.then(() => null)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_invite')
 	async invite(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<any | WSResponse> {
 		// Validate payload
@@ -170,14 +170,14 @@ export class GamesGateway extends BaseGateway {
 
 		// Invite player
 		return this.gamesService
-			.invite(payload.id, client, payload.user_id)
+			.invite(payload.id, socket.userId, payload.user_id)
 			.then((invitee) => invitee)
 			.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_info')
 	async info(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<LocalGameInfo | WSResponse> {
 		// Validate payload
@@ -202,7 +202,7 @@ export class GamesGateway extends BaseGateway {
 
 	@SubscribeMessage('games_history')
 	async history(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<Game[] | WSResponse> {
 		// Validate payload
@@ -236,7 +236,7 @@ export class GamesGateway extends BaseGateway {
 
 	@SubscribeMessage('games_userStats')
 	async userStats(
-		client: SocketWithUser,
+		socket: SocketWithUser,
 		payload: any,
 	): Promise<StatsUser | WSResponse> {
 		// Validate payload

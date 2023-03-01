@@ -106,10 +106,10 @@ export class UsersService {
 		});
 	}
 
-	async update(updater: User, id: number, updateUserDto: UpdateUserDto) {
+	async update(updaterId: number, id: number, updateUserDto: UpdateUserDto) {
 		const user = await this.findOne(id);
 		if (!user) throw new NotFoundException('User not found');
-		if (user.id !== updater.id)
+		if (user.id !== updaterId)
 			throw new ForbiddenException('You can only update your own user');
 
 		user.username = updateUserDto.username;
@@ -145,7 +145,7 @@ export class UsersService {
 		const url = authenticator.keyuri('', 'Transcendence', secret);
 
 		// Update user TOTP secret
-		await this.update(user, user.id, {
+		await this.update(user.id, user.id, {
 			otp: secret,
 		});
 
@@ -178,7 +178,9 @@ export class UsersService {
 		}
 	}
 
-	async inviteFriend(inviter: User, newFriendName: string) {
+	async inviteFriend(inviterId: number, newFriendName: string) {
+		const inviter = await this.findOne(inviterId);
+		if (!inviter) throw new NotFoundException('User not found');
 		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
@@ -211,12 +213,12 @@ export class UsersService {
 		return this.userFriendsRepository.save(newFriendship);
 	}
 
-	async acceptFriendship(invitee: User, inviterId: number) {
+	async acceptFriendship(inviteeId: number, inviterId: number) {
 		const inviter = await this.findOne(inviterId);
 		if (!inviter) throw new NotFoundException('User not found');
 
 		const friendship = await this.userFriendsRepository.findOne({
-			where: { inviterId, inviteeId: invitee.id },
+			where: { inviterId, inviteeId: inviteeId },
 		});
 		if (!friendship)
 			throw new NotFoundException('Friendship request not found');
@@ -228,14 +230,14 @@ export class UsersService {
 		return this.userFriendsRepository.save(friendship);
 	}
 
-	async removeFriendship(user: User, friendId: number) {
+	async removeFriendship(userId: number, friendId: number) {
 		const friend = await this.findOne(friendId);
 		if (!friend) throw new NotFoundException('User not found');
 
 		const friendship = await this.userFriendsRepository.findOne({
 			where: [
-				{ inviterId: user.id, inviteeId: friend.id },
-				{ inviterId: friend.id, inviteeId: user.id },
+				{ inviterId: userId, inviteeId: friend.id },
+				{ inviterId: friend.id, inviteeId: userId },
 			],
 		});
 		if (!friendship) throw new NotFoundException('Friendship not found');
@@ -247,7 +249,9 @@ export class UsersService {
 		return friendship;
 	}
 
-	async ban(banner: User, userToBanId: number, until: Date) {
+	async ban(bannerId: number, userToBanId: number, until: Date) {
+		const banner = await this.findOne(bannerId);
+		if (!banner) throw new NotFoundException('User not found');
 		const userToBan = await this.findOne(userToBanId);
 		if (!userToBan) throw new NotFoundException('User not found');
 
@@ -258,14 +262,16 @@ export class UsersService {
 		banned.until = until;
 
 		// Remove friendship
-		await this.removeFriendship(userToBan, banner.id).catch(() => {
+		await this.removeFriendship(userToBan.id, banner.id).catch(() => {
 			// Ignore exceptions
 		});
 
 		return this.bannedUsersRepository.save(banned);
 	}
 
-	async mute(muter: User, userToMuteId: number, until: Date) {
+	async mute(muterId: number, userToMuteId: number, until: Date) {
+		const muter = await this.findOne(muterId);
+		if (!muter) throw new NotFoundException('User not found');
 		const userToMute = await this.findOne(userToMuteId);
 		if (!userToMute) throw new NotFoundException('User not found');
 
@@ -278,7 +284,9 @@ export class UsersService {
 		return this.mutedUsersRepository.save(muted);
 	}
 
-	async sendMessage(sender: User, receiverId: number, message: string) {
+	async sendMessage(senderId: number, receiverId: number, message: string) {
+		const sender = await this.findOne(senderId);
+		if (!sender) throw new NotFoundException('User not found');
 		const receiver = await this.findOne(receiverId);
 		if (!receiver) throw new NotFoundException('User not found');
 
@@ -312,12 +320,12 @@ export class UsersService {
 		return this.userMessagesRepository.save(newMessage);
 	}
 
-	async getMessages(user: User, contactId: number, before: Date) {
+	async getMessages(userId: number, contactId: number, before: Date) {
 		const contact = await this.findOne(contactId);
 		if (!contact) throw new NotFoundException('User not found');
 
 		// Check if users are friends
-		if (!contact.friends.find((friend) => friend.id === user.id))
+		if (!contact.friends.find((friend) => friend.id === userId))
 			throw new ForbiddenException(
 				'You can only get messages from friends',
 			);
@@ -326,13 +334,13 @@ export class UsersService {
 		return this.userMessagesRepository.find({
 			where: [
 				{
-					senderId: user.id,
+					senderId: userId,
 					receiverId: contact.id,
 					sentAt: LessThan(before),
 				},
 				{
 					senderId: contact.id,
-					receiverId: user.id,
+					receiverId: userId,
 					sentAt: LessThan(before),
 				},
 			],
@@ -341,12 +349,12 @@ export class UsersService {
 		});
 	}
 
-	async updateProfilePicture(user: User, file: any) {
+	async updateProfilePicture(userId: number, file: any) {
 		const ppPath = path.join(
 			'./',
 			'uploads',
 			'profile-pictures',
-			`${user.id}.webp`,
+			`${userId}.webp`,
 		);
 		const pipelinePromise = new Promise<void>((resolve, reject) => {
 			pipeline(
@@ -384,7 +392,7 @@ export class UsersService {
 
 		try {
 			await pipelinePromise;
-			return this.findOne(user.id);
+			return this.findOne(userId);
 		} catch (err) {
 			throw err;
 		}
@@ -406,7 +414,7 @@ export class UsersService {
 							this.push(null);
 						},
 					});
-					await this.updateProfilePicture(user, readable);
+					await this.updateProfilePicture(user.id, readable);
 					resolve();
 				})
 				.catch((err) => reject(new Error(err)));
@@ -429,7 +437,7 @@ export class UsersService {
 				this.push(null);
 			},
 		});
-		await this.updateProfilePicture(user, readable);
+		await this.updateProfilePicture(user.id, readable);
 		return this.findOne(user.id);
 	}
 }

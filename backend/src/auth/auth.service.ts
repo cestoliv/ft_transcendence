@@ -109,7 +109,6 @@ export class AuthService {
 
 		// Update 42 user profile picture if changed
 		if (user.profile_picture_42 !== userData.image.link) {
-			console.log('Updating profile picture');
 			user.profile_picture_42 = userData.image.link;
 			await this.usersService.save(user);
 		}

@@ -1,7 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { v4 as uuidv4 } from 'uuid';
-import { SocketWithUser } from 'src/types';
 import { GameOptions, LocalGame } from './game.class';
 import { Game } from './entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,16 +14,16 @@ import { User } from 'src/users/entities/user.entity';
 export class GamesService {
 	constructor(
 		@Inject(UsersService)
-		private readonly usersService: UsersService,
+		readonly usersService: UsersService,
 		@InjectRepository(Game)
 		private readonly gamesRepository: Repository<Game>,
 	) {}
 
 	public games = new Map<string, LocalGame>(); // Game ID -> Game
-	public queue: Array<SocketWithUser> = [];
+	public queue: Array<number> = []; // User IDs
 
 	async create(
-		creator: SocketWithUser,
+		creatorId: number,
 		payload: any,
 		connectedClientsService: ConnectedClientsService,
 	) {
@@ -38,7 +37,7 @@ export class GamesService {
 		const id = uuidv4();
 		const game = new LocalGame(
 			id,
-			creator,
+			creatorId,
 			options,
 			this,
 			connectedClientsService,
@@ -92,31 +91,31 @@ export class GamesService {
 		return player;
 	}
 
-	async join(id: string, joiner: SocketWithUser) {
+	async join(id: string, joinerId: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
-		game.addPlayer(joiner);
+		await game.addPlayer(joinerId);
 		return game.getInfo();
 	}
 
-	async quit(id: string, quitter: SocketWithUser) {
+	async quit(id: string, quitterId: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
 
 		if (game.players.length == 1) game.end();
-		else if (game.players[0].socket.user.id == quitter.user.id)
-			game.giveUp(game.players[1].socket);
-		else if (game.players[1].socket.user.id == quitter.user.id)
-			game.giveUp(game.players[0].socket);
+		else if (game.players[0].user.id == quitterId)
+			game.giveUp(game.players[1].user.id);
+		else if (game.players[1].user.id == quitterId)
+			game.giveUp(game.players[0].user.id);
 		else throw new NotFoundException('Player not found');
 
 		return game.getInfo();
 	}
 
-	async movePlayer(id: string, player: SocketWithUser, y: number) {
+	async movePlayer(id: string, playerId: number, y: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
-		return game.movePlayer(player, y);
+		return game.movePlayer(playerId, y);
 	}
 
 	async save(localGame: LocalGame) {
@@ -132,12 +131,10 @@ export class GamesService {
 		return this.gamesRepository.save(game);
 	}
 
-	async invite(id: string, inviter: SocketWithUser, inviteeId: number) {
+	async invite(id: string, inviterId: number, inviteeId: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
-		const invitee = await this.usersService.findOne(inviteeId);
-		if (!invitee) throw new NotFoundException('User not found');
-		return game.invite(inviter.user, invitee);
+		return game.invite(inviterId, inviteeId);
 	}
 
 	async info(id: string) {
@@ -146,13 +143,13 @@ export class GamesService {
 		return game.getInfo();
 	}
 
-	async joinMatchmaking(user: SocketWithUser) {
-		this.queue.push(user);
+	async joinMatchmaking(userId: number) {
+		this.queue.push(userId);
 		return true;
 	}
 
-	async leaveMatchmaking(user: SocketWithUser) {
-		this.queue = this.queue.filter((socket) => socket !== user);
+	async leaveMatchmaking(userId: number) {
+		this.queue = this.queue.filter((id) => id != userId);
 		return false;
 	}
 
@@ -165,12 +162,12 @@ export class GamesService {
 
 	@Interval(5000)
 	async matchmaking(): Promise<void> {
-		this.queue.forEach(async (socket) => {
-			await this.matchmake(socket);
+		this.queue.forEach(async (userId) => {
+			await this.matchmake(userId);
 		});
 	}
 
-	async matchmake(socket: SocketWithUser) {
+	async matchmake(userId: number) {
 		// Find public games, in waiting state and with space
 		const publicGames = Array.from(this.games.values()).filter(
 			(game) =>
@@ -181,9 +178,9 @@ export class GamesService {
 
 		// If there are public games, join the first one
 		if (publicGames.length > 0) {
-			await this.join(publicGames[0].id, socket);
+			await this.join(publicGames[0].id, userId);
 			// Remove the user from the queue
-			this.queue = this.queue.filter((user) => user !== socket);
+			this.queue = this.queue.filter((id) => id != userId);
 		}
 	}
 
@@ -212,8 +209,6 @@ export class GamesService {
 		const newElo = user.elo + K * (result - victoryProbability);
 
 		user.elo = Math.round(newElo);
-		console.log(user);
-		console.log('newElo: ', newElo, 'user.elo: ', user.elo, 'K: ', K);
 		return await this.usersService.save(user);
 	}
 
