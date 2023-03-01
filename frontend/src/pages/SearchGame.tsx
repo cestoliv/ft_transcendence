@@ -114,11 +114,11 @@ export const SearchGame = (props: FriendsProps) => {
 		}
 	};
 
-	socket.off('games_start');
-	socket.on('games_start', (data: any) => {
-		navigate(`/pong/${data.id}`);
-		console.log(data);
-	});
+	// socket.off('games_start');
+	// socket.on('games_start', (data: any) => {
+	// 	navigate(`/pong/${data.id}`);
+	// 	console.log(data);
+	// });
 
 	const AddFriend = (username: string) => {
 		socket.emit(
@@ -177,6 +177,7 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	};
+
 
 	useEffect(() => {
 		socket.emit(

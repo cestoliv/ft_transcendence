@@ -28,7 +28,17 @@
 			align-items: center;
 			gap: 5px;
 			font-size: 12px;
-			width: 100px;
+			// width: 100px;
+			.info {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				align-items: center;
+				img {
+					height: 25px;
+					border: 15px;
+				}
+			}
 		}
 		.opponent {
 			.score {

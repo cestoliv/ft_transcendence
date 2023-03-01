@@ -83,15 +83,21 @@ function App() {
 		});
 	};
 
+
+
 	socket.off();
+	socket.on('games_start', (data: any) => {
+		console.log('games_start', data);
+		navigate(`/pong/${data.id}`);
+	});
 	socket.on('game_invitation', (data: any) => {
 		console.log('game_invitation', data);
-		message.success(
-			<div>
+		message.info(
+			<div className="invite-notification">
 				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button onClick={() => joinGame(data)}>Join</button>
+				<button className="nes-btn" onClick={() => joinGame(data)}>Join</button>
 			</div>,
-			20,
+			10,
 		);
 	});
 
@@ -137,7 +143,7 @@ function App() {
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
-						<Route path="/settings" element={<Settings user_me={user} auth={auth}/>} />
+						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

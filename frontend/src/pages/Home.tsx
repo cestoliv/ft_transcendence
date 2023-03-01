@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SocketContext } from '../context/socket';
 import { IAuth, IUser } from '../interfaces';
+import { NavLink } from 'react-router-dom';
 
 const Home = (props: { user: IUser; auth: IAuth }) => {
 	const socket = useContext(SocketContext);
@@ -30,7 +31,7 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 
 	return (
 		<div className="home">
-			<h1>My progression</h1>
+			{/* <h1>My progression</h1>
 			<p>User: {props.user.username}</p>
 			{socket.connected ? (
 				<div className="chat-container">
@@ -41,7 +42,9 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 				<div>Socket Not Connected</div>
 			)}
 
-			<button className="button-start-game">Start a game</button>
+			<button className="button-start-game">Start a game</button> */}
+			<h2>Welcome to<br /><span>PONG42</span></h2>
+			<button className="nes-btn"><NavLink to="/searchGame">Play !</NavLink></button>
 		</div>
 	);
 };
