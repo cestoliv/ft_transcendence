@@ -212,7 +212,6 @@ export class LocalGame {
 			this.invited.push(invitee.id);
 
 		// Send notification to invitee
-		console.log('Sending invitation to', invitee.username)
 		this.connectedClientsService
 			.get(inviteeId)
 			.emit('game_invitation', this.getInfo());

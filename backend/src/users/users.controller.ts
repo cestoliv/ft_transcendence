@@ -26,15 +26,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	async me(@Res() response, @Req() request) {
 		// Create a user object without the totpSecret
-		console.log(request.user)
-		const user = {
-			id: request.user.id,
-			id42: request.user.id42,
-			username: request.user.username,
-			display_name: request.user.display_name,
-			profile_picture: request.user.profile_picture,
-		};
-		return response.send(user);
+		return response.send(this.usersService.findOne(request.user.id));
 	}
 
 	/*
