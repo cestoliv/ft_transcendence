@@ -234,7 +234,17 @@ export class GamesGateway extends BaseGateway {
 		// Invite player
 		return this.gamesService
 			.invite(payload.id, socket.userId, payload.user_id)
-			.then((invitee) => invitee)
+			.then(async (invitee) => {
+				// Send notification to invitee
+				this.connectedClientsService
+					.get(invitee.id)
+					.emit('games_invitation', {
+						game: await this.gamesService.info(payload.id),
+						inviter: await this.usersService.findOne(socket.userId),
+					});
+
+				return invitee;
+			})
 			.catch((err) => exceptionToObj(err));
 	}
 

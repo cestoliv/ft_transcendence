@@ -68,6 +68,7 @@ export class ChannelsGateway extends BaseGateway {
 			socket.userId,
 			channel.id,
 		);
+		// TODO: Maybe send a message to everyone if the channel is joinable
 		return channel;
 	}
 
@@ -166,7 +167,13 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to update channel
 		return this.channelsService
 			.update(socket.userId, payload.id, payload)
-			.then((channel) => channel)
+			.then((channel) => {
+				// Propagate channel update
+				socket
+					.to(`channel_${channel.id}`)
+					.emit('channels_update', channel);
+				return channel;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -195,14 +202,18 @@ export class ChannelsGateway extends BaseGateway {
 			};
 
 		// Try to join channel
-		const channel = await this.channelsService
+		return await this.channelsService
 			.join(socket.userId, payload.code, payload.password)
-			.then((channel) => channel)
-			.catch((error) => exceptionToObj(error));
-		if (!(channel instanceof Channel)) return channel;
+			.then((channel) => {
+				// Propagate channel join
+				socket.join(`channel_${channel.id}`);
+				socket
+					.to(`channel_${channel.id}`)
+					.emit('channels_join', channel);
 
-		socket.join(`channel_${channel.id}`);
-		return channel;
+				return channel;
+			})
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -235,14 +246,18 @@ export class ChannelsGateway extends BaseGateway {
 			};
 
 		// Try to leave channel
-		const channel = await this.channelsService
+		return await this.channelsService
 			.leave(socket.userId, payload.id)
-			.then((channel) => channel)
-			.catch((error) => exceptionToObj(error));
-		if (!(channel instanceof Channel)) return channel;
+			.then((channel) => {
+				// Propagate channel leave
+				socket
+					.to(`channel_${channel.id}`)
+					.emit('channels_leave', channel);
+				socket.leave(`channel_${channel.id}`);
 
-		socket.leave(`channel_${channel.id}`);
-		return channel;
+				return channel;
+			})
+			.catch((error) => exceptionToObj(error));
 	}
 
 	/*
@@ -273,7 +288,13 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to add admin
 		return this.channelsService
 			.addAdmin(socket.userId, payload.user_id, payload.id)
-			.then((channel) => channel)
+			.then((channel) => {
+				// Propagate admin add
+				socket
+					.to(`channel_${channel.id}`)
+					.emit('channels_addAdmin', channel);
+				return channel;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -305,7 +326,13 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to remove admin
 		return this.channelsService
 			.removeAdmin(socket.userId, payload.user_id, payload.id)
-			.then((channel) => channel)
+			.then((channel) => {
+				// Propagate admin remove
+				socket
+					.to(`channel_${channel.id}`)
+					.emit('channels_removeAdmin', channel);
+				return channel;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -338,20 +365,21 @@ export class ChannelsGateway extends BaseGateway {
 			};
 
 		// Try to ban user
-		const channelBannedUser = await this.channelsService
+		return await this.channelsService
 			.banUser(
 				socket.userId,
 				payload.user_id,
 				payload.id,
 				until.toJSDate(),
 			)
-			.then((channel) => channel)
+			.then((ban) => {
+				// Propagate user ban
+				socket
+					.to(`channel_${ban.channelId}`)
+					.emit('channels_banUser', ban);
+				return ban;
+			})
 			.catch((error) => exceptionToObj(error));
-		if (!(channelBannedUser instanceof ChannelBannedUser))
-			return channelBannedUser;
-
-		socket.leave(`channel_${payload.id}`);
-		return channelBannedUser;
 	}
 
 	/*
@@ -390,7 +418,13 @@ export class ChannelsGateway extends BaseGateway {
 				payload.id,
 				until.toJSDate(),
 			)
-			.then((channel) => channel)
+			.then((mute) => {
+				// Propagate user mute
+				socket
+					.to(`channel_${mute.channelId}`)
+					.emit('channels_muteUser', mute);
+				return mute;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -422,7 +456,13 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to invite user
 		return this.channelsService
 			.inviteUser(socket.userId, payload.user_id, payload.id)
-			.then((channel) => channel)
+			.then((invite) => {
+				// Propagate invitation to user
+				this.connectedClientsService
+					.get(invite.userId)
+					.emit('channels_inviteUser', invite);
+				return invite;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -452,18 +492,16 @@ export class ChannelsGateway extends BaseGateway {
 			};
 
 		// Try to send message
-		const message = await this.channelsService
+		return await this.channelsService
 			.sendMessage(socket.userId, payload.id, payload.message)
-			.then((message) => message)
+			.then((message) => {
+				// Send message to all members of the channel (except the sender)
+				socket
+					.to(`channel_${message.channelId}`)
+					.emit('channels_message', message);
+				return message;
+			})
 			.catch((error) => exceptionToObj(error));
-		if (!(message instanceof ChannelMessage)) return message;
-
-		// Send message to all members of the channel (except the sender)
-		socket
-			.to(`channel_${message.channelId}`)
-			.emit('channels_message', message);
-
-		return message;
 	}
 
 	/*

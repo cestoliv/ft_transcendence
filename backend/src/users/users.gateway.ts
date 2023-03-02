@@ -52,7 +52,7 @@ export class UsersGateway extends BaseGateway {
 
 	/*
 	 * Update user
-	 * The client must the user himself
+	 * The client must be the user himself
 	 */
 	@SubscribeMessage('users_update')
 	async update(
@@ -88,7 +88,11 @@ export class UsersGateway extends BaseGateway {
 		// Try to update user
 		return await this.usersService
 			.update(socket.userId, payload.id, updateUserDto)
-			.then((user) => user)
+			.then((user) => {
+				// Propagate user update
+				this.propagateUserUpdate(user, 'users_update');
+				return user;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -117,7 +121,14 @@ export class UsersGateway extends BaseGateway {
 		// Try to invite friend
 		return await this.usersService
 			.inviteFriend(socket.userId, payload.username)
-			.then((userFriend) => userFriend)
+			.then((userFriend) => {
+				// Propagate friendship invitation
+				this.connectedClientsService
+					.get(userFriend.inviteeId)
+					.emit('users_friendshipInvitation', userFriend);
+
+				return userFriend;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -145,7 +156,13 @@ export class UsersGateway extends BaseGateway {
 		// Try to accept friend
 		return await this.usersService
 			.acceptFriendship(socket.userId, payload.id)
-			.then((userFriend) => userFriend)
+			.then((userFriend) => {
+				// Propagate friendship acceptance
+				this.connectedClientsService
+					.get(userFriend.inviterId)
+					.emit('users_friendshipAccepted', userFriend);
+				return userFriend;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -173,7 +190,13 @@ export class UsersGateway extends BaseGateway {
 		// Try to remove friend
 		return await this.usersService
 			.removeFriendship(socket.userId, payload.id)
-			.then((userFriend) => userFriend)
+			.then((userFriend) => {
+				// Propagate friendship removal
+				this.connectedClientsService
+					.get(userFriend.inviterId)
+					.emit('users_friendshipRemoved', userFriend);
+				return userFriend;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -205,7 +228,13 @@ export class UsersGateway extends BaseGateway {
 		// Try to ban user
 		return await this.usersService
 			.ban(socket.userId, payload.id, until.toJSDate())
-			.then((user) => user)
+			.then((user) => {
+				// Propagate user ban
+				this.connectedClientsService
+					.get(user.banned.id)
+					.emit('users_banned', user);
+				return user;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -237,7 +266,13 @@ export class UsersGateway extends BaseGateway {
 		// Try to mute user
 		return await this.usersService
 			.mute(socket.userId, payload.id, until.toJSDate())
-			.then((user) => user)
+			.then((user) => {
+				// Propagate user mute
+				this.connectedClientsService
+					.get(user.muted.id)
+					.emit('users_muted', user);
+				return user;
+			})
 			.catch((error) => exceptionToObj(error));
 	}
 
@@ -265,18 +300,16 @@ export class UsersGateway extends BaseGateway {
 			};
 
 		// Try to send message
-		const message = await this.usersService
+		return await this.usersService
 			.sendMessage(socket.userId, payload.id, payload.message)
-			.then((message) => message)
+			.then((message) => {
+				// Send message to the user
+				this.connectedClientsService
+					.get(message.receiverId)
+					.emit('users_message', { message: message });
+				return message;
+			})
 			.catch((error) => exceptionToObj(error));
-		if (!(message instanceof UserMessage)) return message;
-
-		// Send message to the user
-		socket
-			.to(`user_${payload.id}`)
-			.emit('users_message', { message: message });
-
-		return message;
 	}
 
 	/*

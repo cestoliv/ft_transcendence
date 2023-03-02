@@ -25,6 +25,7 @@ import { UserFriend } from './entities/user-friend.entity';
 import { MutedUser } from './entities/user-muted.entity';
 import { User } from './entities/user.entity';
 import { UserMessage } from './entities/user.message.entity';
+import { BaseGateway } from 'src/base.gateway';
 
 @Injectable()
 export class UsersService {
@@ -42,6 +43,8 @@ export class UsersService {
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
 	) {}
+
+	public gateway: BaseGateway = null;
 
 	create(createUserDto: CreateUserDto) {
 		const user = new User();
@@ -392,7 +395,13 @@ export class UsersService {
 
 		try {
 			await pipelinePromise;
-			return this.findOne(userId);
+			const user = await this.findOne(userId);
+			// Propage the new profile picture
+			this.gateway.propagateUserUpdate(
+				user,
+				'users_profilePictureUpdate',
+			);
+			return user;
 		} catch (err) {
 			throw err;
 		}

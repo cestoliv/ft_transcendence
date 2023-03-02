@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import { ChannelsService } from './channels/channels.service';
 import { GamesService } from './games/games.service';
 import { SocketWithUser } from './types';
+import { User } from './users/entities/user.entity';
 import { UsersService } from './users/users.service';
 
 @Injectable()
@@ -66,9 +67,14 @@ export abstract class BaseGateway implements OnGatewayConnection {
 
 			// Make the user join all the channels he is in
 			const channels = await this.channelsService.listJoined(user.id);
-			for (const channel of channels) {
+			channels.forEach((channel) => {
 				socket.join(`channel_${channel.id}`);
-			}
+			});
+
+			// Join every friends channel
+			user.friends.forEach((friend) => {
+				socket.join(`user_${friend.id}`);
+			});
 
 			// Make the join his own channel
 			socket.join(`user_${user.id}`);
@@ -114,5 +120,24 @@ export abstract class BaseGateway implements OnGatewayConnection {
 
 		// Leave his own channel
 		// socket.leave(`user_${socket.userId}`);
+	}
+
+	async afterInit() {
+		this.usersService.gateway = this;
+	}
+
+	async propagateUserUpdate(updatedUser: User, event: string) {
+		const channels = await this.channelsService.listJoined(updatedUser.id);
+
+		let socket: Server | SocketWithUser = this.server;
+		if (this.connectedClientsService.has(updatedUser.id)) {
+			socket = this.connectedClientsService.get(updatedUser.id);
+		}
+
+		// Send to every friends and in every channels the user is in
+		socket
+			.to(`user_${updatedUser.id}`)
+			.to(channels.map((c) => `channel_${c.id}`))
+			.emit(event, updatedUser);
 	}
 }

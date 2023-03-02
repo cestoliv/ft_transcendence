@@ -32,6 +32,13 @@
 		* [Retrieve a conversation](#get-messages)
 	+ **Websocket Events**
 		* [New private message](#new-private-message)
+		* [On profile update](#on-profile-update)
+		* [On profile picture update](#on-profile-picture-update)
+		* [On friendship invitation](#on-friendship-invitation)
+		* [On friendship acceptation](#on-friendship-acceptation)
+		* [On friendship deletion](#on-friendship-deletion)
+		* [On ban](#on-ban)
+		* [On mute](#on-mute)
 - **Channels**
 	+ **Websocket API**
 		* [Create a channel](#create-channel)
@@ -50,6 +57,14 @@
 		* [Retrieve channel conversation](#get-channel-messages)
 	+ **Websocket Events**
 		* [New message](#new-channel-message)
+		* [On channel update](#on-channel-update)
+		* [On member join](#on-member-join)
+		* [On member leave](#on-member-leave)
+		* [On admin added](#on-admin-added)
+		* [On admin removed](#on-admin-removed)
+		* [On member ban](#on-member-ban)
+		* [On member mute](#on-member-mute)
+		* [On channel invitation](#on-channel-invitation)
 - **Games**
 	+ **Websocket API**
 		* [Create a game](#create-a-game)
@@ -1329,12 +1344,109 @@ payload: {
 - Event name: `users_message`
 - Data type: [UserMessage](#usermessage)
 
+### **On profile update**
+
+When a user related to you update his profile (a friend or someone who is in one of the channels you joined)
+
+- Event name: `users_update`
+- Data type: [User](#user)
+
+### **On profile picture update**
+
+When a user related to you update it's profile profile (a friend or someone who is in one of the channels you joined)
+
+- Event name: `users_profilePictureUpdate`
+- Data type: [User](#user)
+
+### **On friendship invitation**
+
+- Event name: `users_friendshipInvitation`
+- Data type: [UserFriend](#userfriend)
+
+### **On friendship acceptation**
+
+- Event name: `users_friendshipAccepted`
+- Data type: [UserFriend](#userfriend)
+
+### **On friendship deletion**
+
+When someone remove your friendship or decline your invitation
+
+- Event name: `users_friendshipRemoved`
+- Data type: [UserFriend](#userfriend)
+
+### **On ban**
+
+When someone ban you from his friends.
+
+- Event name: `users_banned`
+- Data type: [BannedUser](#banneduser)
+
+### **On mute**
+
+- Event name: `users_muted`
+- Data type: [MutedUser](#muteduser)
+
 ## Channels
 
 ### **New channel message**
 
 - Event name: `channels_message`
 - Data type: [ChannelMessage](#channelmessage)
+
+### **On channel update**
+
+- Event name: `channels_update`
+- Data type: [Channel](#channel)
+
+### **On member join**
+
+When a new member join the channel
+
+- Event name: `channels_join`
+- Data type: [Channel](#channel)
+
+### **On member leave**
+
+When a member leave the channel
+
+- Event name: `channels_leave`
+- Data type: [Channel](#channel)
+
+### **On admin added**
+
+When a member is promoted admin
+
+- Event name: `channels_addAdmin`
+- Data type: [Channel](#channel)
+
+### **On admin removed**
+
+When a member is downgraded
+
+- Event name: `channels_removeAdmin`
+- Data type: [Channel](#channel)
+
+### **On member ban**
+
+When a member is banned
+
+- Event name: `channels_banUser`
+- Data type: [ChannelBannedUser](#channelbanneduser)
+
+### **On member mute**
+
+When a member is muted
+
+- Event name: `channels_muteUser`
+- Data type: [ChannelMutedUser](#channelmuteduser)
+
+### **On channel invitation**
+
+When you receive an invitation to join a channel
+
+- Event name: `channels_inviteUser`
+- Data type: [ChannelInvitedUser](#channelinviteduser)
 
 #### Example
 
@@ -1388,6 +1500,15 @@ Send game information 3 seconds before the start of the game.
 	```typescript
 		you: number, // your score
 		opponent: number, // opponent score
+	```
+
+### **On play invitation**
+
+- Event name: `games_invitation`
+- Data type:
+	```typescript
+		game: LocalGameInfo,
+		inviter: User,
 	```
 
 ### **New ball position**
