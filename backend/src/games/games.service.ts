@@ -53,6 +53,7 @@ export class GamesService {
 	async findGame(id: number | string) {
 		if (typeof id === 'number') {
 			for (const game of this.games.values()) {
+				if (game.state != 'started') continue;
 				if (game.players.length >= 1 && game.players[0].user.id == id)
 					return game;
 				if (game.players.length >= 2 && game.players[1].user.id == id)

@@ -505,7 +505,7 @@ export class LocalGame {
 
 		// Send state to watchers
 		this.server.to(`game_watch_${this.id}`).emit('games_watch_ballMove', {
-			x: this.ball.x,
+			x: this.screen.width - this.ball.x,
 			y: this.ball.y,
 		});
 	}
