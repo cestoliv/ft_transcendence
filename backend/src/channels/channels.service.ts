@@ -215,9 +215,18 @@ export class ChannelsService {
 	}
 
 	async listJoined(userId: number): Promise<Channel[]> {
+		// Return channels where user is a member (and ensure that members array does not contain only the current user)
 		const channels = await this.channelsRepository.find({
 			where: { members: { id: userId } },
 		});
+		// Reload members array (workaround because members array contains only the current user)
+		for (const channel of channels) {
+			channel.members = await this.channelsRepository
+				.createQueryBuilder('channel')
+				.relation(Channel, 'members')
+				.of(channel)
+				.loadMany();
+		}
 		return channels;
 	}
 
