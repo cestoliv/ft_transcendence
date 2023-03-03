@@ -18,12 +18,14 @@ import { IAuth, IUser } from './interfaces';
 import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
+import useGameInfo from './hooks/useGameInfo';
 import NotFound from './pages/NotFound';
 
 function App() {
 	const navigate = useNavigate();
 	const socket = useContext(SocketContext);
 	const { auth, setAuth } = useAuth();
+	const { gameInfo, setGameInfo } = useGameInfo();
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
@@ -36,12 +38,13 @@ function App() {
 			},
 		});
 		const data = await response.json();
+		console.log(data);
 		setUserLoading(false);
 		if (response.ok) {
 			setUser(data);
+			console.log('user', data);
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
 				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
-
 			// Connect to socket
 			socket.connect();
 		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
@@ -88,6 +91,7 @@ function App() {
 	socket.off();
 	socket.on('games_start', (data: any) => {
 		console.log('games_start', data);
+		setGameInfo(data);
 		navigate(`/pong/${data.id}`);
 	});
 	socket.on('game_invitation', (data: any) => {
@@ -100,6 +104,14 @@ function App() {
 			10,
 		);
 	});
+
+	useEffect(() => {
+		setGameInfo('test');
+	}, [])
+
+	useEffect(() => {
+		console.log(gameInfo)
+	}, [gameInfo])
 
 	useEffect(() => {
 		console.log("buzz");
