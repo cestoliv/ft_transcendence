@@ -49,6 +49,19 @@ export class GamesService {
 		return game.getInfo();
 	}
 
+	// Find game from it's id or from a user id
+	async findGame(id: number | string) {
+		if (typeof id === 'number') {
+			for (const game of this.games.values()) {
+				if (game.players.length >= 1 && game.players[0].user.id == id)
+					return game;
+				if (game.players.length >= 2 && game.players[1].user.id == id)
+					return game;
+			}
+		} else return this.games.get(id);
+		throw new NotFoundException('Game not found');
+	}
+
 	async getHistory(userId: number) {
 		const user = await this.usersService.findOne(userId);
 		if (!user) throw new NotFoundException('User not found');

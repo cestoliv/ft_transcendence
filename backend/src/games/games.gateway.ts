@@ -161,7 +161,10 @@ export class GamesGateway extends BaseGateway {
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
-		if (payload.id === undefined) errors.push('Game id is not specified');
+		if (payload.id === undefined || payload.user_id === undefined)
+			errors.push(
+				'Game id and User id are not specified (provide one of them)',
+			);
 
 		if (errors.length != 0)
 			return {
@@ -172,13 +175,13 @@ export class GamesGateway extends BaseGateway {
 
 		// Start watching
 		const game = await this.gamesService
-			.info(payload.id)
+			.findGame(payload.id || payload.user_id)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 		if (isWsResponse(game)) return game;
 
 		socket.join(`game_watch_${game.id}`);
-		return game;
+		return game.getInfo();
 	}
 
 	@SubscribeMessage('games_stopWatching')

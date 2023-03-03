@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { BannedUser } from './user-banned.entity';
 import { UserFriend } from './user-friend.entity';
 import { MutedUser } from './user-muted.entity';
+import { Status } from '../enums/status.enum';
 
 // Get config service
 const configService = new ConfigService();
@@ -29,6 +30,9 @@ export class User {
 
 	@Column()
 	elo: number;
+
+	@Column()
+	status: Status;
 
 	@Column({ nullable: true, select: false })
 	otp: string;

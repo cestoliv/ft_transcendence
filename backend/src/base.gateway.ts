@@ -5,6 +5,7 @@ import { ChannelsService } from './channels/channels.service';
 import { GamesService } from './games/games.service';
 import { SocketWithUser } from './types';
 import { User } from './users/entities/user.entity';
+import { Status } from './users/enums/status.enum';
 import { UsersService } from './users/users.service';
 
 @Injectable()
@@ -51,8 +52,11 @@ export abstract class BaseGateway implements OnGatewayConnection {
 	async handleConnection(socket: SocketWithUser) {
 		try {
 			const user = await this.usersService.getUserFromSocket(socket);
+
+			// Save the user id in the socket
 			socket.userId = user.id;
 
+			// Check if the user is already connected
 			if (this.connectedClientsService.has(user.id)) {
 				console.log(
 					`Client already connected: ${user.username} (${socket.id})`,
@@ -78,6 +82,13 @@ export abstract class BaseGateway implements OnGatewayConnection {
 
 			// Make the join his own channel
 			socket.join(`user_${user.id}`);
+
+			// Propagate new user status
+			this.gamesService.usersService
+				.changeStatus(user.id, Status.Online)
+				.catch(() => {
+					// Ignore error
+				});
 		} catch (error) {
 			// Reject connection
 			socket.emit('error', {
@@ -101,12 +112,6 @@ export abstract class BaseGateway implements OnGatewayConnection {
 
 		this.connectedClientsService.delete(socket.userId);
 
-		// Leave all the channels he is in
-		// const channels = await this.channelsService.listJoined(socket.userId);
-		// for (const channel of channels) {
-		// 	socket.leave(`channel_${channel.id}`);
-		// }
-
 		// Make the user give up all the games he is in
 		const games = [...this.gamesService.games].filter((g) => {
 			const game = g[1];
@@ -118,8 +123,12 @@ export abstract class BaseGateway implements OnGatewayConnection {
 			game[1].giveUp(socket.userId);
 		}
 
-		// Leave his own channel
-		// socket.leave(`user_${socket.userId}`);
+		// Propagate new user status
+		this.gamesService.usersService
+			.changeStatus(socket.userId, Status.Offline)
+			.catch(() => {
+				// Ignore error
+			});
 	}
 
 	async afterInit() {

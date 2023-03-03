@@ -26,6 +26,7 @@ import { MutedUser } from './entities/user-muted.entity';
 import { User } from './entities/user.entity';
 import { UserMessage } from './entities/user.message.entity';
 import { BaseGateway } from 'src/base.gateway';
+import { Status } from './enums/status.enum';
 
 @Injectable()
 export class UsersService {
@@ -52,6 +53,7 @@ export class UsersService {
 		user.username = createUserDto.username;
 		user.displayName = createUserDto.displayName || 'Unnamed';
 		user.elo = 1000;
+		user.status = Status.Offline;
 		user.otp = createUserDto.otp;
 		user.profile_picture_42 = createUserDto.profile_picture_42;
 
@@ -448,5 +450,19 @@ export class UsersService {
 		});
 		await this.updateProfilePicture(user.id, readable);
 		return this.findOne(user.id);
+	}
+
+	async changeStatus(userId: number, status: Status) {
+		let user = await this.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
+
+		if (user.status != status) {
+			user.status = status;
+			user = await this.usersRepository.save(user);
+
+			// Propage the new status
+			this.gateway.propagateUserUpdate(user, 'users_update');
+		}
+		return user;
 	}
 }
