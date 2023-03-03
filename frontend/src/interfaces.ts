@@ -111,3 +111,13 @@ export interface IOtp {
 	setCookie: SetCookie;
 	removeCookie: RemoveCookie;
 }
+
+export interface ILocalGameInfo {
+	id: string;
+	state: "waiting" | "started" | "ended" | "saved";
+	startAt: number | null;
+	players: Array<{
+		user: IUser;
+		score: number;
+	}>;
+}

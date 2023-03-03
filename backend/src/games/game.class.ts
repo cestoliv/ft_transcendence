@@ -249,6 +249,7 @@ export class LocalGame {
 		this.startAt = new Date();
 		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
 		this.players.forEach((player) => {
+			console.log('Sending start to', player.user.username);
 			this.connectedClientsService
 				.get(player.user.id)
 				.emit('games_start', this.getInfo());
@@ -489,7 +490,7 @@ export class LocalGame {
 
 		// Send state to watchers
 		this.server.to(`game_watch_${this.id}`).emit('games_watch_ballMove', {
-			x: this.ball.x,
+			x: this.screen.width - this.ball.x,
 			y: this.ball.y,
 		});
 	}

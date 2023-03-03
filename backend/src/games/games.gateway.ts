@@ -331,4 +331,32 @@ export class GamesGateway extends BaseGateway {
 			.then((history) => history)
 			.catch((err) => exceptionToObj(err));
 	}
+
+	/*
+	 * Get user actual game
+	 */
+	@SubscribeMessage('games_userGame')
+	async userGame(
+		socket: SocketWithUser,
+		payload: any,
+	): Promise<LocalGameInfo | WSResponse> {
+		// Validate payload
+		const errors: Array<string> = [];
+		if (payload === undefined || typeof payload != 'object')
+			errors.push('Empty payload');
+		if (payload.id === undefined) errors.push('User id is not specified');
+
+		if (errors.length != 0)
+			return {
+				statusCode: 400,
+				error: 'Bad request',
+				messages: errors,
+			};
+
+		// Get user stats
+		return this.gamesService
+			.getUserGame(payload.id)
+			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
 }

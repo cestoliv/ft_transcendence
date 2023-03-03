@@ -7,8 +7,11 @@ import { IUser, IAuth } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import useAuth from '../hooks/useAuth';
 import { throttle } from '../utils';
+import { useNavigate } from 'react-router-dom';
+import useGameInfo from '../hooks/useGameInfo';
 
 const Canvas = ({ gameId, socket }) => {
+	const { gameInfo, setGameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');
 		let width = parent?.offsetWidth || window.innerWidth;
@@ -23,7 +26,7 @@ const Canvas = ({ gameId, socket }) => {
 	// Vars
 	let canvasSize: { width: number; height: number } = computeCanvasSize();
 	let mP5: p5Types;
-	const started = false;
+	let started = false;
 
 	const ball = {
 		x: canvasSize.width / 2,
@@ -60,7 +63,10 @@ const Canvas = ({ gameId, socket }) => {
 			return mP5.min(canvasSize.height, mP5.max(y, 0));
 		},
 		position: function (y: number) {
-			this.y = this.computePosition(y);
+			if (gameInfo.isWatching)
+				this.y = mP5.min(canvasSize.height, mP5.max(y, 0));
+			else
+				this.y = this.computePosition(y);
 		},
 		draw: function () {
 			mP5.stroke(255);
@@ -116,7 +122,7 @@ const Canvas = ({ gameId, socket }) => {
 		p5.background(0);
 
 		// If pos changed, send it to the server
-		if (me.y != me.computePosition(p5.mouseY)) {
+		if (me.y != me.computePosition(p5.mouseY) && !gameInfo.isWatching) {
 			me.position(p5.mouseY);
 			throttledSendPaddlePos(p5.mouseY);
 		}
@@ -171,14 +177,27 @@ const Canvas = ({ gameId, socket }) => {
 	// Watchers events
 	socket.off('games_watch_opponentMove'); // Unbind previous event
 	socket.on('games_watch_opponentMove', (data: any) => {
+		if (mP5) {
+			// Apply ratio, server side is 512x256
+			opponent.position(data.y * (canvasSize.height / 256));
+		}
 		console.log('games_watch_opponentMove', data);
 	});
 	socket.off('games_watch_creatorMove'); // Unbind previous event
 	socket.on('games_watch_creatorMove', (data: any) => {
 		console.log('games_watch_creatorMove', data);
+		if (mP5) {
+			// Apply ratio, server side is 512x256
+			me.position(data.y * (canvasSize.height / 256));
+		}
 	});
 	socket.off('games_watch_ballMove'); // Unbind previous event
 	socket.on('games_watch_ballMove', (data: any) => {
+		if (mP5) {
+			// Apply ratio, server side is 512x256
+			ball.x = data.x * (canvasSize.width / 512);
+			ball.y = data.y * (canvasSize.height / 256);
+		}
 		console.log('games_watch_ballMove', data);
 	});
 
@@ -190,11 +209,14 @@ const Canvas = ({ gameId, socket }) => {
 };
 
 const Pong = (props: { user: IUser; auth: IAuth }) => {
+	const navigate = useNavigate();
 	const params = useParams();
 	const gameId = params.gameId;
 	const socket = useContext(SocketContext);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [gameInfo, setGameInfo] = useState(null);
+	const { gameInfo, setGameInfo } = useGameInfo();
+	// const [gameInfo, setGameInfo] = useState(null);
+	const [meInfo, setMeInfo] = useState({});
 	const [opponentInfo, setOpponentInfo] = useState({});
 	const [endGameInfo, setEndGameInfo] = useState(null);
 	const { auth } = useAuth();
@@ -214,16 +236,25 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	window.socket = socket;
 
 	useEffect(() => {
-		socket.emit('games_info', { id: gameId }, (data: any) => {
-			console.log('games_info', data);
-			if (!data) {
-				message.error('Game not found');
-			}
-			setGameInfo(data);
-			// setOpponentName()
-			setOpponentInfo(data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
-			console.log('opponentInfo', data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
-		});
+		if (gameInfo.isWatching) {
+			setMeInfo(gameInfo.players[0]);
+			setOpponentInfo(gameInfo.players[1]);
+		} else {
+			setMeInfo(gameInfo.players.filter((p: any) => p.user.username === auth.user.username)[0]);
+			setOpponentInfo(gameInfo.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
+		}
+		// if (!gameInfo.isWatching) {
+		// 	socket.emit('games_info', { id: gameId }, (data: any) => {
+		// 		console.log('games_info', data);
+		// 		if (!data) {
+		// 			message.error('Game not found');
+		// 		}
+		// 		setGameInfo(data);
+		// 		// setOpponentName()
+		// 		setOpponentInfo(data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
+		// 		console.log('opponentInfo', data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
+		// 	});
+		// }
 	}, []);
 
 	socket.off('games_score');
@@ -242,29 +273,45 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	socket.off('games_watch_score'); // Unbind previous event
 	socket.on('games_watch_score', (data: any) => {
 		console.log('games_watch_score', data);
+		setGameScore(data);
 	});
 	socket.off('games_watch_end'); // Unbind previous event
 	socket.on('games_watch_end', (data: any) => {
 		console.log('games_watch_end', data);
+		setEndGameInfo(data);
+		setIsModalOpen(true);
 	});
+
+	const test = () => {
+		navigate('/pong/435543543534534545')
+	}
+
+	useEffect(() => {
+		return () => {
+			setGameInfo(null);
+			console.log('unmount');
+		}
+	}, [])
 
 	return (
 		<div className="game-wrapper">
+			{gameInfo.isWatching && <div className="watching">Watching</div>}
+			<button onClick={test}>TESTESTEST</button>
 			<div className="game-score">
 				<div className="opponent">
 					<div className="info">
 						<img src={opponentInfo?.user?.profile_picture} alt='User image' />
 						<p>{opponentInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameScore.opponent}</span>
+					<span className="score">{gameInfo.isWatching ? gameScore.opponent : gameScore.opponent}</span>
 				</div>
 				<span>-</span>
 				<div className="me">
 					<div className="info">
-						<img src={auth.user?.profile_picture} />
-						<p>{auth.user?.username}</p>
+						<img src={meInfo?.user?.profile_picture} />
+						<p>{meInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameScore.you}</span>
+					<span className="score">{gameInfo.isWatching ? gameScore.creator : gameScore.you}</span>
 				</div>
 			</div>
 			<div className="pong-wrapper" id="game-container">
@@ -292,8 +339,8 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 							</p>
 							<span>-</span>
 							<p className="me">
-								<span className="score">{endGameInfo.score}</span>
-								{auth.user?.username}
+								<span className="score">{gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}</span>
+								{meInfo.user.username}
 
 							</p>
 						</div>

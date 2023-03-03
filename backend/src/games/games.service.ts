@@ -94,6 +94,17 @@ export class GamesService {
 		return player;
 	}
 
+	async getUserGame(userId: number) {
+		// Find a game where the user is playing
+		const game = Array.from(this.games.values()).find(
+			(game) =>
+				game.players.find((player) => player.user.id == userId) &&
+				game.state == 'started',
+		);
+		if (!game) throw new NotFoundException('Game not found');
+		return game.getInfo();
+	}
+
 	async join(id: string, joinerId: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
