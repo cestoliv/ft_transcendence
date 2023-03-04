@@ -538,31 +538,31 @@ export default function Friends(props: FriendsProps) {
 
 	useEffect(() => {
 		setAllChanMessages([]);
-		console.log('channels_listJoined UseEffect');
+		console.log('setAllChanMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
+			const messagesFromAllChannels: any[] = []; // variable temporaire pour stocker les messages
+			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "messagesFromAllChannels"
 			data.forEach((channel: any) => {
-				// console.log(channel);
 				socket.emit(
-					'channels_messages',
-					{ id: channel.id, before: new Date().toISOString() },
-					(messages: any) => {
-						if (messages.message) {
-							alert(messages.errors);
-						} else {
-							// Ajouter les messages du channel à "allChanMessages"
-							messages.forEach((message: any) => {
-								// console.log(message);
-								setAllChanMessages((prevMessages) => [...prevMessages, message]);
-							});
-							// setAllChanMessages((prevMessages) => [...prevMessages, ...messages]);
-						}
-					},
+				'channels_messages',
+				{ id: channel.id, before: new Date().toISOString() },
+				(messages: any) => {
+					if (messages.message) {
+						alert(messages.errors);
+					} else {
+					// Ajouter les messages du channel à "messagesFromAllChannels"
+						messages.forEach((message: any) => {
+							messagesFromAllChannels.push(message);
+					});
+					}
+				},
 				);
-			});
+		  	});
+			// Ajouter tous les messages récupérés à "allChanMessages"
+			setAllChanMessages(messagesFromAllChannels);
 		});
-	}, [chanList]);
+	  }, [chanList]);
 
 	socket.off('users_message'); // Unbind previous event
 	socket.on('users_message', (data: any) => {
@@ -575,29 +575,32 @@ export default function Friends(props: FriendsProps) {
 		console.log('AllPrivateConvMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "allChanMessages"
-			data.friends?.forEach((friend: any) => {
-				// console.log(channel);
-				socket.emit(
-					'users_getMessages',
-					{ id: friend.id, before: new Date().toISOString() },
-					(messages: any) => {
-						if (messages.message) {
-							alert(messages.errors);
-						} else {
-							// Ajouter les messages du channel à "allChanMessages"
-							if (messages)
-							{
-								messages.forEach((message: any) => {
-									setAllPrivateConvMessages((prevMessages) => [...prevMessages, message]);
-								});
-							}
-						}
-					},
-				);
-			});
+		  const messagesFromAllConversations: any[] = []; // variable temporaire pour stocker les messages
+		  // Pour chaque conversation privée, récupérer les messages et les ajouter à "messagesFromAllConversations"
+		  data.friends?.forEach((friend: any) => {
+			// console.log(channel);
+			socket.emit(
+			  'users_getMessages',
+			  { id: friend.id, before: new Date().toISOString() },
+			  (messages: any) => {
+				if (messages.message) {
+				  alert(messages.errors);
+				} else {
+				  // Ajouter les messages de la conversation à "messagesFromAllConversations"
+				  if (messages)
+				  {
+					messages.forEach((message: any) => {
+					  messagesFromAllConversations.push(message);
+					});
+				  }
+				}
+			  },
+			);
+		  });
+		  // Ajouter tous les messages récupérés à "allPrivateConvMessages"
+		  setAllPrivateConvMessages(messagesFromAllConversations);
 		});
-	}, [friends]);
+	  }, [friends]);
 
 	// useEffect(() => {
 	// 	console.log('ChansList UseEffect');
