@@ -6,6 +6,7 @@ import {
 import { Server } from 'socket.io';
 import { ConnectedClientsService } from 'src/base.gateway';
 import { User } from 'src/users/entities/user.entity';
+import { Status } from 'src/users/enums/status.enum';
 import { GamesService } from './games.service';
 
 interface LocalGamePlayer {
@@ -256,6 +257,15 @@ export class LocalGame {
 		setTimeout(() => {
 			this.state = 'started';
 			this.resetBall();
+
+			// Update users status
+			this.players.forEach(async (player) => {
+				this.gamesService.usersService
+					.changeStatus(player.user.id, Status.Playing)
+					.catch(() => {
+						// Ignore error
+					});
+			});
 		}, 3000);
 
 		setTimeout(() => {
@@ -328,11 +338,17 @@ export class LocalGame {
 			opponent_score: this.players[1].score,
 		});
 
-		// Remove players from room
-		this.players.forEach((player) => {
+		// Remove players from room and update their status
+		this.players.forEach(async (player) => {
 			this.connectedClientsService
 				.get(player.user.id)
 				.leave(`game_${this.id}`);
+			// Update user status
+			this.gamesService.usersService
+				.changeStatus(player.user.id, Status.Online)
+				.catch(() => {
+					// Ignore error
+				});
 		});
 
 		// Save game to database
@@ -489,7 +505,7 @@ export class LocalGame {
 
 		// Send state to watchers
 		this.server.to(`game_watch_${this.id}`).emit('games_watch_ballMove', {
-			x: this.ball.x,
+			x: this.screen.width - this.ball.x,
 			y: this.ball.y,
 		});
 	}

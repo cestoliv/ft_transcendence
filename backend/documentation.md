@@ -1287,7 +1287,8 @@ payload: empty
 ```typescript
 message: `games_startWatching`
 payload: {
-	id: string, // Game id
+	id: string, // Game id, optionnal if you provide a user_id
+	user_id: number, // User id, optionnal if you provide a game id
 }
 ```
 
@@ -1314,7 +1315,8 @@ payload: {
 ```typescript
 message: `games_stopWatching`
 payload: {
-	id: string, // Game id
+	id: string, // Game id, optionnal if you provide a user_id
+	user_id: number, // User id, optionnal if you provide a game id
 }
 ```
 
@@ -1589,6 +1591,7 @@ Send game information 3 seconds before the start of the game.
 	id42: number, // null for non-42 users
 	username: string,
 	displayName: string,
+	status: 'online' | 'offline' | 'playing',
 	elo: number,
 	invitedFriends: UserFriends[],
 	friendOf: UserFriend[],

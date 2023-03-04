@@ -1,6 +1,8 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
+
+import useGameInfo from '../hooks/useGameInfo';
 
 import PrivateChanJoined from './PrivateChanJoined';
 
@@ -23,6 +25,8 @@ type FriendProps = {
 
 export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
+	const navigate = useNavigate();
+	const { gameInfo, setGameInfo } = useGameInfo();
 
 	const [banTimeValue, setBanTimeValue] = useState<string>('');
     const [muteTimeValue, setMuteTimeValue] = useState<string>('');
@@ -176,6 +180,27 @@ export const Friend = (props: FriendProps) => {
 		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 		setPrivateChanJoined(privateChanNotJoined);
 	}, [props.chanList]);
+  
+	const showGame = () => {
+		console.log(props.user.id)
+		socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
+			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.messages);
+				return;
+			}
+			socket.emit('games_startWatching', { id: data.id }, (data: any) => {
+				console.log(data);
+				if (data?.statusCode) {
+					message.error(data.messages);
+					return;
+				}
+				setGameInfo({...data, isWatching: true});
+				navigate(`/pong/${data.id}`)
+			});
+		});
+		console.log(gameInfo);
+	}
 
 	return (
 		<div
@@ -204,7 +229,7 @@ export const Friend = (props: FriendProps) => {
 				>
 					<Box className="friend-action-modal background-modal">
 						<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
-						<button className='discord-blue'>Regarder la partie</button>
+						<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
 						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
 						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>

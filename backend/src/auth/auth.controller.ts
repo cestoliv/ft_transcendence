@@ -43,9 +43,6 @@ export class AuthController {
 			return response.code(200).send({
 				bearer: bearer,
 			});
-			return response
-				.code(303)
-				.redirect(this.configService.get('FRONTEND_URL'));
 		} else {
 			response
 				.code(303)
