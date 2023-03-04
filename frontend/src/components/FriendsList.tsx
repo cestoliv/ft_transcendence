@@ -56,6 +56,11 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 	};
 
+	// useEffect(() => {
+	// 	console.log("hello56");
+	// 	console.log(props.user_me.status);
+	// }, []);
+
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
 			<span className="close-friend-list" id="close-friend-list" onClick={closeFriendList}>
