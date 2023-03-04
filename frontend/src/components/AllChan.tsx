@@ -27,10 +27,23 @@ export const AllChan = (props: AllChanProps) => {
 	const [chansInv, setChansInv] = useState<IChannel[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 
+	socket.off('channels_inviteUser'); // Unbind previous event
+	socket.on('channels_inviteUser', (data: IChannelInvitedUser) => {
+		socket.emit(
+			'channels_get',
+			{
+				id: data.channelId,
+			},
+			(data: any) => {
+				if (data.message) alert(data.errors);
+				else setChansInv((prev) => [data, ...prev]);
+			},
+		);
+	});
+
 	useEffect(() => {
 		console.log('AllChan UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-			console.log(data);
 			setChans(data);
 			setChansInv(
 				data.filter((channel) =>
@@ -57,6 +70,7 @@ export const AllChan = (props: AllChanProps) => {
 					})
 					.map((chan) => (
 						<ChansOther
+							key={chan.id}
 							chan={chan}
 							chanList={props.chanList}
 							user_me={props.user_me}
@@ -67,7 +81,7 @@ export const AllChan = (props: AllChanProps) => {
 			</div>
 			{!loading && <h3 className="display-chan-title pixel-font">ban Chan</h3>}
 			{chans?.map((chan) => (
-				<ChansBan chan={chan} user_me={props.user_me} />
+				<ChansBan key={chan.id} chan={chan} user_me={props.user_me} />
 			))}
 			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
             {chans?.map((channel: IChannel) => {

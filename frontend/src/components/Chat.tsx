@@ -11,8 +11,10 @@ import ChatMessages from './ChatMessages';
 
 type ChatProps = {
 	user_me: IUser;
-	activeConvId: number;
+	activeChan : IChannel;
 	messages: IChannelMessage[];
+	addPassword: (passWord: string, chan_id : number) => void;
+	togglePrivateChan : (activeChan : IChannel) => void;
 };
 
 export default function Chat(props: ChatProps) {
@@ -20,7 +22,6 @@ export default function Chat(props: ChatProps) {
 
 	const [passWord, setPassWord] = useState<string>('');
 	const [message, setMessage] = useState<string>('');
-	const [chan, setChan] = useState<IChannel | null>(null);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'password-input') setPassWord(event.target.value);
@@ -33,12 +34,16 @@ export default function Chat(props: ChatProps) {
 			socket.emit(
 				'channels_sendMessage',
 				{
-					id: chan?.id,
+					id: props.activeChan?.id,
 					message: message,
 				},
 				(data: any) => {
-					setMessage('');
-					props.messages.unshift(data);
+					if (data.messages) alert(data.messages);
+					else
+					{
+						setMessage('');
+						props.messages.unshift(data);
+					}
 				},
 			);
 		}
@@ -46,51 +51,12 @@ export default function Chat(props: ChatProps) {
 
 	const addPassWord = (event: any): void => {
 		event?.preventDefault();
-		socket.emit(
-			'channels_update',
-			{
-				id: chan?.id,
-				visibility: 'password-protected',
-				password: passWord,
-			},
-			(data: any) => {
-				if (data.message) alert(data.errors);
-				else {
-					setChan(data);
-					setPassWord('');
-				}
-			},
-		);
+		props.addPassword(passWord, props.activeChan.id);
+		setPassWord('');
 	};
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if ((chan && chan.visibility === 'public') || chan?.visibility === 'password-protected') {
-			socket.emit(
-				'channels_update',
-				{
-					id: chan.id,
-					visibility: 'private',
-				},
-				(data: any) => {
-					if (data.message) alert(data.errors);
-					else {
-						setChan(data);
-					}
-				},
-			);
-		} else {
-			socket.emit(
-				'channels_update',
-				{
-					id: chan?.id,
-					visibility: 'public',
-				},
-				(data: any) => {
-					if (data.message) alert(data.errors);
-					else setChan(data);
-				},
-			);
-		}
+		props.togglePrivateChan(props.activeChan);
 	};
 
 	const toggleHidden = (event: any) => {
@@ -99,39 +65,21 @@ export default function Chat(props: ChatProps) {
 	};
 
 	const isOwner = (): boolean => {
-		if (props.user_me.id === chan?.owner.id) return true;
-		return false;
+		if (props.user_me.id === props.activeChan?.owner.id) return true;
+			return false;
 	};
-
-	const fetchData = () => {
-		socket.emit(
-			'channels_get',
-			{
-				id: props.activeConvId,
-			},
-			(data: any) => {
-				if (data.message) alert(data.errors);
-				else setChan(data);
-			},
-		);
-	};
-
-	useEffect(() => {
-		console.log('Chat useEffect');
-		fetchData();
-	}, [props.activeConvId]);
 
 	return (
 		<div className="chat-wrapper discord-black-three">
 			<div className="chat-nav" id="chat-nav">
-				<span className='pixel-font'>{chan ? `${chan.name} #${chan.code}` : 'Unknown channel'}</span>
+				<span className='pixel-font'>{props.activeChan ? `${props.activeChan.name} #${props.activeChan.code}` : 'Unknown channel'}</span>
 				{isOwner() && (
 					<div className="chat-nav-right">
 						<div className="wrapper-settings hidden pixel-font">
 							<Checkbox
 								handleChange={isChecked}
 								isChecked={
-									chan?.visibility === 'public' || chan?.visibility === 'password-protected'
+									props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
 										? false
 										: true
 								}
@@ -155,7 +103,7 @@ export default function Chat(props: ChatProps) {
 					</div>
 				)}
 			</div>
-			<ChatMessages user_me={props.user_me} chan_id={props.activeConvId} messages={props.messages} />
+			<ChatMessages user_me={props.user_me} chan_id={props.activeChan.id} messages={props.messages} />
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
 					value={message}

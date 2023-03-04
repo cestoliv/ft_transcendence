@@ -41,3 +41,76 @@
     cursor: pointer;
     background-color: #65B876;
 }
+
+
+.ban-time-modal {
+    position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 300px;
+	border-radius: 20px;
+	box-shadow: 24;
+	padding: 10px 0px;
+    display: flex;
+    justify-content: center;
+}
+
+.ban-time-form {
+    width: 80%;
+}
+
+.ban-time-input {
+    width: 100%;
+    background-color: #36393e !important;
+    font-size: 10px;
+    color: white;
+    border-radius: 15px;
+    padding: 5px;
+    border: none;
+}
+
+.ban-time-input::placeholder {
+    color: white;
+    padding-left: 5px;
+}
+
+.ban-time-input:focus {
+	outline: none;
+}
+
+.mute-time-modal {
+    position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 300px;
+	border-radius: 20px;
+	box-shadow: 24;
+	padding: 10px 0px;
+    display: flex;
+    justify-content: center;
+}
+
+.mute-time-form {
+    width: 80%;
+}
+
+.mute-time-input {
+    width: 100%;
+    background-color: #36393e !important;
+    font-size: 10px;
+    color: white;
+    border-radius: 15px;
+    padding: 5px;
+    border: none;
+}
+
+.mute-time-input::placeholder {
+    color: white;
+    padding-left: 5px;
+}
+
+.mute-time-input:focus {
+	outline: none;
+}

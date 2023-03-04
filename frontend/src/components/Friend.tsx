@@ -17,12 +17,17 @@ type FriendProps = {
 	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	removeFriend: (user_id: number) => void;
+	banFriend : (banTime : string, friend_id : number) => void;
 	gameInfo: any;
 };
 
 export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
 
+	const [banTimeValue, setBanTimeValue] = useState<string>('');
+    const [muteTimeValue, setMuteTimeValue] = useState<string>('');
+
+	const [privateChanJoined, setPrivateChanJoined] = useState<IChannel[]>([]);
 	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
 	const [openInviteGameModal, setOpenInviteGameModal] = React.useState(false);
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
@@ -56,35 +61,74 @@ export const Friend = (props: FriendProps) => {
 	const OpenChanListModal = () => setOpenChanListModal(true);
 	const CloseChanListModal = () => setOpenChanListModal(false);
 
+	const [openBanTimeModal, setOpenBanTimeModal] = React.useState(false);
+	const OpenBanTimeModal = () => setOpenBanTimeModal(true);
+	const closeBanTimeModal = () => setOpenBanTimeModal(false);
+
+    const [openMuteTimeModal, setOpenMuteTimeModal] = React.useState(false);
+	const OpenMuteTimeModal = () => setOpenMuteTimeModal(true);
+	const closeMuteTimeModal = () => setOpenMuteTimeModal(false);
+
+	const handleChangeBantime = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'ban-time-input') setBanTimeValue(event.target.value);
+	};
+
+    const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
+	};
+
 	const removeFriendClick = (event: any): void => {
 		props.removeFriend(props.user.id);
 	};
 
-	const muteFriend = (event: any): void => {
-		socket.emit(
+	const banFriend = async (event: any) => {
+        event.preventDefault();
+        props.banFriend(banTimeValue, props.user.id);
+        closeBanTimeModal();
+    }
+
+    const muteFriend = async (event: any) => {
+        event.preventDefault();
+		let now = new Date();
+        now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
+        socket.emit(
 			'users_mute',
 			{
 				id: props.user.id,
-				until: new Date().toISOString(),
+				until: now,
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
+				else closeBanTimeModal();
 			},
 		);
-	};
+    }
 
-	const banFriend = (event: any): void => {
-		socket.emit(
-			'users_ban',
-			{
-				id: props.user.id,
-				until: new Date().toISOString(),
-			},
-			(data: any) => {
-				if (data.messages) alert(data.messages);
-			},
-		);
-	};
+	// const muteFriend = (event: any): void => {
+	// 	socket.emit(
+	// 		'users_mute',
+	// 		{
+	// 			id: props.user.id,
+	// 			until: new Date().toISOString(),
+	// 		},
+	// 		(data: any) => {
+	// 			if (data.messages) alert(data.messages);
+	// 		},
+	// 	);
+	// };
+
+	// const banFriend = (event: any): void => {
+	// 	socket.emit(
+	// 		'users_ban',
+	// 		{
+	// 			id: props.user.id,
+	// 			until: new Date().toISOString(),
+	// 		},
+	// 		(data: any) => {
+	// 			if (data.messages) alert(data.messages);
+	// 		},
+	// 	);
+	// };
 
 	const inviteFriend = () => {
 		socket.emit('games_create', { maxDuration: parseInt(time), maxScore: parseInt(points), mode: mode, visibility: 'private' }, (data: any) => {
@@ -105,12 +149,33 @@ export const Friend = (props: FriendProps) => {
 		});
 	};
 
-	// useEffect(() => {
-	// 	console.log("Friend useEffect");
-	// 	socket.emit('channels_listJoined', {}, (data: any) => {
-	// 		setChanListJoined(data);
-	// 	});
-	// }, []);
+	const chanInvit = (chan_id : number, invited_user_id : number): void => {
+		socket.emit(
+			'channels_inviteUser',
+			{
+				id: chan_id,
+				user_id: invited_user_id,
+			},
+			(data: any) => {
+				if (data.messages) 
+					alert(data.messages);
+				else
+				{
+					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+				}
+			},
+		);
+	};
+
+	useEffect(() => {
+		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
+		let privateChanNotJoined = props.chanList.filter(channel =>
+			channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
+		);
+		// props.chanList.map(chan => (console.log(chan)));
+		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+		setPrivateChanJoined(privateChanNotJoined);
+	}, [props.chanList]);
 
 	return (
 		<div
@@ -141,8 +206,8 @@ export const Friend = (props: FriendProps) => {
 						<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
 						<button className='discord-blue'>Regarder la partie</button>
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
-						<button className='discord-blue' onClick={muteFriend}>Mute</button>
-						<button className='discord-blue' onClick={banFriend}>Ban</button>
+						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
+						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>
 						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
 					</Box>
 				</Modal>
@@ -213,16 +278,37 @@ export const Friend = (props: FriendProps) => {
 				aria-describedby="modal-modal-description"
 			>
 				<Box className="chan-user-modal">
-					{props.chanList
-						?.filter((chan) => {
-							if (chan.visibility === 'private') return true;
-							return false;
-						})
-						.map((chan) => (
-							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} />
+					{privateChanJoined.map((chan) => (
+							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} chanInvit={chanInvit} />
 						))}
 				</Box>
 			</Modal>
+
+			<Modal
+                open={openBanTimeModal}
+                onClose={closeBanTimeModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box className="ban-time-modal background-modal">
+                    <form className="ban-time-form" onSubmit={banFriend}>
+                        <input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input"/>
+                    </form>
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openMuteTimeModal}
+                onClose={closeMuteTimeModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box className="mute-time-modal background-modal">
+                    <form className="mute-time-form" onSubmit={muteFriend}>
+                        <input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input"/>
+                    </form>
+                </Box>
+            </Modal>
 		</div>
 	);
 };
