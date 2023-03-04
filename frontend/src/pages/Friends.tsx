@@ -602,27 +602,28 @@ export default function Friends(props: FriendsProps) {
 		});
 	  }, [friends]);
 
-	// useEffect(() => {
-	// 	console.log('ChansList UseEffect');
-	// 	socket.emit('channels_listJoined', {}, (data: any) => {
-	// 		// console.log(data);
-	// 		setChanList(data);
-	// 	});
-	// }, []);
-
 	useEffect(() => {
 		console.log('ChansList UseEffect');
-		socket.emit('channels_list', {}, (data: IChannel[]) => {
-				let chanJoined : IChannel[];
-				chanJoined = data.filter(channel =>
-				channel.members.some(member => member.id === props.user_me.id)
-			);
-			// props.chanList.map(chan => (console.log(chan)));
-			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
-			setChanList(chanJoined);
+		socket.emit('channels_listJoined', {}, (data: any) => {
+			console.log("hello42");
+			console.log(data);
+			setChanList(data);
 		});
-		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
 	}, []);
+
+	// useEffect(() => {
+	// 	console.log('ChansList UseEffect');
+	// 	socket.emit('channels_list', {}, (data: IChannel[]) => {
+	// 			let chanJoined : IChannel[];
+	// 			chanJoined = data.filter(channel =>
+	// 			channel.members.some(member => member.id === props.user_me.id)
+	// 		);
+	// 		// props.chanList.map(chan => (console.log(chan)));
+	// 		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+	// 		setChanList(chanJoined);
+	// 	});
+	// 	// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
+	// }, []);
 
 	useEffect(() => {
 		console.log('FriendsList useEffect');

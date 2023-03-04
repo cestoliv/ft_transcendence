@@ -1,18 +1,16 @@
 import { SetCookie, RemoveCookie } from './types';
 
 export interface IUser {
-	id: number;
-	id42: number;
-	username: string;
-	elo: number;
-	wins: number;
-	loses: number;
-	scores: IScore[];
-	profile_picture: string;
-	invitedFriends: IUserFriend[];
-	friendOf: IUserFriend[];
-	friends: IUser[];
-	blocked: IUser[];
+	id: number,
+	id42: number, // null for non-42 users
+	username: string,
+	displayName: string,
+	status: 'online' | 'offline' | 'playing',
+	elo: number,
+	invitedFriends: IUserFriend[],
+	friendOf: IUserFriend[],
+	friends: IUser[],
+	profile_picture: string,
 }
 
 export interface IScore {
