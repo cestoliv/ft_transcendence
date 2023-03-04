@@ -18,6 +18,7 @@ type PersonListProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
+	banFriend : (banTime : string, friend_id : number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
 };
@@ -55,10 +56,6 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 	};
 
-	useEffect(() => {
-		console.log('FriendsList useEffect');
-	}, [props.friends]);
-
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
 			<span className="close-friend-list" id="close-friend-list" onClick={closeFriendList}>
@@ -73,6 +70,7 @@ export const FriendsList = (props: PersonListProps) => {
 							chanList={props.chanList}
 							activeConv={props.activeConv}
 							removeFriend={props.removeFriend}
+							banFriend = {props.banFriend}
 							gameInfo={props.gameInfo}
 						/>
 					))}

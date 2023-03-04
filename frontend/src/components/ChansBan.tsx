@@ -24,7 +24,7 @@ export const ChansBan = (props: ChansBanProps) => {
             let x = 0;
             while (x < props.chan.banned.length)
             {
-                if (props.chan.banned[x].userId === props.user_me.id)
+                if (props.chan.banned[x].userId === props.user_me.id && props.chan.banned[x].until > new Date())
                     return true;
                 x++;
             }

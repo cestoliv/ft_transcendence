@@ -30,15 +30,6 @@ export const ChanList = (props: ChanListProps) => {
 		button2?.classList.remove('hidden-button');
 	};
 
-	// useEffect(() => {
-	// 	console.log("ChansList UseEffect");
-	// 	socket.emit('channels_listJoined', {}, (data: any) => {
-	// 		// console.log("hello10 : ");
-	// 		// console.log(data);
-	// 		setChanList(data);
-	// 	});
-	// }, [chanList]);
-
 	return (
 		<div className="ChanList-wrapper">
 			<span className="close-chan-list" id="close-chan-list" onClick={closeChanList}>

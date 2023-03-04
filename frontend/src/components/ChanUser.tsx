@@ -15,16 +15,36 @@ type ChanUserProps = {
     member_id : number,
     chan_id : number,
     chan_admins : IUser[],
+    chan_owner : IUser,
+    banUser : (banTime : string, chan_id : number, member_id : number) => void;
+    muteUser : (banTime : string, chan_id : number, member_id : number) => Promise<any>;
 };
 
 export const ChanUser = (props: ChanUserProps) => {
     const socket = useContext(SocketContext);
 
-    const [admins, setAdmins] = useState<IUser[]>([]);
+    const [banTimeValue, setBanTimeValue] = useState<string>('');
+    const [muteTimeValue, setMuteTimeValue] = useState<string>('');
 
     const [openChanUserModal, setOpenChanUserModal] = React.useState(false);
 	const OpenChanUserModal = () => setOpenChanUserModal(true);
 	const CloseChanUserModal = () => setOpenChanUserModal(false);
+
+    const [openBanTimeModal, setOpenBanTimeModal] = React.useState(false);
+	const OpenBanTimeModal = () => setOpenBanTimeModal(true);
+	const closeBanTimeModal = () => setOpenBanTimeModal(false);
+
+    const [openMuteTimeModal, setOpenMuteTimeModal] = React.useState(false);
+	const OpenMuteTimeModal = () => setOpenMuteTimeModal(true);
+	const closeMuteTimeModal = () => setOpenMuteTimeModal(false);
+
+    const handleChangeBantime = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'ban-time-input') setBanTimeValue(event.target.value);
+	};
+
+    const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
+	};
 
     const amIAdmin = (): boolean => {
         if (props.chan_admins)
@@ -36,8 +56,9 @@ export const ChanUser = (props: ChanUserProps) => {
                     return true;
                 x++;
             }
-            return false;
         }
+        if (props.chan_owner.id === props.user_me_id)
+            return true;
         return false;
     }
 
@@ -90,38 +111,27 @@ export const ChanUser = (props: ChanUserProps) => {
 		}
 	};
 
-    const banUser = (event: any): void => {
-        socket.emit(
-            'channels_banUser',
-            {
-                id: props.chan_id,
-                user_id: props.member_id,
-                until : "2023-02-10T01:00:00-01:00",
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-                    CloseChanUserModal();
-            },
-        );
+    const banUser = async (event: any) => {
+        event.preventDefault();
+        props.banUser(banTimeValue, props.chan_id, props.member_id);
+        CloseChanUserModal();
+        closeBanTimeModal();
     }
 
-    const muteUser = (event: any): void => {
-        socket.emit(
-            'channels_muteUser',
+    
+
+    const muteUser = async (event: any) => {
+        event.preventDefault();
+        try {
+            const data = await props.muteUser(muteTimeValue, props.chan_id, props.member_id);
+            if (data)
             {
-                id: props.chan_id,
-                user_id: props.member_id,
-                until : "2023-02-11T03:00:00-01:00",
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-                    CloseChanUserModal();
-            },
-        );
+                closeMuteTimeModal();
+                CloseChanUserModal();
+            }
+        } catch (error) {
+            console.error('muteUser error:');
+        }
     }
 
     const isAdmin = (): boolean => {
@@ -141,10 +151,10 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper list-item discord-background-three">
-            {amIAdmin() && props.user_me_id != props.member_id && (
+            {amIAdmin() && (
                 <h3 onClick={OpenChanUserModal}>{props.username}</h3>
             )}
-            {!amIAdmin() || props.user_me_id === props.member_id  && (
+            {!amIAdmin() && (
                 <h3>{props.username}</h3>
             )}
             <Modal
@@ -160,9 +170,34 @@ export const ChanUser = (props: ChanUserProps) => {
                     {isAdmin() && (
                         <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font discord-blue' onClick={setAdmin}>Remove Admin</button>
                     )}
-                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={banUser}>Ban</button>
+                    <button name='button-ban_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={OpenBanTimeModal}>Ban</button>
                     <button className='discord-blue'>Kick</button>
-                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={muteUser}>Mute</button>
+                    <button name='button-mute_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
+                </Box>
+            </Modal>
+            <Modal
+                open={openBanTimeModal}
+                onClose={closeBanTimeModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box className="ban-time-modal background-modal">
+                    <form className="ban-time-form" onSubmit={banUser}>
+                        <input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input"/>
+                    </form>
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openMuteTimeModal}
+                onClose={closeMuteTimeModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box className="mute-time-modal background-modal">
+                    <form className="mute-time-form" onSubmit={muteUser}>
+                        <input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input"/>
+                    </form>
                 </Box>
             </Modal>
 		</div>

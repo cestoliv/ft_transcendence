@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import { IUser } from '../interfaces';
+import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage, IChannelInvitedUser, IChannelBannedUser } from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
 
@@ -178,6 +178,22 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
+	const banFriend = (banTime : string, friend_id : number): void => {
+        let now = new Date();
+        now.setMinutes(now.getMinutes() + parseInt(banTime));
+		socket.emit(
+			'users_ban',
+			{
+				id: friend_id,
+				until: now,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
+			},
+		);
+    }
+
 
 	useEffect(() => {
 		socket.emit(
@@ -195,11 +211,25 @@ export const SearchGame = (props: FriendsProps) => {
 		console.log(mode);
 	}, [mode]);
 
+	// useEffect(() => {
+	// 	console.log('ChansList UseEffect');
+	// 	socket.emit('channels_listJoined', {}, (data: any) => {
+	// 		setChanList(data);
+	// 	});
+	// }, []);
+
 	useEffect(() => {
 		console.log('ChansList UseEffect');
-		socket.emit('channels_listJoined', {}, (data: any) => {
-			setChanList(data);
+		socket.emit('channels_list', {}, (data: IChannel[]) => {
+				let chanJoined : IChannel[];
+				chanJoined = data.filter(channel =>
+				channel.members.some(member => member.id === props.user_me.id)
+			);
+			// props.chanList.map(chan => (console.log(chan)));
+			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+			setChanList(chanJoined);
 		});
+		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
 	}, []);
 
 	useEffect(() => {
@@ -231,6 +261,7 @@ export const SearchGame = (props: FriendsProps) => {
 					AddFriend={AddFriend}
 					accept_friend_request={accept_friend_request}
 					removeFriend={removeFriend}
+					banFriend={banFriend}
 					gameInfo={gameInfo}
 				/>
 			)}

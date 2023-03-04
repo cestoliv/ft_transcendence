@@ -12,27 +12,19 @@ import Box from '@mui/material/Box';
 type PrivateChanJoinedProps = {
 	chan: IChannel;
 	userToInviteId: number;
+	chanInvit : (chan_id : number, invited_user_id : number) => void;
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
 	const socket = useContext(SocketContext);
 
 	const chanInvit = (event: any): void => {
-		socket.emit(
-			'channels_inviteUser',
-			{
-				id: props.chan.id,
-				user_id: props.userToInviteId,
-			},
-			(data: any) => {
-				if (data.messages) alert(data.messages);
-			},
-		);
+		props.chanInvit(props.chan.id, props.userToInviteId);
 	};
 
 	return (
 		<div className="wrapper-private-chan-joined-item">
-			<div className="private-chan-joined-item" onClick={chanInvit}>
+			<div className="private-chan-joined-item discord-blue" onClick={chanInvit}>
 				{props.chan.name}
 			</div>
 		</div>

@@ -114,7 +114,6 @@ function App() {
 	}, [gameInfo])
 
 	useEffect(() => {
-		console.log("buzz");
 		console.log(auth);
 		if (auth.bearer != null) {
 			fetchUser();
