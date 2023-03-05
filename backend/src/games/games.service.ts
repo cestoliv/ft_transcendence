@@ -203,27 +203,26 @@ export class GamesService {
 
 	async updateElo(
 		userId: number,
-		opponentId: number,
+		userElo: number,
+		opponentElo: number,
 		result: 0 | 0.5 | 1,
 	): Promise<User> {
 		const user = await this.usersService.findOne(userId);
 		if (!user) throw new NotFoundException('User not found');
-		const opponent = await this.usersService.findOne(opponentId);
-		if (!opponent) throw new NotFoundException('User not found');
 
 		// See: https://fr.wikipedia.org/wiki/Classement_Elo
 
 		const publicGamesCount = await this.gamesRepository.count({
-			where: [{ winner: { id: user.id } }, { loser: { id: user.id } }],
+			where: [{ winner: { id: userId } }, { loser: { id: userId } }],
 		});
 
 		let K = 40;
 		if (publicGamesCount > 30) K = 20;
-		if (user.elo > 2400) K = 10;
+		if (userElo > 2400) K = 10;
 
 		const victoryProbability =
-			1 / (1 + 10 ** ((opponent.elo - user.elo) / 400));
-		const newElo = user.elo + K * (result - victoryProbability);
+			1 / (1 + 10 ** ((opponentElo - userElo) / 400));
+		const newElo = userElo + K * (result - victoryProbability);
 
 		user.elo = Math.round(newElo);
 		return await this.usersService.save(user);
