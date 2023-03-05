@@ -69,14 +69,14 @@ export class User {
 	muted: MutedUser[];
 
 	// Profile picture URL
-	@Column({ select: false, nullable: true })
+	@Column({ nullable: true })
 	profile_picture: string;
 
 	@AfterLoad()
 	getProfilePicture() {
 		this.profile_picture = `${configService.get(
 			'API_URL',
-		)}/users/profile-picture/${this.id}`;
+		)}/users/profile-picture/${this.profile_picture}`;
 	}
 
 	// 42 Profile picture URL

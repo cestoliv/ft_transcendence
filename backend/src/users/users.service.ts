@@ -10,6 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
+import { v4 as uuidv4 } from 'uuid';
 import { authenticator } from 'otplib';
 import { pipeline, Readable } from 'stream';
 import * as fs from 'fs';
@@ -77,6 +78,7 @@ export class UsersService {
 			'displayName',
 			'elo',
 			'status',
+			'profile_picture',
 		];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
@@ -99,6 +101,7 @@ export class UsersService {
 			'displayName',
 			'elo',
 			'status',
+			'profile_picture',
 		];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
@@ -121,6 +124,7 @@ export class UsersService {
 			'displayName',
 			'elo',
 			'status',
+			'profile_picture',
 		];
 		if (withTotp) select.push('otp');
 		if (with42ProfilePicture) select.push('profile_picture_42');
@@ -376,12 +380,12 @@ export class UsersService {
 	}
 
 	async updateProfilePicture(userId: number, file: any) {
-		const ppPath = path.join(
-			'./',
-			'uploads',
-			'profile-pictures',
-			`${userId}.webp`,
-		);
+		let user = await this.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
+
+		const filename = `${uuidv4()}.webp`;
+		const ppPath = path.join('./', 'uploads', 'profile-pictures', filename);
+
 		const pipelinePromise = new Promise<void>((resolve, reject) => {
 			pipeline(
 				file,
@@ -416,14 +420,37 @@ export class UsersService {
 			);
 		});
 
+		const deleteOldProfilePicture = new Promise<void>((resolve, reject) => {
+			if (!user.profile_picture) resolve();
+			const filename = user.profile_picture.split('/').slice(-1)[0];
+			fs.unlink(
+				path.join('./', 'uploads', 'profile-pictures', filename),
+				(err) => {
+					if (err) {
+						if (err.code === 'ENOENT') {
+							console.log(
+								path.join(
+									'./',
+									'uploads',
+									'profile-pictures',
+									filename,
+								),
+							);
+							resolve();
+						} else reject(new BadRequestException(err.message));
+					} else resolve();
+				},
+			);
+		});
+
 		try {
 			await pipelinePromise;
-			const user = await this.findOne(userId);
+			await deleteOldProfilePicture;
+			// Update the user profile picture filename
+			user.profile_picture = filename;
+			user = await this.save(user);
 			// Propage the new profile picture
-			this.gateway.propagateUserUpdate(
-				user,
-				'users_profilePictureUpdate',
-			);
+			this.gateway.propagateUserUpdate(user, 'users_update');
 			return user;
 		} catch (err) {
 			throw err;

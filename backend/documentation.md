@@ -33,7 +33,6 @@
 	+ **Websocket Events**
 		* [New private message](#new-private-message)
 		* [On profile update](#on-profile-update)
-		* [On profile picture update](#on-profile-picture-update)
 		* [On friendship invitation](#on-friendship-invitation)
 		* [On friendship acceptation](#on-friendship-acceptation)
 		* [On friendship deletion](#on-friendship-deletion)
@@ -1351,13 +1350,6 @@ payload: {
 When a user related to you update his profile (a friend or someone who is in one of the channels you joined)
 
 - Event name: `users_update`
-- Data type: [User](#user)
-
-### **On profile picture update**
-
-When a user related to you update it's profile profile (a friend or someone who is in one of the channels you joined)
-
-- Event name: `users_profilePictureUpdate`
 - Data type: [User](#user)
 
 ### **On friendship invitation**

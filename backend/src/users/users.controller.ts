@@ -42,7 +42,7 @@ export class UsersController {
 
 		return response.send(
 			await this.usersService.updateProfilePicture(
-				request.user,
+				request.user.id,
 				data.file,
 			),
 		);
@@ -79,17 +79,12 @@ export class UsersController {
 	/*
 	 * Return the profile picture of the user with the given id
 	 */
-	@Get('/profile-picture/:id')
+	@Get('/profile-picture/:filename')
 	async getProfilePicture(
-		@Param('id') id: number,
+		@Param('filename') filename: string,
 		@Res() response,
 	): Promise<StreamableFile> {
-		const ppPath = path.join(
-			'./',
-			'uploads',
-			'profile-pictures',
-			`${id}.webp`,
-		);
+		const ppPath = path.join('./', 'uploads', 'profile-pictures', filename);
 		if (!fs.existsSync(ppPath))
 			throw new NotFoundException('No profile picture found');
 		const file = fs.createReadStream(ppPath);
