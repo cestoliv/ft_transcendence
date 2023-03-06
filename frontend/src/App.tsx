@@ -86,8 +86,6 @@ function App() {
 		});
 	};
 
-
-
 	socket.off();
 	socket.on('games_start', (data: any) => {
 		console.log('games_start', data);

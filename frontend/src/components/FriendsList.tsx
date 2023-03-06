@@ -18,6 +18,7 @@ type PersonListProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
+	refuse_friend_request : (inviter_id : number) => void;
 	banFriend : (banTime : string, friend_id : number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
@@ -56,10 +57,10 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 	};
 
-	// useEffect(() => {
-	// 	console.log("hello56");
-	// 	console.log(props.user_me.status);
-	// }, []);
+	useEffect(() => {
+		console.log("hello56");
+		console.log(props.friends);
+	}, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
@@ -94,6 +95,7 @@ export const FriendsList = (props: PersonListProps) => {
 									key={friend_request.inviterId}
 									friend_request={friend_request}
 									accept_friend_request={props.accept_friend_request}
+									refuse_friend_request={props.refuse_friend_request}
 								/>
 							))}
 					</Box>

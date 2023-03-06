@@ -172,12 +172,15 @@ export const Friend = (props: FriendProps) => {
 
 	useEffect(() => {
 		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
-		let privateChanNotJoined = props.chanList.filter(channel =>
-			channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
-		);
-		// props.chanList.map(chan => (console.log(chan)));
-		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
-		setPrivateChanJoined(privateChanNotJoined);
+		if (props.chanList)
+		{
+			let privateChanNotJoined = props.chanList.filter(channel =>
+				channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
+			);
+			// props.chanList.map(chan => (console.log(chan)));
+			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+			setPrivateChanJoined(privateChanNotJoined);
+		}
 	}, [props.chanList]);
 
 	const showGame = () => {
@@ -219,15 +222,12 @@ export const Friend = (props: FriendProps) => {
 		>
 			<div className="avatar_username">
 				<img className='avatar' src={props.user.profile_picture} alt="" />
-				<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
+				<Link to={`/profile/${props.user.id}`} className={`example-component ${
+						props.user.status === 'online' ? "friend-online" : ""
+						}${props.user.status === 'playing' ? "friend-playing" : ""}`}>
+						{props.user.displayName}</Link>
 			</div>
 			<div className="friendsList-settings">
-				{/* {props.states === 'connected' && (
-					<span className="e-icons e-medium e-play"></span>
-				)}
-				{props.states === 'ingame' && (
-					<span className="e-icons e-medium e-radio-button"></span>
-				)} */}
 				<span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span>
 				<Modal
 					open={openFActionModal}
@@ -236,8 +236,12 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
-						<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
+						{props.user.status === 'online' && (
+							<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
+						)}
+						{props.user.status === 'playing' && (
+							<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
+						)}
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
 						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
 						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>

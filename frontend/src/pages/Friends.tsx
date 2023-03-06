@@ -7,6 +7,7 @@ import ChanList from '../components/ChanList';
 import AllChan from '../components/AllChan';
 import { useState } from 'react';
 import { IConvList } from '../interface';
+import { message } from 'antd';
 
 import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage, IChannelInvitedUser, IChannelBannedUser } from '../interfaces';
 
@@ -122,8 +123,11 @@ export default function Friends(props: FriendsProps) {
 				} else {
 					// Remove the channel with the given chan_id from the chanList array
 					setChanList((prevList) => prevList.filter((chan) => chan.id !== chan_id));
-					setActivConvId(-1);
-					setActiveChan(null);
+					if (activeChan?.id === data.id)
+					{
+						setActivConvId(-1);
+						setActiveChan(null);
+					}
 				}
 			},
 		);
@@ -317,11 +321,21 @@ export default function Friends(props: FriendsProps) {
 				if (data.messages) alert(data.messages);
 				else {
 					setFriends((prevFriends) => [...prevFriends, data.inviter]);
-					friendOf.forEach(item => {
-						console.log(item);
-						if (item.inviteeId == data.inviteeId && item.inviterId == data.inviterId)
-							console.log("buzz");
-					});
+					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId)));
+				} 
+			},
+		);
+	};
+
+	const refuse_friend_request = (inviter_id: number): void => {
+		socket.emit(
+			'users_removeFriend',
+			{
+				id: inviter_id,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else {
 					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId)));
 				} 
 			},
@@ -460,6 +474,11 @@ export default function Friends(props: FriendsProps) {
 
 		if (data.userId === user?.id) {
 			setChanList((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+			if (activeChan?.id === data.channelId)
+			{
+				setActivConvId(-1);
+				setActiveChan(null);
+			}
 		}
 		if (index !== -1 && data.userId !== user?.id) {
 			let updatedChanList : IChannel[];
@@ -495,15 +514,15 @@ export default function Friends(props: FriendsProps) {
 
 	// start socket.on user
 
-	socket.off('users_profilePictureUpdate'); // Unbind previous event
-	socket.on('users_profilePictureUpdate', (data: any) => {
+	socket.off('users_update'); // Unbind previous event
+	socket.on('users_update', (data: any) => {
 		const index = friends.findIndex(friend => friend.id === data.id);
 
 		if (index !== -1) {
 			let updatedFriendList : IUser[];
 
 			updatedFriendList = [...friends];
-			updatedFriendList[index].profile_picture = data.profile_picture;
+			updatedFriendList[index] = data;
 			setFriends(updatedFriendList);
 		}
 	});
@@ -520,17 +539,12 @@ export default function Friends(props: FriendsProps) {
 
 	socket.off('users_friendshipRemoved'); // Unbind previous event
 	socket.on('users_friendshipRemoved', (data: any) => {
-		// console.log("hello 42");
-		// console.log(data);
-		// let updatedFriendList : IUser[];
-		// updatedFriendList = [...friends];
-		setFriends((prevList) => prevList.filter((friend) => friend.id !== data.invitee.id || friend.id !== data.inviter.id));
+		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.invitee.id)));
+		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.inviter.id)));
 	});
 
 	socket.off('users_banned'); // Unbind previous event
 	socket.on('users_banned', (data: any) => {
-		console.log('user banned socketon');
-		console.log(data);
 		setFriends((prevList) => prevList.filter((user) => user.id !== data.userId));
 	});	
 
@@ -567,8 +581,8 @@ export default function Friends(props: FriendsProps) {
 	socket.off('users_message'); // Unbind previous event
 	socket.on('users_message', (data: any) => {
 		console.log('Socket users_message:');
-		console.log(data.message);
 		setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
+		message.info(`Message receive from ${data.message.sender.username}`);
 	});
 
 	useEffect(() => {
@@ -602,28 +616,26 @@ export default function Friends(props: FriendsProps) {
 		});
 	  }, [friends]);
 
-	useEffect(() => {
-		console.log('ChansList UseEffect');
-		socket.emit('channels_listJoined', {}, (data: any) => {
-			console.log("hello42");
-			console.log(data);
-			setChanList(data);
-		});
-	}, []);
-
 	// useEffect(() => {
 	// 	console.log('ChansList UseEffect');
-	// 	socket.emit('channels_list', {}, (data: IChannel[]) => {
-	// 			let chanJoined : IChannel[];
-	// 			chanJoined = data.filter(channel =>
-	// 			channel.members.some(member => member.id === props.user_me.id)
-	// 		);
-	// 		// props.chanList.map(chan => (console.log(chan)));
-	// 		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
-	// 		setChanList(chanJoined);
+	// 	socket.emit('channels_listJoined', {}, (data: any) => {
+	// 		setChanList(data);
 	// 	});
-	// 	// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
 	// }, []);
+
+	useEffect(() => {
+		console.log('ChansList UseEffect');
+		socket.emit('channels_list', {}, (data: IChannel[]) => {
+				let chanJoined : IChannel[];
+				chanJoined = data.filter(channel =>
+				channel.members.some(member => member.id === props.user_me.id)
+			);
+			// props.chanList.map(chan => (console.log(chan)));
+			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+			setChanList(chanJoined);
+		});
+		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
+	}, []);
 
 	useEffect(() => {
 		console.log('FriendsList useEffect');
@@ -771,7 +783,8 @@ export default function Friends(props: FriendsProps) {
 							friendOf={friendOf} 
 							activeConv={activeConv} 
 							AddFriend={AddFriend} 
-							accept_friend_request={accept_friend_request} 
+							accept_friend_request={accept_friend_request}
+							refuse_friend_request={refuse_friend_request}
 							removeFriend={removeFriend} 
 							banFriend={banFriend} 
 							gameInfo={undefined} />}
