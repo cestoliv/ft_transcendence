@@ -121,7 +121,7 @@ const Canvas = ({ gameId, socket }) => {
 
 		p5.background(0);
 
-		// If pos changed, send it to the server
+		//If pos changed, send it to the server
 		if (me.y != me.computePosition(p5.mouseY) && !gameInfo.isWatching) {
 			me.position(p5.mouseY);
 			throttledSendPaddlePos(p5.mouseY);
@@ -282,12 +282,27 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 		setIsModalOpen(true);
 	});
 
-	const test = () => {
-		navigate('/pong/435543543534534545')
+	const stopWatching = () => {
+		navigate(-1);
+	}
+
+	const quitGame = () => {
+		navigate(-1);
 	}
 
 	useEffect(() => {
 		return () => {
+			if (gameInfo) {
+				if (gameInfo.isWatching) {
+					socket.emit('games_watch_stop', { id: gameId }, (data: any) => {
+						console.log('games_watch_stop', data);
+					});
+				} else {
+					socket.emit('games_quit', { id: gameId }, (data: any) => {
+						console.log('games_quit', data);
+					});
+				}
+			}
 			setGameInfo(null);
 			console.log('unmount');
 		}
@@ -295,8 +310,6 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 
 	return (
 		<div className="game-wrapper">
-			{gameInfo.isWatching && <div className="watching">Watching</div>}
-			<button onClick={test}>TESTESTEST</button>
 			<div className="game-score">
 				<div className="opponent">
 					<div className="info">
@@ -347,7 +360,25 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 					</div>
 				</Modal>
 			)}
-			<span className="game-id">{gameId}</span>
+			{gameInfo.isWatching ? <button className="nes-btn quit-button is-error" onClick={stopWatching}>Stop watching</button> : <button className="nes-btn quit-button is-error" onClick={quitGame}>Quit</button>}
+			<div className="game-info">
+				<p><span className="title">Game ID</span> : {gameId}</p>
+				<div className="divider"></div>
+				{/* convert unix timestamp to date */}
+				<p><span className="title">Started at</span> : {new Date(gameInfo.startAt).toLocaleString()}</p>
+				<div className="divider"></div>
+				<div className="players-list">
+					<p className="title">Players : </p>
+					<div className="list">
+						{gameInfo.players.map((player: any) => (
+							<div className="player" key={player.user.username}>
+								<img src={player.user.profile_picture} alt='User image' />
+								<p>{player.user.username}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };

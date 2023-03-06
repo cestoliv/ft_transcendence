@@ -19,7 +19,7 @@ type FriendProps = {
 	chanList: IChannel[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	removeFriend: (user_id: number) => void;
-	banFriend : (banTime : string, friend_id : number) => void;
+	banFriend: (banTime: string, friend_id: number) => void;
 	gameInfo: any;
 };
 
@@ -29,7 +29,7 @@ export const Friend = (props: FriendProps) => {
 	const { gameInfo, setGameInfo } = useGameInfo();
 
 	const [banTimeValue, setBanTimeValue] = useState<string>('');
-    const [muteTimeValue, setMuteTimeValue] = useState<string>('');
+	const [muteTimeValue, setMuteTimeValue] = useState<string>('');
 
 	const [privateChanJoined, setPrivateChanJoined] = useState<IChannel[]>([]);
 	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
@@ -69,7 +69,7 @@ export const Friend = (props: FriendProps) => {
 	const OpenBanTimeModal = () => setOpenBanTimeModal(true);
 	const closeBanTimeModal = () => setOpenBanTimeModal(false);
 
-    const [openMuteTimeModal, setOpenMuteTimeModal] = React.useState(false);
+	const [openMuteTimeModal, setOpenMuteTimeModal] = React.useState(false);
 	const OpenMuteTimeModal = () => setOpenMuteTimeModal(true);
 	const closeMuteTimeModal = () => setOpenMuteTimeModal(false);
 
@@ -77,7 +77,7 @@ export const Friend = (props: FriendProps) => {
 		if (event.target.name === 'ban-time-input') setBanTimeValue(event.target.value);
 	};
 
-    const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
+	const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
 	};
 
@@ -86,16 +86,16 @@ export const Friend = (props: FriendProps) => {
 	};
 
 	const banFriend = async (event: any) => {
-        event.preventDefault();
-        props.banFriend(banTimeValue, props.user.id);
-        closeBanTimeModal();
-    }
+		event.preventDefault();
+		props.banFriend(banTimeValue, props.user.id);
+		closeBanTimeModal();
+	}
 
-    const muteFriend = async (event: any) => {
-        event.preventDefault();
+	const muteFriend = async (event: any) => {
+		event.preventDefault();
 		let now = new Date();
-        now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
-        socket.emit(
+		now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
+		socket.emit(
 			'users_mute',
 			{
 				id: props.user.id,
@@ -106,7 +106,7 @@ export const Friend = (props: FriendProps) => {
 				else closeBanTimeModal();
 			},
 		);
-    }
+	}
 
 	// const muteFriend = (event: any): void => {
 	// 	socket.emit(
@@ -153,7 +153,7 @@ export const Friend = (props: FriendProps) => {
 		});
 	};
 
-	const chanInvit = (chan_id : number, invited_user_id : number): void => {
+	const chanInvit = (chan_id: number, invited_user_id: number): void => {
 		socket.emit(
 			'channels_inviteUser',
 			{
@@ -161,10 +161,9 @@ export const Friend = (props: FriendProps) => {
 				user_id: invited_user_id,
 			},
 			(data: any) => {
-				if (data.messages) 
+				if (data.messages)
 					alert(data.messages);
-				else
-				{
+				else {
 					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
 				}
 			},
@@ -180,24 +179,33 @@ export const Friend = (props: FriendProps) => {
 		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 		setPrivateChanJoined(privateChanNotJoined);
 	}, [props.chanList]);
-  
+
 	const showGame = () => {
 		console.log(props.user.id)
-		socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
+		// socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
+		// 	console.log(data);
+		// 	if (data?.statusCode) {
+		// 		message.error(data.messages);
+		// 		return;
+		// 	}
+		// 	socket.emit('games_startWatching', { id: data.id }, (data: any) => {
+		// 		console.log(data);
+		// 		if (data?.statusCode) {
+		// 			message.error(data.messages);
+		// 			return;
+		// 		}
+		// 		setGameInfo({...data, isWatching: true});
+		// 		navigate(`/pong/${data.id}`)
+		// 	});
+		// });
+		socket.emit('games_startWatching', { id: props.user.id }, (data: any) => {
 			console.log(data);
 			if (data?.statusCode) {
 				message.error(data.messages);
 				return;
 			}
-			socket.emit('games_startWatching', { id: data.id }, (data: any) => {
-				console.log(data);
-				if (data?.statusCode) {
-					message.error(data.messages);
-					return;
-				}
-				setGameInfo({...data, isWatching: true});
-				navigate(`/pong/${data.id}`)
-			});
+			setGameInfo({ ...data, isWatching: true });
+			navigate(`/pong/${data.id}`)
 		});
 		console.log(gameInfo);
 	}
@@ -304,36 +312,36 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="chan-user-modal">
 					{privateChanJoined.map((chan) => (
-							<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} chanInvit={chanInvit} />
-						))}
+						<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} chanInvit={chanInvit} />
+					))}
 				</Box>
 			</Modal>
 
 			<Modal
-                open={openBanTimeModal}
-                onClose={closeBanTimeModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box className="ban-time-modal background-modal">
-                    <form className="ban-time-form" onSubmit={banFriend}>
-                        <input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input"/>
-                    </form>
-                </Box>
-            </Modal>
+				open={openBanTimeModal}
+				onClose={closeBanTimeModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="ban-time-modal background-modal">
+					<form className="ban-time-form" onSubmit={banFriend}>
+						<input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input" />
+					</form>
+				</Box>
+			</Modal>
 
-            <Modal
-                open={openMuteTimeModal}
-                onClose={closeMuteTimeModal}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box className="mute-time-modal background-modal">
-                    <form className="mute-time-form" onSubmit={muteFriend}>
-                        <input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input"/>
-                    </form>
-                </Box>
-            </Modal>
+			<Modal
+				open={openMuteTimeModal}
+				onClose={closeMuteTimeModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="mute-time-modal background-modal">
+					<form className="mute-time-form" onSubmit={muteFriend}>
+						<input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input" />
+					</form>
+				</Box>
+			</Modal>
 		</div>
 	);
 };
