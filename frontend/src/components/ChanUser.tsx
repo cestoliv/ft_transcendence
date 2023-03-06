@@ -151,8 +151,14 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper list-item discord-background-three">
-            {amIAdmin() && (
+            {amIAdmin() && props.user_me_id != props.member_id && props.member_id != props.chan_owner.id && (
                 <h3 onClick={OpenChanUserModal}>{props.username}</h3>
+            )}
+            {amIAdmin() && props.member_id === props.chan_owner.id && props.user_me_id != props.chan_owner.id && (
+                <h3>{props.username}</h3>
+            )}
+            {amIAdmin() && props.user_me_id === props.member_id && (
+                <h3>{props.username}</h3>
             )}
             {!amIAdmin() && (
                 <h3>{props.username}</h3>
@@ -171,7 +177,6 @@ export const ChanUser = (props: ChanUserProps) => {
                         <button name='button-remove-admin' className='infosConv-modal-buttons pixel-font discord-blue' onClick={setAdmin}>Remove Admin</button>
                     )}
                     <button name='button-ban_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={OpenBanTimeModal}>Ban</button>
-                    <button className='discord-blue'>Kick</button>
                     <button name='button-mute_user' className='infosConv-modal-buttons pixel-font discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
                 </Box>
             </Modal>

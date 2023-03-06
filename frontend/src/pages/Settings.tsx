@@ -18,7 +18,7 @@ type SettingsProps = {
 export const Settings = (props: SettingsProps) => {
 	const socket = useContext(SocketContext);
 
-	const [username, setUsername] = useState<string>('');
+	const [displayname, setDisplayName] = useState<string>('');
 
 	const [file, setFile] = useState<File | null>(null);
 	const [fileName, setFileName] = useState<string>('');
@@ -54,7 +54,7 @@ export const Settings = (props: SettingsProps) => {
     };
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'name') setUsername(event.target.value);
+		if (event.target.name === 'name') setDisplayName(event.target.value);
 	};
 
 	const submit42ProfilPicture = async (event: any) => {
@@ -83,13 +83,12 @@ export const Settings = (props: SettingsProps) => {
 	  };
 
 	  const changeSettings = (event: any): void => {
-		console.log(username);
 		event?.preventDefault();
 		socket.emit(
 			'users_update',
 			{
 				id: props.user_me.id,
-				username: username,
+				username: displayname,
 			},
 			(data: any) => {
 				if (data.messages)
@@ -97,7 +96,7 @@ export const Settings = (props: SettingsProps) => {
 				else
 				{
 					message.success('Username uploaded');
-					setUsername("");
+					setDisplayName("");
 				}
 			},
 		);
@@ -119,8 +118,8 @@ export const Settings = (props: SettingsProps) => {
 							<input
 								type="text"
 								name="name"
-								placeholder="changeName"
-								value={username}
+								placeholder="change display name"
+								value={displayname}
 								className="input-change-name"
 								onChange={handleChange}
 							/>

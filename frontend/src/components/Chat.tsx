@@ -69,11 +69,6 @@ export default function Chat(props: ChatProps) {
 			return false;
 	};
 
-	useEffect(() => {
-		console.log("hello42");
-		console.log(props.messages);
-	}, []);
-
 	return (
 		<div className="chat-wrapper discord-black-three">
 			<div className="chat-nav" id="chat-nav">

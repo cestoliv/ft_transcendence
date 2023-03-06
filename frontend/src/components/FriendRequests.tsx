@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 type FriendRequestsProps = {
 	friend_request : IUserFriend,
     accept_friend_request : (inviter_id : number) => void;
+    refuse_friend_request : (inviter_id : number) => void;
 };
 
 export const FriendRequests = (props: FriendRequestsProps) => {
@@ -21,21 +22,7 @@ export const FriendRequests = (props: FriendRequestsProps) => {
     }
 
     const refuse_friend_request = (event: any): void => {
-        socket.emit(
-            'users_removeFriend',
-            {
-                id: props.friend_request.inviter.id,
-            },
-            (data: any) => {
-                if (data.messages)
-						alert(data.messages);
-                else
-                {
-                    console.log("hello 53");
-                    console.log(data);
-                }
-            },
-        );
+        props.refuse_friend_request(props.friend_request.inviter.id);
     }
 
 	return (
