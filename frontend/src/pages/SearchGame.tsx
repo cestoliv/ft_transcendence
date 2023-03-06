@@ -8,7 +8,7 @@ import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage, IChannelInvitedUser, IChannelBannedUser } from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
-
+import useGameInfo from '../hooks/useGameInfo';
 import { SocketContext } from '../context/socket';
 import { SearchSettings } from '../components/SearchGame/SearchSettings';
 
@@ -31,7 +31,7 @@ export const SearchGame = (props: FriendsProps) => {
 	const [time, setTime] = useState('1');
 	const [points, setPoints] = useState('5');
 
-	const [gameInfo, setGameInfo] = useState<any>(null);
+	const { gameInfo, setGameInfo } = useGameInfo();
 	const [inMatchmaking, setInMatchmaking] = useState<boolean>(false);
 
 	const [user, setUser] = useState<IUser>();
@@ -178,9 +178,9 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
-	const banFriend = (banTime : string, friend_id : number): void => {
-        let now = new Date();
-        now.setMinutes(now.getMinutes() + parseInt(banTime));
+	const banFriend = (banTime: string, friend_id: number): void => {
+		let now = new Date();
+		now.setMinutes(now.getMinutes() + parseInt(banTime));
 		socket.emit(
 			'users_ban',
 			{
@@ -192,7 +192,7 @@ export const SearchGame = (props: FriendsProps) => {
 				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
 			},
 		);
-    }
+	}
 
 
 	useEffect(() => {
@@ -221,8 +221,8 @@ export const SearchGame = (props: FriendsProps) => {
 	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-				let chanJoined : IChannel[];
-				chanJoined = data.filter(channel =>
+			let chanJoined: IChannel[];
+			chanJoined = data.filter(channel =>
 				channel.members.some(member => member.id === props.user_me.id)
 			);
 			// props.chanList.map(chan => (console.log(chan)));

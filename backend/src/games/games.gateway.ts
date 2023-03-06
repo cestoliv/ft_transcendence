@@ -161,7 +161,7 @@ export class GamesGateway extends BaseGateway {
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
-		if (payload.id === undefined || payload.user_id === undefined)
+		if (payload.id === undefined && payload.user_id === undefined)
 			errors.push(
 				'Game id and User id are not specified (provide one of them)',
 			);
