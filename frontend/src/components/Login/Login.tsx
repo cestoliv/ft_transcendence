@@ -53,7 +53,7 @@ const Login = (props: ILogin) => {
 			setTotpUrl(data.url);
 			setNewUsername('');
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 	};
 
@@ -76,7 +76,7 @@ const Login = (props: ILogin) => {
 			setAuth({ bearer: data.bearer, otp_ok: true });
 			window.location.replace('/');
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 	};
 
@@ -105,7 +105,7 @@ const Login = (props: ILogin) => {
 		if (response.status === 200) {
 			setAuth({ bearer: data.bearer });
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 		setConfirmLoading(false);
 		console.log(data);

@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { message, Modal } from 'antd';
+import { Socket } from 'socket.io-client';
 import Sketch from 'react-p5';
 import p5Types from 'p5'; //Import this for typechecking and intellisense
 import { IUser, IAuth } from '../interfaces';
@@ -10,16 +11,19 @@ import { throttle } from '../utils';
 import { useNavigate } from 'react-router-dom';
 import useGameInfo from '../hooks/useGameInfo';
 
-const Canvas = ({ gameId, socket }) => {
+const Canvas = (gameId: string) => {
+	const socket = useContext(SocketContext);
 	const { gameInfo, setGameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');
 		let width = parent?.offsetWidth || window.innerWidth;
 		let height = parent?.offsetHeight || window.innerHeight;
+		console.log(width, height);
 		// Apply 1:2 ratio
+		height = width / 2;
 		// TODO: make it more responsive
-		if (height > width / 2) height = width / 2;
-		else width = height * 2;
+		// if (height > width / 2) height = width / 2;
+		// else width = height * 2;
 		return { width, height };
 	};
 
@@ -63,10 +67,8 @@ const Canvas = ({ gameId, socket }) => {
 			return mP5.min(canvasSize.height, mP5.max(y, 0));
 		},
 		position: function (y: number) {
-			if (gameInfo.isWatching)
-				this.y = mP5.min(canvasSize.height, mP5.max(y, 0));
-			else
-				this.y = this.computePosition(y);
+			if (gameInfo.isWatching) this.y = mP5.min(canvasSize.height, mP5.max(y, 0));
+			else this.y = this.computePosition(y);
 		},
 		draw: function () {
 			mP5.stroke(255);
@@ -236,6 +238,8 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	window.socket = socket;
 
 	useEffect(() => {
+		if (!gameInfo.players || gameInfo.players.length !== 2) return;
+
 		if (gameInfo.isWatching) {
 			setMeInfo(gameInfo.players[0]);
 			setOpponentInfo(gameInfo.players[1]);
@@ -284,11 +288,11 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 
 	const stopWatching = () => {
 		navigate(-1);
-	}
+	};
 
 	const quitGame = () => {
 		navigate(-1);
-	}
+	};
 
 	useEffect(() => {
 		return () => {
@@ -305,15 +309,15 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 			}
 			setGameInfo(null);
 			console.log('unmount');
-		}
-	}, [])
+		};
+	}, []);
 
 	return (
 		<div className="game-wrapper">
 			<div className="game-score">
 				<div className="opponent">
 					<div className="info">
-						<img src={opponentInfo?.user?.profile_picture} alt='User image' />
+						<img src={opponentInfo?.user?.profile_picture} alt="User image" />
 						<p>{opponentInfo?.user?.username}</p>
 					</div>
 					<span className="score">{gameInfo.isWatching ? gameScore.opponent : gameScore.opponent}</span>
@@ -328,7 +332,7 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 				</div>
 			</div>
 			<div className="pong-wrapper" id="game-container">
-				<Canvas gameId={gameId} socket={socket} />
+				<Canvas gameId={gameId} />
 			</div>
 			{endGameInfo && (
 				<Modal
@@ -352,30 +356,45 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 							</p>
 							<span>-</span>
 							<p className="me">
-								<span className="score">{gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}</span>
+								<span className="score">
+									{gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}
+								</span>
 								{meInfo.user.username}
-
 							</p>
 						</div>
 					</div>
 				</Modal>
 			)}
-			{gameInfo.isWatching ? <button className="nes-btn quit-button is-error" onClick={stopWatching}>Stop watching</button> : <button className="nes-btn quit-button is-error" onClick={quitGame}>Quit</button>}
+			{gameInfo.isWatching ? (
+				<button className="nes-btn quit-button is-error" onClick={stopWatching}>
+					Stop watching
+				</button>
+			) : (
+				<button className="nes-btn quit-button is-error" onClick={quitGame}>
+					Quit
+				</button>
+			)}
 			<div className="game-info">
-				<p><span className="title">Game ID</span> : {gameId}</p>
+				<p>
+					<span className="title">Game ID</span> : {gameId}
+				</p>
 				<div className="divider"></div>
 				{/* convert unix timestamp to date */}
-				<p><span className="title">Started at</span> : {new Date(gameInfo.startAt).toLocaleString()}</p>
+				<p>
+					<span className="title">Started at</span> : {new Date(gameInfo.startAt).toLocaleString()}
+				</p>
 				<div className="divider"></div>
 				<div className="players-list">
 					<p className="title">Players : </p>
 					<div className="list">
-						{gameInfo.players.map((player: any) => (
-							<div className="player" key={player.user.username}>
-								<img src={player.user.profile_picture} alt='User image' />
-								<p>{player.user.username}</p>
-							</div>
-						))}
+						{gameInfo.players
+							? gameInfo.players.map((player: any) => (
+									<div className="player" key={player.user.username}>
+										<img src={player.user.profile_picture} alt="User image" />
+										<p>{player.user.username}</p>
+									</div>
+							  ))
+							: null}
 					</div>
 				</div>
 			</div>

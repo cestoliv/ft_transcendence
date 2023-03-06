@@ -60,7 +60,7 @@ export const SearchGame = (props: FriendsProps) => {
 			(data: any) => {
 				console.log(data);
 				if (data?.statusCode) {
-					message.error(data.message);
+					message.error(data.error);
 					return;
 				}
 				message.success('Game created');
@@ -78,7 +78,10 @@ export const SearchGame = (props: FriendsProps) => {
 	};
 
 	const quitGame = () => {
-		console.log(gameInfo.id);
+		if (!gameInfo.id) {
+			setGameInfo(null);
+			return;
+		}
 		socket.emit(
 			'games_quit',
 			{
@@ -87,7 +90,7 @@ export const SearchGame = (props: FriendsProps) => {
 			(data: any) => {
 				console.log(data);
 				if (data?.statusCode) {
-					message.error(data.message);
+					message.error(data.error);
 					return;
 				}
 				setGameInfo(null);
@@ -99,7 +102,7 @@ export const SearchGame = (props: FriendsProps) => {
 		socket.emit('games_quitMatchmaking', (data: any) => {
 			console.log(data);
 			if (data?.statusCode) {
-				message.error(data.message);
+				message.error(data.error);
 				return;
 			}
 			setInMatchmaking(data);

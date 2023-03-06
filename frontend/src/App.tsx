@@ -79,7 +79,7 @@ function App() {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
 			console.log('games_join', data);
 			if (data?.statusCode) {
-				message.error(data.message);
+				message.error(data.error);
 			} else {
 				navigate(`/pong/${gameInfo.id}`);
 			}
