@@ -440,7 +440,8 @@ export default function Friends(props: FriendsProps) {
 		}
 		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv')
 			setChanConv(1);
-		else setChanConv(2);
+		else
+			setChanConv(2);
 	};
 
 	const OpenConvs = (event: any): void => {
@@ -464,6 +465,16 @@ export default function Friends(props: FriendsProps) {
 		button2?.classList.add('hidden-button');
 		button3?.classList.add('hidden-button');
 	};
+
+	const isHidden = (): boolean => {
+		const button1 = document.getElementById('open-chan-joined-button');
+
+		if (button1?.className.includes("hidden-button")) {
+			return true;
+		  } else {
+			return false;
+		  }
+	}
 
 	// start socket.on channel
 
@@ -703,15 +714,6 @@ export default function Friends(props: FriendsProps) {
 	return (
 		<div className="friends-wrapper">
 			<div className="burger-menu">
-				{/* <div className="vertical-button">
-					<span>B</span>
-					<span>O</span>
-					<span>U</span>
-					<span>T</span>
-					<span>O</span>
-					<span>N</span>
-
-				</div> */}
 				<button
 					className="open-chan-joined-button nes-btn is-primary"
 					id="open-chan-joined-button"
@@ -743,7 +745,7 @@ export default function Friends(props: FriendsProps) {
 				</button>
 				{activeConvId != -1 && chanConv == 1 ? (
 					<button
-					className="open-infos-conv-button hidden-button nes-btn is-primary"
+					className={`open-infos-conv-button nes-btn is-primary ${isHidden() ? 'hidden-button' : ''}`}
 					id="open-infos-conv-button"
 					name="open-infos-conv-button"
 					onClick={OpenConvs}
