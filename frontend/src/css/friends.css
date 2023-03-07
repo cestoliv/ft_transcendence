@@ -515,10 +515,16 @@
 	}
 }
 
-.avatar_username {
-	height: 50px;
-	width: 50px;
-	border-radius: 50%;
+/* .wrapper-active-conv-friend {
+	display: flex;
+	justify-content: space-around;
+} */
+
+.badge {
+		height: 30px;
+		width: 30px;
+		border-radius: 50%;
+		margin-right: 5px;
 }
 
 .avatar {
@@ -526,13 +532,4 @@
 	width: 50px; */
 	border-radius: 50%;
 	margin-right: 5px;
-}
-
-
-.friend-online {
-	color : #1EFFBC;
-}
-
-.friend-playing {
-	color : #F2AF29;
 }

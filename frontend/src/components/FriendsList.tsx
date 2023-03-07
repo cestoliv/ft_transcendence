@@ -57,10 +57,10 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 	};
 
-	useEffect(() => {
-		console.log("hello56");
-		console.log(props.friends);
-	}, [props.friends]);
+	// useEffect(() => {
+	// 	console.log("hello56");
+	// 	console.log(props.friends);
+	// }, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
