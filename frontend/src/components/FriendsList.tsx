@@ -54,15 +54,17 @@ export const FriendsList = (props: PersonListProps) => {
 
 		const button1 = document.getElementById('open-chan-joined-button');
 		const button2 = document.getElementById('open-friend-list-button');
+		const button3 = document.getElementById('open-infos-conv-button');
 
 		button1?.classList.remove('hidden-button');
 		button2?.classList.remove('hidden-button');
+		button3?.classList.remove('hidden-button');
 	};
 
-	useEffect(() => {
-		console.log("hello56");
-		console.log(props.friends);
-	}, [props.friends]);
+	// useEffect(() => {
+	// 	console.log("hello56");
+	// 	console.log(props.friends);
+	// }, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">

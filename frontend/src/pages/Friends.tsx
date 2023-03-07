@@ -416,15 +416,11 @@ export default function Friends(props: FriendsProps) {
 		let newId;
 		let element;
 
-		if (
-			event.target.classList != 'wrapper-active-conv list-item' &&
-			event.target.classList != 'wrapper-active-conv-span'
-		)
-			return;
+		if (event.target.classList != 'wrapper-active-conv list-item' && event.target.classList != 'wrapper-active-conv-span pixel-font' && event.target.classList != 'avatar wrapper-active-conv-img')
+			return ;
 		let active_elem = document.getElementById('active-conv-bg');
 		if (active_elem) active_elem.removeAttribute('id');
-		if (event.target.classList == 'wrapper-active-conv-span')
-			element = event.target.parentElement;
+		if (event.target.classList == 'wrapper-active-conv-span pixel-font' || event.target.classList == 'avatar wrapper-active-conv-img') element = event.target.parentElement;
 		else element = event.target;
 		element.setAttribute('id', 'active-conv-bg');
 		active_elem = element;
@@ -456,11 +452,17 @@ export default function Friends(props: FriendsProps) {
 			var sidenav = document.getElementById('priv-conv-list');
 			sidenav?.classList.add('active-friend-list');
 		}
+		if (event.target.name === 'open-infos-conv-button') {
+			var sidenav = document.getElementById('infos-conv');
+			sidenav?.classList.add('active-infos-conv');
+		}
 		const button1 = document.getElementById('open-chan-joined-button');
 		const button2 = document.getElementById('open-friend-list-button');
+		const button3 = document.getElementById('open-infos-conv-button');
 
 		button1?.classList.add('hidden-button');
 		button2?.classList.add('hidden-button');
+		button3?.classList.add('hidden-button');
 	};
 
 	// start socket.on channel
@@ -701,22 +703,60 @@ export default function Friends(props: FriendsProps) {
 	return (
 		<div className="friends-wrapper">
 			<div className="burger-menu">
+				{/* <div className="vertical-button">
+					<span>B</span>
+					<span>O</span>
+					<span>U</span>
+					<span>T</span>
+					<span>O</span>
+					<span>N</span>
+
+				</div> */}
 				<button
-					className="open-chan-joined-button"
+					className="open-chan-joined-button nes-btn is-primary"
 					id="open-chan-joined-button"
 					name="open-chan-joined-button"
 					onClick={OpenConvs}
 				>
-					Channels
+					<span>C</span>
+					<span>H</span>
+					<span>A</span>
+					<span>N</span>
+					<span>N</span>
+					<span>E</span>
+					<span>L</span>
+					<span>S</span>
 				</button>
 				<button
-					className="open-friend-list-button"
+					className="open-friend-list-button nes-btn is-primary"
 					id="open-friend-list-button"
 					name="open-friend-list-button"
 					onClick={OpenConvs}
 				>
-					Friends
+					<span>F</span>
+					<span>R</span>
+					<span>I</span>
+					<span>E</span>
+					<span>N</span>
+					<span>D</span>
+					<span>S</span>
 				</button>
+				{activeConvId != -1 && chanConv == 1 ? (
+					<button
+					className="open-infos-conv-button hidden-button nes-btn is-primary"
+					id="open-infos-conv-button"
+					name="open-infos-conv-button"
+					onClick={OpenConvs}
+					>
+						<span>M</span>
+						<span>E</span>
+						<span>M</span>
+						<span>B</span>
+						<span>E</span>
+						<span>R</span>
+						<span>S</span>
+					</button>
+				) : null}
 			</div>
 			<div className="chan-list" id="chan-list">
 				<ChanList
@@ -851,7 +891,7 @@ export default function Friends(props: FriendsProps) {
 							removeFriend={removeFriend} 
 							banFriend={banFriend} 
 							gameInfo={undefined} />}
-			<div className="chat discord-black-three">
+			<div className="chat">
 				{activeChan && activeConvId != -1 && user && chanConv == 1 ? (
 					<Chat
 						user_me={user}
@@ -869,7 +909,7 @@ export default function Friends(props: FriendsProps) {
 					/>
 				) : null}
 			</div>
-			<div className="infos-conv">
+			<div className="infos-conv" id='infos-conv'>
 				{activeChan && activeConvId != -1 && user && chanConv == 1 ? (
 					<InfosConv
 						user_me={user}

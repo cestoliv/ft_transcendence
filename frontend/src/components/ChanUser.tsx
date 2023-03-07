@@ -193,13 +193,6 @@ export const ChanUser = (props: ChanUserProps) => {
                     </form>
                 </Box>
             </Modal>
-            )} */}
-			<div
-				className="user-info"
-				onClick={amIAdmin() ? OpenChanUserModal : null}
-			>
-				<h3>{props.username}</h3>
-			</div>
 			<Modal
 				open={openChanUserModal}
 				onClose={CloseChanUserModal}
@@ -232,7 +225,6 @@ export const ChanUser = (props: ChanUserProps) => {
 					>
 						Ban
 					</button>
-					<button className="nes-btn is-primary">Kick</button>
 					<button
 						name="button-mute_user"
 						className="nes-btn is-primary"

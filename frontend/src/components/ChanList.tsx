@@ -25,9 +25,11 @@ export const ChanList = (props: ChanListProps) => {
 
 		const button1 = document.getElementById('open-chan-joined-button');
 		const button2 = document.getElementById('open-friend-list-button');
+		const button3 = document.getElementById('open-infos-conv-button');
 
 		button1?.classList.remove('hidden-button');
 		button2?.classList.remove('hidden-button');
+		button3?.classList.remove('hidden-button');
 	};
 
 	return (

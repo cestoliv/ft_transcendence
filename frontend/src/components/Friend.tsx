@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 
 import useGameInfo from '../hooks/useGameInfo';
@@ -12,7 +12,7 @@ import { IChannel, IUser } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { message } from 'antd';
+import { message, Badge } from 'antd';
 
 type FriendProps = {
 	user: IUser;
@@ -25,6 +25,8 @@ type FriendProps = {
 
 export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
+
+	const [redirect, setRedirect] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { gameInfo, setGameInfo } = useGameInfo();
 
@@ -186,6 +188,16 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
+	const handleRedirect = (event: any): void => {
+		setRedirect(true);
+	};
+
+	const renderRedirect = () => {
+		if (redirect) {
+			return <Navigate to={`/stats/${props.user.id}`} />;
+		}
+	};
+
 	useEffect(() => {
 		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
 		if (props.chanList)
@@ -233,6 +245,18 @@ export const Friend = (props: FriendProps) => {
 		console.log(gameInfo);
 	};
 
+	function getBadgeStyle() {
+		if (props.user.status === "online") {
+		  return { backgroundColor: 'green' };
+		} else if (props.user.status === "offline") {
+		  return { backgroundColor: 'red' };
+		} else if (props.user.status === "playing") {
+		  return { backgroundColor: 'orange' };
+		} else {
+		  return {}; // Retourne un objet vide pour utiliser le style par défaut
+		}
+	  }
+
 	return (
 		<div
 			data-id={props.user.id}
@@ -240,21 +264,12 @@ export const Friend = (props: FriendProps) => {
 			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<div className="avatar_username">
-				<img className='avatar' src={props.user.profile_picture} alt="" />
-				<Link to={`/profile/${props.user.id}`} className={`example-component ${
-						props.user.status === 'online' ? "friend-online" : ""
-						}${props.user.status === 'playing' ? "friend-playing" : ""}`}>
-						{props.user.displayName}</Link>
-			</div>
+			{renderRedirect()}
+			<Badge dot={true} className="badge wrapper-active-conv" data-id={props.user.id} style={getBadgeStyle()}>
+				<img className='avatar wrapper-active-conv-img' src={props.user.profile_picture} alt="" onClick={props.activeConv}/>
+			</Badge>
+			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.user.displayName}</span>
 			<div className="friendsList-settings">
-				{/* {props.states === 'connected' && (
-					<span className="e-icons e-medium e-play"></span>
-				)}
-				{props.states === 'ingame' && (
-					<span className="e-icons e-medium e-radio-button"></span>
-				)} */}
-				{/* <span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span> */}
 				<img
 					src="https://static.thenounproject.com/png/2758640-200.png"
 					alt="Menu"
@@ -273,6 +288,7 @@ export const Friend = (props: FriendProps) => {
 						{props.user.status === 'playing' && (
 							<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
 						)}
+						<button className='discord-blue' onClick={handleRedirect}>Profil</button>
 						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
 						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
 						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>

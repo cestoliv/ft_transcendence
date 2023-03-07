@@ -45,8 +45,28 @@ export default function InfosConv(props: InfosConvProps) {
 		});
 	};
 
+	const closeInfosConv = (event: any): void => {
+		const sidenav = document.getElementById('infos-conv');
+		sidenav?.classList.remove('active-infos-conv');
+
+		const button1 = document.getElementById('open-chan-joined-button');
+		const button2 = document.getElementById('open-friend-list-button');
+		const button3 = document.getElementById('open-infos-conv-button');
+
+		button1?.classList.remove('hidden-button');
+		button2?.classList.remove('hidden-button');
+		button3?.classList.remove('hidden-button');
+	};
+
 	return (
 		<div className="i-conv-wrapper discord-background-three">
+			<span
+				className="close-infos-conv"
+				id="close-infos-conv"
+				onClick={closeInfosConv}
+			>
+				close
+			</span>
 			{props.activeChan && (
 				<div className="chan_user_wrapper discord-background-three">
 					{props.activeChan.members.map((member) => (
