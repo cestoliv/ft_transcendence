@@ -76,11 +76,13 @@ export const Friend = (props: FriendProps) => {
 	const closeMuteTimeModal = () => setOpenMuteTimeModal(false);
 
 	const handleChangeBantime = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'ban-time-input') setBanTimeValue(event.target.value);
+		if (event.target.name === 'ban-time-input')
+			setBanTimeValue(event.target.value);
 	};
 
 	const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
+		if (event.target.name === 'mute-time-input')
+			setMuteTimeValue(event.target.value);
 	};
 
 	const removeFriendClick = (event: any): void => {
@@ -91,7 +93,7 @@ export const Friend = (props: FriendProps) => {
 		event.preventDefault();
 		props.banFriend(banTimeValue, props.user.id);
 		closeBanTimeModal();
-	}
+	};
 
 	const muteFriend = async (event: any) => {
 		event.preventDefault();
@@ -108,7 +110,7 @@ export const Friend = (props: FriendProps) => {
 				else closeBanTimeModal();
 			},
 		);
-	}
+	};
 
 	// const muteFriend = (event: any): void => {
 	// 	socket.emit(
@@ -137,22 +139,35 @@ export const Friend = (props: FriendProps) => {
 	// };
 
 	const inviteFriend = () => {
-		socket.emit('games_create', { maxDuration: parseInt(time), maxScore: parseInt(points), mode: mode, visibility: 'private' }, (data: any) => {
-			console.log(data);
-			if (data?.statusCode) {
-				message.error(data.messages);
-				return;
-			}
-			socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+		socket.emit(
+			'games_create',
+			{
+				maxDuration: parseInt(time),
+				maxScore: parseInt(points),
+				mode: mode,
+				visibility: 'private',
+			},
+			(data: any) => {
 				console.log(data);
 				if (data?.statusCode) {
 					message.error(data.messages);
-					// TODO: delete game if needed
 					return;
 				}
-				message.success('Invitation sent');
-			});
-		});
+				socket.emit(
+					'games_invite',
+					{ id: data.id, user_id: props.user.id },
+					(data: any) => {
+						console.log(data);
+						if (data?.statusCode) {
+							message.error(data.messages);
+							// TODO: delete game if needed
+							return;
+						}
+						message.success('Invitation sent');
+					},
+				);
+			},
+		);
 	};
 
 	const chanInvit = (chan_id: number, invited_user_id: number): void => {
@@ -163,10 +178,11 @@ export const Friend = (props: FriendProps) => {
 				user_id: invited_user_id,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 				else {
-					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+					setPrivateChanJoined((prevList) =>
+						prevList.filter((chan) => chan.id !== data.channelId),
+					);
 				}
 			},
 		);
@@ -196,7 +212,7 @@ export const Friend = (props: FriendProps) => {
 	}, [props.chanList]);
 
 	const showGame = () => {
-		console.log(props.user.id)
+		console.log(props.user.id);
 		// socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
 		// 	console.log(data);
 		// 	if (data?.statusCode) {
@@ -213,17 +229,21 @@ export const Friend = (props: FriendProps) => {
 		// 		navigate(`/pong/${data.id}`)
 		// 	});
 		// });
-		socket.emit('games_startWatching', { id: props.user.id }, (data: any) => {
-			console.log(data);
-			if (data?.statusCode) {
-				message.error(data.messages);
-				return;
-			}
-			setGameInfo({ ...data, isWatching: true });
-			navigate(`/pong/${data.id}`)
-		});
+		socket.emit(
+			'games_startWatching',
+			{ id: props.user.id },
+			(data: any) => {
+				console.log(data);
+				if (data?.statusCode) {
+					message.error(data.messages);
+					return;
+				}
+				setGameInfo({ ...data, isWatching: true });
+				navigate(`/pong/${data.id}`);
+			},
+		);
 		console.log(gameInfo);
-	}
+	};
 
 	function getBadgeStyle() {
 		if (props.user.status === "online") {
@@ -250,7 +270,11 @@ export const Friend = (props: FriendProps) => {
 			</Badge>
 			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.user.displayName}</span>
 			<div className="friendsList-settings">
-				<span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span>
+				<img
+					src="https://static.thenounproject.com/png/2758640-200.png"
+					alt="Menu"
+					onClick={OpenFriendActionModal}
+				/>
 				<Modal
 					open={openFActionModal}
 					onClose={CloseFriendActionModal}
@@ -282,13 +306,18 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="mode_select">Mode</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value)}
+								onChange={(
+									e: React.ChangeEvent<HTMLSelectElement>,
+								) => setMode(e.target.value)}
 								required
 								id="mode_select"
 							>
 								{modeOptions.map((option) => {
 									return (
-										<option key={option.value} value={option.value}>
+										<option
+											key={option.value}
+											value={option.value}
+										>
 											{option.label}
 										</option>
 									);
@@ -298,13 +327,18 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="time-select">Time</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTime(e.target.value)}
+								onChange={(
+									e: React.ChangeEvent<HTMLSelectElement>,
+								) => setTime(e.target.value)}
 								required
 								id="time_select"
 							>
 								{timeOptions.map((option) => {
 									return (
-										<option key={option.value} value={option.value}>
+										<option
+											key={option.value}
+											value={option.value}
+										>
 											{option.label}
 										</option>
 									);
@@ -314,20 +348,27 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="points_select">Points</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPoints(e.target.value)}
+								onChange={(
+									e: React.ChangeEvent<HTMLSelectElement>,
+								) => setPoints(e.target.value)}
 								required
 								id="points_select"
 							>
 								{pointsOptions.map((option) => {
 									return (
-										<option key={option.value} value={option.value}>
+										<option
+											key={option.value}
+											value={option.value}
+										>
 											{option.label}
 										</option>
 									);
 								})}
 							</select>
 						</div>
-						<button className="nes-btn" onClick={inviteFriend}>Invite</button>
+						<button className="nes-btn" onClick={inviteFriend}>
+							Invite
+						</button>
 					</div>
 				</Modal>
 			</div>
@@ -339,7 +380,12 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="chan-user-modal">
 					{privateChanJoined.map((chan) => (
-						<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} chanInvit={chanInvit} />
+						<PrivateChanJoined
+							key={chan.id}
+							chan={chan}
+							userToInviteId={props.user.id}
+							chanInvit={chanInvit}
+						/>
 					))}
 				</Box>
 			</Modal>
@@ -352,7 +398,15 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="ban-time-modal background-modal">
 					<form className="ban-time-form" onSubmit={banFriend}>
-						<input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input" />
+						<input
+							value={banTimeValue}
+							name="ban-time-input"
+							type="message"
+							placeholder="Ban time in mintues"
+							onChange={handleChangeBantime}
+							required
+							className="ban-time-input"
+						/>
 					</form>
 				</Box>
 			</Modal>
@@ -365,7 +419,15 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="mute-time-modal background-modal">
 					<form className="mute-time-form" onSubmit={muteFriend}>
-						<input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input" />
+						<input
+							value={muteTimeValue}
+							name="mute-time-input"
+							type="message"
+							placeholder="Mute time in minutes"
+							onChange={handleChangeMutetime}
+							required
+							className="mute-time-input"
+						/>
 					</form>
 				</Box>
 			</Modal>

@@ -82,7 +82,13 @@ const Pong: React.FC = () => {
 						clearInterval(intervalId);
 					};
 				}
-				if (dx < 0 && ballX < 20 && ballX > 10 && ballY + dy < leftRacketY + 80 && ballY + dy > leftRacketY) {
+				if (
+					dx < 0 &&
+					ballX < 20 &&
+					ballX > 10 &&
+					ballY + dy < leftRacketY + 80 &&
+					ballY + dy > leftRacketY
+				) {
 					let x = ballY - leftRacketY;
 					if (x < 40) {
 						x = (40 - x) / 10;
@@ -192,13 +198,20 @@ const Pong: React.FC = () => {
 	return (
 		<div className="pong-wrapper">
 			{renderRedirect()}
-			<Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+			<Modal
+				open={open}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
 				<Box className="end-game-modal">
 					<h1>Score</h1>
 					<h3>
 						hadrien {leftScore} - {rightScore} Olivier
 					</h3>
-					<button className="redirect-game-button" onClick={handleRedirect}>
+					<button
+						className="redirect-game-button"
+						onClick={handleRedirect}
+					>
 						Continuer
 					</button>
 				</Box>

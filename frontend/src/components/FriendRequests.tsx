@@ -17,9 +17,9 @@ type FriendRequestsProps = {
 export const FriendRequests = (props: FriendRequestsProps) => {
 	const socket = useContext(SocketContext);
 
-    const accept_friend_requestClick = (event: any): void => {
-        props.accept_friend_request(props.friend_request.inviter.id);
-    }
+	const accept_friend_requestClick = (event: any): void => {
+		props.accept_friend_request(props.friend_request.inviter.id);
+	};
 
     const refuse_friend_request = (event: any): void => {
         props.refuse_friend_request(props.friend_request.inviter.id);
@@ -27,11 +27,19 @@ export const FriendRequests = (props: FriendRequestsProps) => {
 
 	return (
 		<div className="FriendRequests-wrapper modal-item">
-			<span className='pixel-font'>{props.friend_request.inviter.username}</span>
-            <div className="accept-refuse-friend-request">
-                <span className="e-icons e-medium e-plus modal-e-plus" onClick={accept_friend_requestClick}></span>
-                <span className="e-icons e-medium e-close modal-e-close" onClick={refuse_friend_request}></span>
-            </div>
+			<span className="pixel-font">
+				{props.friend_request.inviter.username}
+			</span>
+			<div className="accept-refuse-friend-request">
+				<span
+					className="e-icons e-medium e-plus modal-e-plus"
+					onClick={accept_friend_requestClick}
+				></span>
+				<span
+					className="e-icons e-medium e-close modal-e-close"
+					onClick={refuse_friend_request}
+				></span>
+			</div>
 		</div>
 	);
 };
