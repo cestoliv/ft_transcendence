@@ -37,7 +37,10 @@ export function usePrevious<T>(value: T) {
 	return ref.current;
 }
 
-export function useDebounce<T extends (...args: any[]) => any>(callback: T, delay: number): [T, () => void] {
+export function useDebounce<T extends (...args: any[]) => any>(
+	callback: T,
+	delay: number,
+): [T, () => void] {
 	// A ref object to store the timeout id
 	const timeoutRef = useRef<NodeJS.Timeout>();
 	// A function that clears the timeout
@@ -61,7 +64,10 @@ export function useDebounce<T extends (...args: any[]) => any>(callback: T, dela
 	return [debouncedCallback as T, clear];
 }
 
-export function throttle<T extends (...args: any[]) => any>(callback: T, limit: number): T {
+export function throttle<T extends (...args: any[]) => any>(
+	callback: T,
+	limit: number,
+): T {
 	let lastCall = 0;
 	return ((...args: Parameters<T>) => {
 		const now = new Date().getTime();

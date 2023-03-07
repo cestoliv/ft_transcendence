@@ -43,8 +43,15 @@ const Home = (props: { user: IUser; auth: IAuth }) => {
 			)}
 
 			<button className="button-start-game">Start a game</button> */}
-			<h2>Welcome to<br /><span>PONG42</span></h2>
-			<button className="nes-btn"><NavLink to="/searchGame">Play !</NavLink></button>
+			<div className="welcome">
+				<h2>Welcome to</h2>
+				<h2>
+					<span>42</span>Pong
+				</h2>
+			</div>
+			<button className="nes-btn">
+				<NavLink to="/searchGame">Play !</NavLink>
+			</button>
 		</div>
 	);
 };

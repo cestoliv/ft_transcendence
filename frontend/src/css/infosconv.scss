@@ -1,8 +1,14 @@
+.infos-conv {
+	h3 {
+		font-size: 12px;
+		padding: 20px 0;
+	}
+}
+
 .i-conv-wrapper {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	font-family: 'VT323', monospace;
 }
 
 .chan_user_wrapper {
@@ -19,7 +25,6 @@
 	background-color: rgb(143, 145, 162);
 	border: none;
 	border-bottom: 1px solid black;
-	font-family: 'VT323', monospace;
 	font-size: 20px;
 }
 

@@ -1,5 +1,13 @@
 import '../../css/app.scss';
-import { Button, Modal, Input, ConfigProvider, theme, Divider, message } from 'antd';
+import {
+	Button,
+	Modal,
+	Input,
+	ConfigProvider,
+	theme,
+	Divider,
+	message,
+} from 'antd';
 import { ILogin } from '../../interfaces';
 import { UserOutlined } from '@ant-design/icons';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -39,13 +47,16 @@ const Login = (props: ILogin) => {
 			message.error('Please enter a username');
 			return;
 		}
-		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
+		const response = await fetch(
+			`${process.env.REACT_APP_API_URL}/auth/register`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ username: newUsername }),
 			},
-			body: JSON.stringify({ username: newUsername }),
-		});
+		);
 		const data = await response.json();
 		if (response.status === 201) {
 			message.success('Account created, you can now log in');
@@ -58,12 +69,15 @@ const Login = (props: ILogin) => {
 	};
 
 	const handleOtp = async () => {
-		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/${otpCode}`, {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${auth.bearer}`,
+		const response = await fetch(
+			`${process.env.REACT_APP_API_URL}/auth/totp/${otpCode}`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${auth.bearer}`,
+				},
 			},
-		});
+		);
 
 		const data = await response.json();
 
@@ -90,12 +104,15 @@ const Login = (props: ILogin) => {
 			message.error('Please enter a username');
 			return;
 		}
-		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login?username=${username}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
+		const response = await fetch(
+			`${process.env.REACT_APP_API_URL}/auth/login?username=${username}`,
+			{
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
 			},
-		});
+		);
 		const data = await response.json();
 		props.setCookie('bearer', data.bearer, {
 			path: '/',

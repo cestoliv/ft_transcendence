@@ -16,8 +16,12 @@ const Pong: React.FC = () => {
 	// game var
 
 	const [racketHeight, setRacketHeight] = useState(canvasHeight / 6);
-	const [leftRacketY, setLeftRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
-	const [rightRacketY, setRightRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
+	const [leftRacketY, setLeftRacketY] = useState(
+		canvasHeight / 2 - racketHeight / 2,
+	);
+	const [rightRacketY, setRightRacketY] = useState(
+		canvasHeight / 2 - racketHeight / 2,
+	);
 	const [ballX, setBallX] = useState(canvasWidth / 2);
 	const [ballY, setBallY] = useState(canvasHeight / 2);
 	const [ballSpeedX, setBallSpeedX] = useState(1);
@@ -65,7 +69,16 @@ const Pong: React.FC = () => {
 
 	useEffect(() => {
 		draw();
-	}, [leftRacketY, rightRacketY, ballX, ballY, gameStarted, canvasHeight, canvasWidth, racketHeight]);
+	}, [
+		leftRacketY,
+		rightRacketY,
+		ballX,
+		ballY,
+		gameStarted,
+		canvasHeight,
+		canvasWidth,
+		racketHeight,
+	]);
 
 	useEffect(() => {
 		if (gameStarted && !gameEnd) {
@@ -146,13 +159,17 @@ const Pong: React.FC = () => {
 				setRightRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 40:
-				setRightRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
+				setRightRacketY((prevY) =>
+					Math.min(canvasHeight - racketHeight, prevY + 20),
+				);
 				break;
 			case 90:
 				setLeftRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 83:
-				setLeftRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
+				setLeftRacketY((prevY) =>
+					Math.min(canvasHeight - racketHeight, prevY + 20),
+				);
 				break;
 			default:
 				break;
@@ -193,13 +210,20 @@ const Pong: React.FC = () => {
 	return (
 		<div className="pong-wrapper">
 			{renderRedirect()}
-			<Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+			<Modal
+				open={open}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
 				<Box className="end-game-modal">
 					<h1>Score</h1>
 					<h3>
 						hadrien {leftScore} - {rightScore} Olivier
 					</h3>
-					<button className="redirect-game-button" onClick={handleRedirect}>
+					<button
+						className="redirect-game-button"
+						onClick={handleRedirect}
+					>
 						Continuer
 					</button>
 				</Box>

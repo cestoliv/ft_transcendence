@@ -12,7 +12,7 @@ import Box from '@mui/material/Box';
 type PrivateChanJoinedProps = {
 	chan: IChannel;
 	userToInviteId: number;
-	chanInvit : (chan_id : number, invited_user_id : number) => void;
+	chanInvit: (chan_id: number, invited_user_id: number) => void;
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
@@ -24,7 +24,10 @@ export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
 
 	return (
 		<div className="wrapper-private-chan-joined-item">
-			<div className="private-chan-joined-item discord-blue" onClick={chanInvit}>
+			<div
+				className="private-chan-joined-item discord-blue"
+				onClick={chanInvit}
+			>
 				{props.chan.name}
 			</div>
 		</div>

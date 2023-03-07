@@ -5,7 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage, IChannelInvitedUser, IChannelBannedUser } from '../interfaces';
+import {
+	IChannel,
+	IUser,
+	IUserFriend,
+	IChannelMessage,
+	IUserMessage,
+	IChannelInvitedUser,
+	IChannelBannedUser,
+} from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
 import useGameInfo from '../hooks/useGameInfo';
@@ -68,6 +76,11 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	};
+
+	if (!gameInfo) {
+		console.log('gameInfo', gameInfo);
+	}
+	console.log('inMatchmaking', inMatchmaking);
 
 	const joinMatchmaking = () => {
 		socket.emit('games_joinMatchmaking', (data: any) => {
@@ -140,13 +153,16 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
+				else
+					setFriends((prevFriends) => [...prevFriends, data.inviter]);
 			},
 		);
 		const indexToUpdate = friendOf.findIndex(
 			(friend) =>
-				(friend.inviterId === inviter_id && friend.inviteeId === user?.id) ||
-				(friend.inviterId === user?.id && friend.inviteeId === inviter_id),
+				(friend.inviterId === inviter_id &&
+					friend.inviteeId === user?.id) ||
+				(friend.inviterId === user?.id &&
+					friend.inviteeId === inviter_id),
 		);
 		if (indexToUpdate !== -1) {
 			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
@@ -173,7 +189,10 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
+				else
+					setFriends((prevList) =>
+						prevList.filter((user) => user.id !== user_id),
+					);
 			},
 		);
 	};
@@ -189,11 +208,13 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
+				else
+					setFriends((prevList) =>
+						prevList.filter((user) => user.id !== friend_id),
+					);
 			},
 		);
-	}
-
+	};
 
 	useEffect(() => {
 		socket.emit(
@@ -222,8 +243,10 @@ export const SearchGame = (props: FriendsProps) => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
 			let chanJoined: IChannel[];
-			chanJoined = data.filter(channel =>
-				channel.members.some(member => member.id === props.user_me.id)
+			chanJoined = data.filter((channel) =>
+				channel.members.some(
+					(member) => member.id === props.user_me.id,
+				),
 			);
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
@@ -283,10 +306,16 @@ export const SearchGame = (props: FriendsProps) => {
 					</div>
 				) : (
 					<div className="button-wrapper">
-						<button className="searchButton nes-btn" onClick={createGame}>
+						<button
+							className="searchButton nes-btn"
+							onClick={createGame}
+						>
 							Create a game
 						</button>
-						<button className="searchButton nes-btn" onClick={joinMatchmaking}>
+						<button
+							className="searchButton nes-btn"
+							onClick={joinMatchmaking}
+						>
 							Search a game
 						</button>
 					</div>
@@ -304,7 +333,12 @@ export const SearchGame = (props: FriendsProps) => {
 					</Box>
 				</Modal> */}
 			</div>
-			<SearchSettings setVisibility={setVisibility} setMode={setMode} setTime={setTime} setPoints={setPoints} />
+			<SearchSettings
+				setVisibility={setVisibility}
+				setMode={setMode}
+				setTime={setTime}
+				setPoints={setPoints}
+			/>
 			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>
