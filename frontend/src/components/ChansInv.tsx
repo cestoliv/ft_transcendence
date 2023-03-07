@@ -9,29 +9,32 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser } from '../interfaces';
 
-import ChanBanItem from './ChanBanItem'
+import ChanBanItem from './ChanBanItem';
 
 type ChansInvProps = {
-	chan: IChannel,
-    chanList : IChannel[],
-	user_me : IUser,
-    chanListJoin: (chan_code: string | undefined) => void;
+	chan: IChannel;
+	chanList: IChannel[];
+	user_me: IUser;
+	chanListJoin: (chan_code: string | undefined) => void;
 };
 
 export const ChansInv = (props: ChansInvProps) => {
-    const socket = useContext(SocketContext);
+	const socket = useContext(SocketContext);
 
-    const handleJoinClick = () => {
-        props.chanListJoin(props.chan?.code)
-    };
+	const handleJoinClick = () => {
+		props.chanListJoin(props.chan?.code);
+	};
 
 	return (
-		<div className="ChansInv-wrapper">			
+		<div className="ChansInv-wrapper">
 			<div className="">
-                <div className='chan-list-item modal-item pixel-font'>
-                    <span className='pixel-font'>{props.chan?.name}</span>
-                    <span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
-                </div>
+				<div className="chan-list-item modal-item pixel-font">
+					<span className="pixel-font">{props.chan?.name}</span>
+					<span
+						className="e-icons e-medium e-plus modal-e-plus"
+						onClick={handleJoinClick}
+					></span>
+				</div>
 			</div>
 		</div>
 	);

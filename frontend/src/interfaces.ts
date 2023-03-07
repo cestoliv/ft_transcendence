@@ -1,16 +1,16 @@
 import { SetCookie, RemoveCookie } from './types';
 
 export interface IUser {
-	id: number,
-	id42: number, // null for non-42 users
-	username: string,
-	displayName: string,
-	status: 'online' | 'offline' | 'playing',
-	elo: number,
-	invitedFriends: IUserFriend[],
-	friendOf: IUserFriend[],
-	friends: IUser[],
-	profile_picture: string,
+	id: number;
+	id42: number; // null for non-42 users
+	username: string;
+	displayName: string;
+	status: 'online' | 'offline' | 'playing';
+	elo: number;
+	invitedFriends: IUserFriend[];
+	friendOf: IUserFriend[];
+	friends: IUser[];
+	profile_picture: string;
 }
 
 export interface IScore {
@@ -112,7 +112,7 @@ export interface IOtp {
 
 export interface ILocalGameInfo {
 	id: string;
-	state: "waiting" | "started" | "ended" | "saved";
+	state: 'waiting' | 'started' | 'ended' | 'saved';
 	startAt: number | null;
 	players: Array<{
 		user: IUser;

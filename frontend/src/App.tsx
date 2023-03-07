@@ -31,12 +31,15 @@ function App() {
 	const [user, setUser] = useState({} as IUser);
 
 	const fetchUser = async () => {
-		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${cookies.bearer}`,
+		const response = await fetch(
+			process.env.REACT_APP_API_URL + '/users/me',
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${cookies.bearer}`,
+				},
 			},
-		});
+		);
 		const data = await response.json();
 		console.log(data);
 		setUserLoading(false);
@@ -53,7 +56,8 @@ function App() {
 				setAuth({ bearer: cookies.bearer, otp_ok: false });
 		} else if (response.status === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false)
+				setAuth({ bearer: null, otp_ok: false });
 		} else console.error(data);
 	};
 
@@ -71,7 +75,8 @@ function App() {
 		console.log('Socket error:', error);
 		if (error.code === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false)
+				setAuth({ bearer: null, otp_ok: false });
 		}
 	});
 
@@ -96,20 +101,21 @@ function App() {
 		console.log('game_invitation', data);
 		message.info(
 			<div className="invite-notification">
-				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button className="nes-btn" onClick={() => joinGame(data)}>Join</button>
+				<p>
+					You receive an invitation from{' '}
+					{data.players[0].user.username}
+				</p>
+				<button className="nes-btn" onClick={() => joinGame(data)}>
+					Join
+				</button>
 			</div>,
 			10,
 		);
 	});
 
 	useEffect(() => {
-		setGameInfo('test');
-	}, [])
-
-	useEffect(() => {
-		console.log(gameInfo)
-	}, [gameInfo])
+		console.log(gameInfo);
+	}, [gameInfo]);
 
 	useEffect(() => {
 		console.log(auth);
@@ -142,17 +148,44 @@ function App() {
 				<Routes>
 					<Route
 						path="/login"
-						element={<Login fetchUser={fetchUser} setCookie={setCookie} removeCookie={removeCookie} />}
+						element={
+							<Login
+								fetchUser={fetchUser}
+								setCookie={setCookie}
+								removeCookie={removeCookie}
+							/>
+						}
 					/>
 					<Route element={<RequireAuth />}>
-						<Route path="/" element={<Home user={user} auth={auth} />} />
-						<Route path="/friends" element={<Friends user_me={user} />} />
-						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
-						<Route path="/stats" element={<Stats user_me={user} />} />
-						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
-						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
+						<Route
+							path="/"
+							element={<Home user={user} auth={auth} />}
+						/>
+						<Route
+							path="/friends"
+							element={<Friends user_me={user} />}
+						/>
+						<Route
+							path="/searchGame"
+							element={<SearchGame user_me={user} />}
+						/>
+						<Route
+							path="/stats"
+							element={<Stats user_me={user} />}
+						/>
+						<Route
+							path="/searchGame"
+							element={<SearchGame user_me={user} />}
+						/>
+						<Route
+							path="/stats/:userId"
+							element={<Stats user_me={user} />}
+						/>
 						<Route path="/404" element={<NoUserFound />} />
-						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
+						<Route
+							path="/settings"
+							element={<Settings user_me={user} auth={auth} />}
+						/>
 						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

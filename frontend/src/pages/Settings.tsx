@@ -12,7 +12,7 @@ import Checkbox from '@mui/material/Checkbox';
 
 type SettingsProps = {
 	user_me: IUser;
-	auth : Record<string, unknown>;
+	auth: Record<string, unknown>;
 };
 
 export const Settings = (props: SettingsProps) => {
@@ -27,16 +27,15 @@ export const Settings = (props: SettingsProps) => {
 		const selectedFile = event.target.files?.[0];
 		if (selectedFile) {
 			setFile(selectedFile);
-			setFileName(selectedFile.name)
+			setFileName(selectedFile.name);
 		}
 	};
 
 	const submitProfilPicture = async (event: any) => {
-        event.preventDefault();
-        const formData = new FormData();
+		event.preventDefault();
+		const formData = new FormData();
 		console.log(file);
-		if (file)
-			formData.append("profil_picture", file);
+		if (file) formData.append('profil_picture', file);
 		fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
 			method: 'POST',
 			headers: {
@@ -44,43 +43,49 @@ export const Settings = (props: SettingsProps) => {
 			},
 			body: formData,
 		})
-		.then((response) => response.json())
-		.then((result) => {
-			message.success('Profil Picture uploaded');
-		})
-		.catch((error) => {
-			console.error("Error:", error);
-		});
-    };
+			.then((response) => response.json())
+			.then((result) => {
+				message.success('Profil Picture uploaded');
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (event.target.name === 'name') setDisplayName(event.target.value);
 	};
 
 	const submit42ProfilPicture = async (event: any) => {
-		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+		const response = await fetch(
+			'http://api.transcendence.local/api/v1/users/profile-picture/fetch42',
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${props.auth.bearer}`,
+				},
 			},
-		});
+		);
 		if (response.ok) {
 			message.success('Profil Picture uploaded');
-	  };
-	  };
+		}
+	};
 
-	  const submitRandomProfilPicture = async (event: any) => {
+	const submitRandomProfilPicture = async (event: any) => {
 		event.preventDefault();
-		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/generate', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+		const response = await fetch(
+			'http://api.transcendence.local/api/v1/users/profile-picture/generate',
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${props.auth.bearer}`,
+				},
 			},
-		});
+		);
 		if (response.ok) {
 			message.success('Profil Picture uploaded');
-	  };
-	  };
+		}
+	};
 
 	  const changeSettings = (event: any): void => {
 		event?.preventDefault();
@@ -91,10 +96,8 @@ export const Settings = (props: SettingsProps) => {
 				username: displayname,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
-				else
-				{
+				if (data.messages) alert(data.messages);
+				else {
 					message.success('Username uploaded');
 					setDisplayName("");
 				}
@@ -106,12 +109,34 @@ export const Settings = (props: SettingsProps) => {
 		<div className="settings-wrapper">
 			<div className="settings">
 				<h3>Profil Picture</h3>
-				<button className='profilPicture-button' onClick={submit42ProfilPicture}>42 Profil Picture</button>
-				<button className='profilPicture-button' onClick={submitRandomProfilPicture}>Random Profil Picture</button>
-				<form className="form-file-profil-picture" onSubmit={submitProfilPicture}>
-						<input type="file" name="file" id="file" className="inputfile" onChange={handleFileChange}/>
-						<label htmlFor="file">{fileName || "Choose a file"}</label>
-						<input type="submit" className='form-file-profil-picture-submit-button'/>
+				<button
+					className="profilPicture-button"
+					onClick={submit42ProfilPicture}
+				>
+					42 Profil Picture
+				</button>
+				<button
+					className="profilPicture-button"
+					onClick={submitRandomProfilPicture}
+				>
+					Random Profil Picture
+				</button>
+				<form
+					className="form-file-profil-picture"
+					onSubmit={submitProfilPicture}
+				>
+					<input
+						type="file"
+						name="file"
+						id="file"
+						className="inputfile"
+						onChange={handleFileChange}
+					/>
+					<label htmlFor="file">{fileName || 'Choose a file'}</label>
+					<input
+						type="submit"
+						className="form-file-profil-picture-submit-button"
+					/>
 				</form>
 				<h3>Name</h3>
 				<form className="form-change-name" onSubmit={changeSettings}>
@@ -130,4 +155,3 @@ export const Settings = (props: SettingsProps) => {
 };
 
 export default Settings;
-

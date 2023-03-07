@@ -7,16 +7,15 @@ import { SocketContext } from '../context/socket';
 
 import { IChannel, IUser, IUserMessage } from '../interfaces';
 
-import FriendConvMessages from './FriendConvMessages'
+import FriendConvMessages from './FriendConvMessages';
 
 type FriendConvProps = {
-	user_me : IUser,
-	activeConvId : number,
-	allPrivateConvMessages : IUserMessage[];
+	user_me: IUser;
+	activeConvId: number;
+	allPrivateConvMessages: IUserMessage[];
 };
 
 export default function FriendConv(props: FriendConvProps) {
-
 	const socket = useContext(SocketContext);
 
 	const [passWord, setPassWord] = useState<string>('');
@@ -31,59 +30,65 @@ export default function FriendConv(props: FriendConvProps) {
 	};
 
 	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-		if (message != '')
-		{
+		event.preventDefault();
+		if (message != '') {
 			socket.emit(
 				'users_sendMessage',
 				{
-					id : props.activeConvId,
-					message : message,
+					id: props.activeConvId,
+					message: message,
 				},
 				(data: any) => {
-                    if (data.messages)
-						alert(data.messages);
-                    else
-					{
+					if (data.messages) alert(data.messages);
+					else {
 						props.allPrivateConvMessages.unshift(data);
 						setMessage('');
 					}
 				},
 			);
 		}
-    };
+	};
 	useEffect(() => {
-		console.log("FriendConv useEffect");
+		console.log('FriendConv useEffect');
 		socket.emit(
-            'users_get',
-            {
-                id : props.activeConvId,
-            },
-            (data: any) => {
-                if (data.messages)
-                    alert(data.messages);
-                else
-					setTalkto(data);
-            },
-        );
+			'users_get',
+			{
+				id: props.activeConvId,
+			},
+			(data: any) => {
+				if (data.messages) alert(data.messages);
+				else setTalkto(data);
+			},
+		);
 	}, [props.activeConvId]);
 
 	return (
 		<div className="chat-wrapper discord-black-three">
-			<div className="chat-nav" id='chat-nav'>
-				<span className='pixel-font'>{talkTo?.username}</span>
+			<div className="chat-nav" id="chat-nav">
+				<img src={talkTo?.profile_picture} alt={talkTo?.username} />
+				<span className="pixel-font">{talkTo?.username}</span>
 			</div>
-			<FriendConvMessages user_me={props.user_me} allPrivateConvMessages={props.allPrivateConvMessages} chan_id={props.activeConvId}/>
+			<FriendConvMessages
+				user_me={props.user_me}
+				allPrivateConvMessages={props.allPrivateConvMessages}
+				chan_id={props.activeConvId}
+			/>
 			<form className="write-message" onSubmit={submitMessage}>
-					<input
-						value={message}
-						name='message-input'
-						id='message-input'
-						type='message'
-						placeholder='Message'
-						onChange={handleChange}
-						required
-						/>
+				<input
+					value={message}
+					name="message-input"
+					id="message-input"
+					type="message"
+					placeholder="Enter your message..."
+					onChange={handleChange}
+					required
+				/>
+				<img
+					src="https://cdn-icons-png.flaticon.com/512/408/408161.png"
+					className="send-button"
+					alt="Send"
+					onClick={submitMessage}
+				/>
 			</form>
 		</div>
 	);

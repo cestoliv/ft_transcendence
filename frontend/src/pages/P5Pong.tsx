@@ -65,13 +65,17 @@ const Canvas = ({ gameId, socket }) => {
 		position: function (y: number) {
 			if (gameInfo.isWatching)
 				this.y = mP5.min(canvasSize.height, mP5.max(y, 0));
-			else
-				this.y = this.computePosition(y);
+			else this.y = this.computePosition(y);
 		},
 		draw: function () {
 			mP5.stroke(255);
 			mP5.fill(255);
-			mP5.line(this.x, this.y - this.radius, this.x, this.y + this.radius);
+			mP5.line(
+				this.x,
+				this.y - this.radius,
+				this.x,
+				this.y + this.radius,
+			);
 		},
 	};
 	const opponent = {
@@ -88,7 +92,12 @@ const Canvas = ({ gameId, socket }) => {
 		draw: function () {
 			mP5.stroke(255);
 			mP5.fill(255);
-			mP5.line(this.x, this.y - this.radius, this.x, this.y + this.radius);
+			mP5.line(
+				this.x,
+				this.y - this.radius,
+				this.x,
+				this.y + this.radius,
+			);
 		},
 	};
 	const game = {
@@ -103,7 +112,9 @@ const Canvas = ({ gameId, socket }) => {
 		mP5 = p5;
 		canvasSize = computeCanvasSize();
 
-		p5.createCanvas(canvasSize.width, canvasSize.height).parent(canvasParentRef);
+		p5.createCanvas(canvasSize.width, canvasSize.height).parent(
+			canvasParentRef,
+		);
 		game.reset();
 	};
 
@@ -141,7 +152,8 @@ const Canvas = ({ gameId, socket }) => {
 	// On resize, update the canvas size
 	React.useEffect(() => {
 		window.addEventListener('resize', () => windowResized(mP5));
-		return () => window.removeEventListener('resize', () => windowResized(mP5));
+		return () =>
+			window.removeEventListener('resize', () => windowResized(mP5));
 	}, []);
 
 	socket.off('games_start'); // Unbind previous event
@@ -240,8 +252,16 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 			setMeInfo(gameInfo.players[0]);
 			setOpponentInfo(gameInfo.players[1]);
 		} else {
-			setMeInfo(gameInfo.players.filter((p: any) => p.user.username === auth.user.username)[0]);
-			setOpponentInfo(gameInfo.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
+			setMeInfo(
+				gameInfo.players.filter(
+					(p: any) => p.user.username === auth.user.username,
+				)[0],
+			);
+			setOpponentInfo(
+				gameInfo.players.filter(
+					(p: any) => p.user.username !== auth.user.username,
+				)[0],
+			);
 		}
 		// if (!gameInfo.isWatching) {
 		// 	socket.emit('games_info', { id: gameId }, (data: any) => {
@@ -284,19 +304,23 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 
 	const stopWatching = () => {
 		navigate(-1);
-	}
+	};
 
 	const quitGame = () => {
 		navigate(-1);
-	}
+	};
 
 	useEffect(() => {
 		return () => {
 			if (gameInfo) {
 				if (gameInfo.isWatching) {
-					socket.emit('games_watch_stop', { id: gameId }, (data: any) => {
-						console.log('games_watch_stop', data);
-					});
+					socket.emit(
+						'games_watch_stop',
+						{ id: gameId },
+						(data: any) => {
+							console.log('games_watch_stop', data);
+						},
+					);
 				} else {
 					socket.emit('games_quit', { id: gameId }, (data: any) => {
 						console.log('games_quit', data);
@@ -305,18 +329,25 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 			}
 			setGameInfo(null);
 			console.log('unmount');
-		}
-	}, [])
+		};
+	}, []);
 
 	return (
 		<div className="game-wrapper">
 			<div className="game-score">
 				<div className="opponent">
 					<div className="info">
-						<img src={opponentInfo?.user?.profile_picture} alt='User image' />
+						<img
+							src={opponentInfo?.user?.profile_picture}
+							alt="User image"
+						/>
 						<p>{opponentInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameInfo.isWatching ? gameScore.opponent : gameScore.opponent}</span>
+					<span className="score">
+						{gameInfo.isWatching
+							? gameScore.opponent
+							: gameScore.opponent}
+					</span>
 				</div>
 				<span>-</span>
 				<div className="me">
@@ -324,7 +355,11 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 						<img src={meInfo?.user?.profile_picture} />
 						<p>{meInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameInfo.isWatching ? gameScore.creator : gameScore.you}</span>
+					<span className="score">
+						{gameInfo.isWatching
+							? gameScore.creator
+							: gameScore.you}
+					</span>
 				</div>
 			</div>
 			<div className="pong-wrapper" id="game-container">
@@ -343,36 +378,64 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 				>
 					<div className="end-game">
 						<p className="winner">
-							Winner : <span>{endGameInfo.winner.user.username}</span>
+							Winner :{' '}
+							<span>{endGameInfo.winner.user.username}</span>
 						</p>
 						<div className="game-score">
 							<p className="opponent">
 								{opponentInfo.user.username}
-								<span className="score">{endGameInfo.opponent_score}</span>
+								<span className="score">
+									{endGameInfo.opponent_score}
+								</span>
 							</p>
 							<span>-</span>
 							<p className="me">
-								<span className="score">{gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}</span>
+								<span className="score">
+									{gameInfo.isWatching
+										? endGameInfo.creator_score
+										: endGameInfo.score}
+								</span>
 								{meInfo.user.username}
-
 							</p>
 						</div>
 					</div>
 				</Modal>
 			)}
-			{gameInfo.isWatching ? <button className="nes-btn quit-button is-error" onClick={stopWatching}>Stop watching</button> : <button className="nes-btn quit-button is-error" onClick={quitGame}>Quit</button>}
+			{gameInfo.isWatching ? (
+				<button
+					className="nes-btn quit-button is-error"
+					onClick={stopWatching}
+				>
+					Stop watching
+				</button>
+			) : (
+				<button
+					className="nes-btn quit-button is-error"
+					onClick={quitGame}
+				>
+					Quit
+				</button>
+			)}
 			<div className="game-info">
-				<p><span className="title">Game ID</span> : {gameId}</p>
+				<p>
+					<span className="title">Game ID</span> : {gameId}
+				</p>
 				<div className="divider"></div>
 				{/* convert unix timestamp to date */}
-				<p><span className="title">Started at</span> : {new Date(gameInfo.startAt).toLocaleString()}</p>
+				<p>
+					<span className="title">Started at</span> :{' '}
+					{new Date(gameInfo.startAt).toLocaleString()}
+				</p>
 				<div className="divider"></div>
 				<div className="players-list">
 					<p className="title">Players : </p>
 					<div className="list">
 						{gameInfo.players.map((player: any) => (
 							<div className="player" key={player.user.username}>
-								<img src={player.user.profile_picture} alt='User image' />
+								<img
+									src={player.user.profile_picture}
+									alt="User image"
+								/>
 								<p>{player.user.username}</p>
 							</div>
 						))}

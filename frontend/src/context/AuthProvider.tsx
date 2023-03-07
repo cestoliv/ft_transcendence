@@ -26,7 +26,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 		user: {} as IUser,
 	} as IAuth);
 
-	return <AuthContext.Provider value={{ auth, setAuth }}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={{ auth, setAuth }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
 
 export default AuthContext;
