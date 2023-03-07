@@ -1,13 +1,5 @@
 import '../../css/app.scss';
-import {
-	Button,
-	Modal,
-	Input,
-	ConfigProvider,
-	theme,
-	Divider,
-	message,
-} from 'antd';
+import { Button, Modal, Input, ConfigProvider, theme, Divider, message } from 'antd';
 import { ILogin } from '../../interfaces';
 import { UserOutlined } from '@ant-design/icons';
 import { QRCodeCanvas } from 'qrcode.react';
