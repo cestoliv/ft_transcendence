@@ -17,8 +17,8 @@ export const Stats = (props: StatsProps) => {
 	const [myUser, setMyUser] = useState<IUser>();
 	const [is_friend, setIs_friend] = useState(false);
 	const [is_block, setIs_block] = useState(false);
-	const [rerender,setRerender] = useState(false);
-	const rerendUseEffect: boolean = true;
+	const [rerender, setRerender] = useState(false);
+	const rerendUseEffect = true;
 	const displayScores: IScore[] = [
 		{ me: 2, op: 1, op_name: 'NOOB' },
 		{ me: 2, op: 1, op_name: 'NOOB' },
@@ -51,45 +51,47 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				setMyUser(data);
-				if (myUser && user){
+				if (myUser && user) {
 					initIsfriend();
 					initBlocked();
 				}
 			},
-			);
+		);
 	}, [rerender, rerendUseEffect]);
-	
-	const initIsfriend = ()=>{
-		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)){
+
+	const initIsfriend = () => {
+		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.friends[i].id === user.id) {
-					return (setIs_friend(true));
+					return setIs_friend(true);
 				}
 			}
 			l = myUser.invitedFriends.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.invitedFriends[i].inviteeId === user.id) {
-					return (setIs_friend(true));
+					return setIs_friend(true);
 				}
 			}
-			return (setIs_friend(false));
-		};
-	}
-	const initBlocked = ()=>{
-		if (myUser && user && user.id !== myUser.id && myUser.blocked){
-			let l: number = myUser.blocked.length;
+			return setIs_friend(false);
+		}
+	};
+	const initBlocked = () => {
+		if (myUser && user && user.id !== myUser.id && myUser.blocked) {
+			const l: number = myUser.blocked.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.blocked[i].id === user.id) {
-					return (setIs_block(true));
+					return setIs_block(true);
 				}
 			}
-			return (setIs_block(false));
-		};
-	}
-	
+			return setIs_block(false);
+		}
+	};
+
 	if (!user || !myUser) {
-		setTimeout(() => {setRerender(!rerender);}, 100);
+		setTimeout(() => {
+			setRerender(!rerender);
+		}, 100);
 		return (
 			<div className="loading-wapper">
 				<div>Loading...</div>
@@ -126,13 +128,13 @@ export const Stats = (props: StatsProps) => {
 				<img
 					src="https://i.pinimg.com/originals/f5/a5/9d/f5a59d542851a7dcb3d0eae1851af735.png"
 					alt="marche po"
-					/>
+				/>
 			);
-			else if (current_elo < 1500)
+		else if (current_elo < 1500)
 			return (
 				<img
-				src="https://www.jeuxvideo.lol/wp-content/uploads/2015/10/silver_1-510061efab32cd096791a8d62bf63b39-1.png"
-				alt="marche po"
+					src="https://www.jeuxvideo.lol/wp-content/uploads/2015/10/silver_1-510061efab32cd096791a8d62bf63b39-1.png"
+					alt="marche po"
 				/>
 			);
 		else if (current_elo < 1750)
@@ -140,20 +142,20 @@ export const Stats = (props: StatsProps) => {
 				<img
 					src="https://i.pinimg.com/originals/d7/58/1b/d7581b2a1033309523d20c9d1a1f4589.png"
 					alt="marche po"
-					/>
-					);
-					else if (current_elo < 2000)
-					return (
-						<img
-						src="https://i.pinimg.com/originals/d7/47/1e/d7471e2ef48175986e9b75b566f61408.png"
-					alt="marche po"
-					/>
+				/>
 			);
-			else if (current_elo)
+		else if (current_elo < 2000)
 			return (
 				<img
-				src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/d6df2d66-13da-4ce4-ae85-8009742c5c94/d6u3aiw-18765c64-e07c-418e-a1d9-ffc958e48202.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi9kNmRmMmQ2Ni0xM2RhLTRjZTQtYWU4NS04MDA5NzQyYzVjOTQvZDZ1M2Fpdy0xODc2NWM2NC1lMDdjLTQxOGUtYTFkOS1mZmM5NThlNDgyMDIucG5nIn1dXX0.Nfy5H5LA8hOJG0tCTSQayRJ3R2H2ThI9eQbbUQNKE84"
-				alt="marche po"
+					src="https://i.pinimg.com/originals/d7/47/1e/d7471e2ef48175986e9b75b566f61408.png"
+					alt="marche po"
+				/>
+			);
+		else if (current_elo)
+			return (
+				<img
+					src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/d6df2d66-13da-4ce4-ae85-8009742c5c94/d6u3aiw-18765c64-e07c-418e-a1d9-ffc958e48202.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi9kNmRmMmQ2Ni0xM2RhLTRjZTQtYWU4NS04MDA5NzQyYzVjOTQvZDZ1M2Fpdy0xODc2NWM2NC1lMDdjLTQxOGUtYTFkOS1mZmM5NThlNDgyMDIucG5nIn1dXX0.Nfy5H5LA8hOJG0tCTSQayRJ3R2H2ThI9eQbbUQNKE84"
+					alt="marche po"
 				/>
 			);
 		else
@@ -161,8 +163,8 @@ export const Stats = (props: StatsProps) => {
 				<img
 					src="https://i.pinimg.com/originals/f5/a5/9d/f5a59d542851a7dcb3d0eae1851af735.png"
 					alt="marche po"
-					/>
-					);
+				/>
+			);
 	};
 	const percentWinrate = () => {
 		if (user.wins + user.loses > 0) return Math.trunc(100 * (user.wins / (user.loses + user.wins)));
@@ -180,9 +182,9 @@ export const Stats = (props: StatsProps) => {
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-				});
-			}
-		else {
+				},
+			);
+		} else {
 			console.log('added friend');
 			setIs_friend(!is_friend);
 			socket.emit(
@@ -192,11 +194,12 @@ export const Stats = (props: StatsProps) => {
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-				});
+				},
+			);
 			//envois ajout ami au back
 		}
 	};
-	
+
 	const onChangeblocked = () => {
 		if (is_block) {
 			console.log('removed blocked');
@@ -205,11 +208,12 @@ export const Stats = (props: StatsProps) => {
 				'users_mute',
 				{
 					id: user.id,
-					until: new Date().toISOString()
+					until: new Date().toISOString(),
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-				});
+				},
+			);
 		} else {
 			console.log('added blocked');
 			setIs_block(!is_block);
@@ -217,11 +221,12 @@ export const Stats = (props: StatsProps) => {
 				'users_mute',
 				{
 					id: user.id,
-					until: "2666-01-01T01:00:00-01:00"
+					until: '2666-01-01T01:00:00-01:00',
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-				});
+				},
+			);
 			//envois ajout ami au back
 		}
 	};
@@ -253,7 +258,8 @@ export const Stats = (props: StatsProps) => {
 		return false;
 	};
 
-	if (myUser.id === user.id) // cas ou c'est nortre profil
+	if (myUser.id === user.id)
+		// cas ou c'est nortre profil
 		return (
 			<div className="wrapper">
 				<div className="rank">{displayRank()}</div>

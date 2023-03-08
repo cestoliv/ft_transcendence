@@ -193,7 +193,7 @@ export class UsersGateway extends BaseGateway {
 			.then((userFriend) => {
 				// Propagate friendship removal
 				this.connectedClientsService
-					.get(userFriend.inviterId)
+					.get(payload.id)
 					.emit('users_friendshipRemoved', userFriend);
 				return userFriend;
 			})

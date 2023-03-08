@@ -46,7 +46,7 @@ const Otp = (props: IOtp) => {
 		} else {
 			// This will bring the user back to the login page
 			props.removeCookie('bearer');
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			console.error(data);
 		}
 	};

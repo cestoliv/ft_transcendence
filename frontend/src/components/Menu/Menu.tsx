@@ -1,5 +1,6 @@
 import { message } from 'antd';
-import React from 'react';
+import React, { useContext } from 'react';
+import { SocketContext } from '../../context/socket';
 import { NavLink } from 'react-router-dom';
 import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import useAuth from '../../hooks/useAuth';
@@ -7,28 +8,26 @@ import { SetCookie } from '../../types';
 
 export default function Menu(props: { setCookie: SetCookie }) {
 	const { setAuth } = useAuth();
+	const socket = useContext(SocketContext);
 	const handleLogout = () => {
-		setAuth({ bearer: null, otp_ok: false });
 		props.setCookie('bearer', null, {
 			path: '/',
 			sameSite: 'strict',
 			domain: process.env.REACT_APP_COOKIE_DOMAIN,
 		});
+		setAuth({ bearer: null, otp_ok: false, user: null });
+		socket.disconnect();
 		message.success('Logged out');
 		window.location.reload();
 	};
 	return (
 		<div className="menu">
-			<h1>PONG</h1>
+			<NavLink to="/" className="menu-title">
+				<h1>
+					<span>42</span>PONG
+				</h1>
+			</NavLink>
 			<ul>
-				<li>
-					<NavLink
-						to="/pong"
-						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
-					>
-						<span>Pong</span>
-					</NavLink>
-				</li>
 				<li>
 					<NavLink
 						to="/"

@@ -2,22 +2,22 @@
 @import './otp.scss';
 @import './menu.scss';
 @import './home.scss';
-@import './friends.css';
-@import './infosconv.css';
-@import './chat.css';
-@import './friendsList.css';
-@import './chanList.css';
+@import './friends.scss';
+@import './infosconv.scss';
+@import './chat.scss';
+@import './friendsList.scss';
+@import './chanList.scss';
 @import './searchGame.scss';
 @import './stats.css';
-@import './settings.css';
+@import './settings.scss';
 @import './pong.scss';
-@import './chanuser.css';
+@import './chanuser.scss';
 @import './friendrequests.css';
 @import './privatechanjoined.css';
 @import './notFound.scss';
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-.activeLink .e-icons{
+.activeLink .e-icons {
 	color: #7289da;
 }
 
@@ -30,20 +30,20 @@
 }
 
 .modal-e-plus:hover {
-	color: #4E6AD0;
+	color: #4e6ad0;
 }
 
 .modal-e-close:hover {
-	color: #4E6AD0;
+	color: #4e6ad0;
 }
 
 /* .background-modal input {
     background-color: #8FCB9B !important;
 } */
 
-.pixel-font {
-	font-family: 'VT323', monospace !important;
-}
+// .pixel-font {
+// 	font-family: 'VT323', monospace !important;
+// }
 
 .discord-black-one {
 	background-color: #1e2124 !important;
@@ -66,7 +66,7 @@
 }
 
 .discord-blue:hover {
-	background-color: #4E6AD0 !important;
+	background-color: #4e6ad0 !important;
 }
 
 .list-item {
@@ -75,7 +75,7 @@
 
 .list-item:hover {
 	cursor: pointer;
-	background : #424549 !important;
+	background: #424549 !important;
 }
 
 .buzz {

@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 
 import useGameInfo from '../hooks/useGameInfo';
@@ -12,7 +12,7 @@ import { IChannel, IUser } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { message } from 'antd';
+import { message, Badge } from 'antd';
 
 type FriendProps = {
 	user: IUser;
@@ -25,6 +25,8 @@ type FriendProps = {
 
 export const Friend = (props: FriendProps) => {
 	const socket = useContext(SocketContext);
+
+	const [redirect, setRedirect] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { gameInfo, setGameInfo } = useGameInfo();
 
@@ -89,11 +91,11 @@ export const Friend = (props: FriendProps) => {
 		event.preventDefault();
 		props.banFriend(banTimeValue, props.user.id);
 		closeBanTimeModal();
-	}
+	};
 
 	const muteFriend = async (event: any) => {
 		event.preventDefault();
-		let now = new Date();
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
 		socket.emit(
 			'users_mute',
@@ -106,7 +108,7 @@ export const Friend = (props: FriendProps) => {
 				else closeBanTimeModal();
 			},
 		);
-	}
+	};
 
 	// const muteFriend = (event: any): void => {
 	// 	socket.emit(
@@ -135,22 +137,31 @@ export const Friend = (props: FriendProps) => {
 	// };
 
 	const inviteFriend = () => {
-		socket.emit('games_create', { maxDuration: parseInt(time), maxScore: parseInt(points), mode: mode, visibility: 'private' }, (data: any) => {
-			console.log(data);
-			if (data?.statusCode) {
-				message.error(data.messages);
-				return;
-			}
-			socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+		socket.emit(
+			'games_create',
+			{
+				maxDuration: parseInt(time),
+				maxScore: parseInt(points),
+				mode: mode,
+				visibility: 'private',
+			},
+			(data: any) => {
 				console.log(data);
 				if (data?.statusCode) {
 					message.error(data.messages);
-					// TODO: delete game if needed
 					return;
 				}
-				message.success('Invitation sent');
-			});
-		});
+				socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+					console.log(data);
+					if (data?.statusCode) {
+						message.error(data.messages);
+						// TODO: delete game if needed
+						return;
+					}
+					message.success('Invitation sent');
+				});
+			},
+		);
 	};
 
 	const chanInvit = (chan_id: number, invited_user_id: number): void => {
@@ -161,8 +172,7 @@ export const Friend = (props: FriendProps) => {
 				user_id: invited_user_id,
 			},
 			(data: any) => {
-				if (data.messages)
-					alert(data.messages);
+				if (data.messages) alert(data.messages);
 				else {
 					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
 				}
@@ -170,18 +180,33 @@ export const Friend = (props: FriendProps) => {
 		);
 	};
 
+	const handleRedirect = (event: any): void => {
+		setRedirect(true);
+	};
+
+	const renderRedirect = () => {
+		if (redirect) {
+			return <Navigate to={`/stats/${props.user.id}`} />;
+		}
+	};
+
 	useEffect(() => {
 		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
-		let privateChanNotJoined = props.chanList.filter(channel =>
-			channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
-		);
-		// props.chanList.map(chan => (console.log(chan)));
-		// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
-		setPrivateChanJoined(privateChanNotJoined);
+		if (props.chanList) {
+			const privateChanNotJoined = props.chanList.filter(
+				(channel) =>
+					channel.visibility === 'private' &&
+					!channel.members.some((member) => member.id === props.user.id) &&
+					!channel.invited.some((member) => member.userId === props.user.id),
+			);
+			// props.chanList.map(chan => (console.log(chan)));
+			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
+			setPrivateChanJoined(privateChanNotJoined);
+		}
 	}, [props.chanList]);
 
 	const showGame = () => {
-		console.log(props.user.id)
+		console.log(props.user.id);
 		// socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
 		// 	console.log(data);
 		// 	if (data?.statusCode) {
@@ -205,9 +230,21 @@ export const Friend = (props: FriendProps) => {
 				return;
 			}
 			setGameInfo({ ...data, isWatching: true });
-			navigate(`/pong/${data.id}`)
+			navigate(`/pong/${data.id}`);
 		});
 		console.log(gameInfo);
+	};
+
+	function getBadgeStyle() {
+		if (props.user.status === 'online') {
+			return { backgroundColor: 'green' };
+		} else if (props.user.status === 'offline') {
+			return { backgroundColor: 'red' };
+		} else if (props.user.status === 'playing') {
+			return { backgroundColor: 'orange' };
+		} else {
+			return {}; // Retourne un objet vide pour utiliser le style par défaut
+		}
 	}
 
 	return (
@@ -217,18 +254,24 @@ export const Friend = (props: FriendProps) => {
 			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<div className="avatar_username">
-				<img className='avatar' src={props.user.profile_picture} alt="" />
-				<Link to={`/profile/${props.user.id}`} className='friend-list-item-username pixel-font '>{props.user.username}</Link>
-			</div>
+			{renderRedirect()}
+			<Badge dot={true} className="badge wrapper-active-conv" data-id={props.user.id} style={getBadgeStyle()}>
+				<img
+					className="avatar wrapper-active-conv-img"
+					src={props.user.profile_picture}
+					alt=""
+					onClick={props.activeConv}
+				/>
+			</Badge>
+			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>
+				{props.user.displayName}
+			</span>
 			<div className="friendsList-settings">
-				{/* {props.states === 'connected' && (
-					<span className="e-icons e-medium e-play"></span>
-				)}
-				{props.states === 'ingame' && (
-					<span className="e-icons e-medium e-radio-button"></span>
-				)} */}
-				<span className="e-icons e-medium e-menu modal-e-plus" onClick={OpenFriendActionModal}></span>
+				<img
+					src="https://static.thenounproject.com/png/2758640-200.png"
+					alt="Menu"
+					onClick={OpenFriendActionModal}
+				/>
 				<Modal
 					open={openFActionModal}
 					onClose={CloseFriendActionModal}
@@ -236,12 +279,31 @@ export const Friend = (props: FriendProps) => {
 					aria-describedby="modal-modal-description"
 				>
 					<Box className="friend-action-modal background-modal">
-						<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
-						<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
-						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
-						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
-						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>
-						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
+						{props.user.status === 'online' && (
+							<button className="discord-blue" onClick={OpenInviteGameModal}>
+								Inviter à jouer
+							</button>
+						)}
+						{props.user.status === 'playing' && (
+							<button className="discord-blue" onClick={showGame}>
+								Regarder la partie
+							</button>
+						)}
+						<button className="discord-blue" onClick={handleRedirect}>
+							Profil
+						</button>
+						<button className="discord-blue" onClick={OpenChanListModal}>
+							Inviter channel
+						</button>
+						<button className="discord-blue" onClick={OpenMuteTimeModal}>
+							Mute
+						</button>
+						<button className="discord-blue" onClick={OpenBanTimeModal}>
+							Ban
+						</button>
+						<button className="discord-blue" onClick={removeFriendClick}>
+							Suprrimer
+						</button>
 					</Box>
 				</Modal>
 				<Modal
@@ -300,7 +362,9 @@ export const Friend = (props: FriendProps) => {
 								})}
 							</select>
 						</div>
-						<button className="nes-btn" onClick={inviteFriend}>Invite</button>
+						<button className="nes-btn" onClick={inviteFriend}>
+							Invite
+						</button>
 					</div>
 				</Modal>
 			</div>
@@ -312,7 +376,12 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="chan-user-modal">
 					{privateChanJoined.map((chan) => (
-						<PrivateChanJoined key={chan.id} chan={chan} userToInviteId={props.user.id} chanInvit={chanInvit} />
+						<PrivateChanJoined
+							key={chan.id}
+							chan={chan}
+							userToInviteId={props.user.id}
+							chanInvit={chanInvit}
+						/>
 					))}
 				</Box>
 			</Modal>
@@ -325,7 +394,15 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="ban-time-modal background-modal">
 					<form className="ban-time-form" onSubmit={banFriend}>
-						<input value={banTimeValue} name='ban-time-input' type='message' placeholder='Ban time in mintues' onChange={handleChangeBantime} required className="ban-time-input" />
+						<input
+							value={banTimeValue}
+							name="ban-time-input"
+							type="message"
+							placeholder="Ban time in mintues"
+							onChange={handleChangeBantime}
+							required
+							className="ban-time-input"
+						/>
 					</form>
 				</Box>
 			</Modal>
@@ -338,7 +415,15 @@ export const Friend = (props: FriendProps) => {
 			>
 				<Box className="mute-time-modal background-modal">
 					<form className="mute-time-form" onSubmit={muteFriend}>
-						<input value={muteTimeValue} name='mute-time-input' type='message' placeholder='Mute time in minutes' onChange={handleChangeMutetime} required className="mute-time-input" />
+						<input
+							value={muteTimeValue}
+							name="mute-time-input"
+							type="message"
+							placeholder="Mute time in minutes"
+							onChange={handleChangeMutetime}
+							required
+							className="mute-time-input"
+						/>
 					</form>
 				</Box>
 			</Modal>

@@ -44,7 +44,7 @@ export const ChanBanItem = (props: ChanBanItemProps) => {
 		});
 	});
 
-	return <div>{isBan() && <div className='pixel-font'>{props.chan.name}</div>}</div>;
+	return <div>{isBan() && <div className="pixel-font">{props.chan.name}</div>}</div>;
 };
 
 export default ChanBanItem;

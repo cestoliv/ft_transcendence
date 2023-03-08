@@ -5,7 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage, IChannelInvitedUser, IChannelBannedUser } from '../interfaces';
+import {
+	IChannel,
+	IUser,
+	IUserFriend,
+	IChannelMessage,
+	IUserMessage,
+	IChannelInvitedUser,
+	IChannelBannedUser,
+} from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
 import useGameInfo from '../hooks/useGameInfo';
@@ -68,6 +76,11 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	};
+
+	if (!gameInfo) {
+		console.log('gameInfo', gameInfo);
+	}
+	console.log('inMatchmaking', inMatchmaking);
 
 	const joinMatchmaking = () => {
 		socket.emit('games_joinMatchmaking', (data: any) => {
@@ -182,7 +195,7 @@ export const SearchGame = (props: FriendsProps) => {
 	};
 
 	const banFriend = (banTime: string, friend_id: number): void => {
-		let now = new Date();
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(banTime));
 		socket.emit(
 			'users_ban',
@@ -195,8 +208,7 @@ export const SearchGame = (props: FriendsProps) => {
 				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
 			},
 		);
-	}
-
+	};
 
 	useEffect(() => {
 		socket.emit(
@@ -225,9 +237,7 @@ export const SearchGame = (props: FriendsProps) => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
 			let chanJoined: IChannel[];
-			chanJoined = data.filter(channel =>
-				channel.members.some(member => member.id === props.user_me.id)
-			);
+			chanJoined = data.filter((channel) => channel.members.some((member) => member.id === props.user_me.id));
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 			setChanList(chanJoined);

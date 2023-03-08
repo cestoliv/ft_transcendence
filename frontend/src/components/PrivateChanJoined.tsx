@@ -12,7 +12,7 @@ import Box from '@mui/material/Box';
 type PrivateChanJoinedProps = {
 	chan: IChannel;
 	userToInviteId: number;
-	chanInvit : (chan_id : number, invited_user_id : number) => void;
+	chanInvit: (chan_id: number, invited_user_id: number) => void;
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {

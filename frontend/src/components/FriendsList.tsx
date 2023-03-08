@@ -18,7 +18,8 @@ type PersonListProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
-	banFriend : (banTime : string, friend_id : number) => void;
+	refuse_friend_request: (inviter_id: number) => void;
+	banFriend: (banTime: string, friend_id: number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
 };
@@ -51,15 +52,17 @@ export const FriendsList = (props: PersonListProps) => {
 
 		const button1 = document.getElementById('open-chan-joined-button');
 		const button2 = document.getElementById('open-friend-list-button');
+		const button3 = document.getElementById('open-infos-conv-button');
 
 		button1?.classList.remove('hidden-button');
 		button2?.classList.remove('hidden-button');
+		button3?.classList.remove('hidden-button');
 	};
 
 	// useEffect(() => {
 	// 	console.log("hello56");
-	// 	console.log(props.user_me.status);
-	// }, []);
+	// 	console.log(props.friends);
+	// }, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
@@ -75,15 +78,22 @@ export const FriendsList = (props: PersonListProps) => {
 							chanList={props.chanList}
 							activeConv={props.activeConv}
 							removeFriend={props.removeFriend}
-							banFriend = {props.banFriend}
+							banFriend={props.banFriend}
 							gameInfo={props.gameInfo}
 						/>
 					))}
 			</div>
 			<div className="add-accept-friend">
-				<button className="en-attente-button discord-blue" onClick={OpenListFriendRequest}>En attente</button>
-				<Modal open={OpenLFriendRequest} onClose={CloseListFriendRequest} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-					<Box className="friend-request-modal background-modal">
+				<button className="en-attente-button nes-btn is-primary" onClick={OpenListFriendRequest}>
+					En attente
+				</button>
+				<Modal
+					open={OpenLFriendRequest}
+					onClose={CloseListFriendRequest}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box className="friend-request-modal modal background-modal">
 						{props.friendOf
 							?.filter((friend) => {
 								if (friend.accepted === false) return true;
@@ -94,6 +104,7 @@ export const FriendsList = (props: PersonListProps) => {
 									key={friend_request.inviterId}
 									friend_request={friend_request}
 									accept_friend_request={props.accept_friend_request}
+									refuse_friend_request={props.refuse_friend_request}
 								/>
 							))}
 					</Box>
@@ -107,7 +118,7 @@ export const FriendsList = (props: PersonListProps) => {
 						placeholder="Add a friend"
 						onChange={handleChange}
 						required
-						className="add-friend-form-input"
+						className="nes-input is-dark"
 					/>
 				</form>
 			</div>

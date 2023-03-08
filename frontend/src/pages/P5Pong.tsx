@@ -1,10 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { message, Modal } from 'antd';
-import { Socket } from 'socket.io-client';
+import { Modal } from 'antd';
 import Sketch from 'react-p5';
 import p5Types from 'p5'; //Import this for typechecking and intellisense
-import { IUser, IAuth } from '../interfaces';
+import { IUser, ILocalGameInfo } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import useAuth from '../hooks/useAuth';
 import { throttle } from '../utils';
@@ -15,7 +14,7 @@ const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;
 	console.log('Canvas', gameId);
 	const socket = useContext(SocketContext);
-	const { gameInfo, setGameInfo } = useGameInfo();
+	const { gameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');
 		if (!parent) return { width: 0, height: 0 };
@@ -193,9 +192,12 @@ const Canvas = (gameId: any) => {
 	const sendPaddlePos = (y: number) => {
 		if (y == 0) return;
 		// console.log('sendPaddlePos', y);
-		socket.emit('games_playerMove', { id: gameId, y }, (res: any) => {
-			// console.log('games_playerMove', res);
-		});
+		socket.emit(
+			'games_playerMove',
+			{ id: gameId, y } /*(res: any) => {
+			console.log('games_playerMove', res);
+		}*/,
+		);
 	};
 	const throttledSendPaddlePos = throttle(sendPaddlePos, 1000 / 30);
 
@@ -209,10 +211,12 @@ const Canvas = (gameId: any) => {
 		p5.background(0);
 
 		//If pos changed, send it to the server
-		if (me.y != me.computePosition(p5.mouseY) && !gameInfo.isWatching) {
-			const serverMouseY = p5.mouseY * (serverScreen.height / canvasSize.height);
-			me.position(serverMouseY);
-			throttledSendPaddlePos(serverMouseY);
+		if ((gameInfo && !gameInfo.isWatching) || !gameInfo) {
+			if (me.y != me.computePosition(p5.mouseY)) {
+				const serverMouseY = p5.mouseY * (serverScreen.height / canvasSize.height);
+				me.position(serverMouseY);
+				throttledSendPaddlePos(serverMouseY);
+			}
 		}
 
 		game.draw();
@@ -243,7 +247,6 @@ const Canvas = (gameId: any) => {
 			let delay = data.startAt - Date.now();
 			if (delay < 0) delay = 0;
 			setTimeout(() => {
-				console.log('start');
 				started = true;
 			}, delay);
 		}
@@ -278,17 +281,24 @@ const Canvas = (gameId: any) => {
 	);
 };
 
-const Pong = (props: { user: IUser; auth: IAuth }) => {
+const Pong = () => {
 	const navigate = useNavigate();
 	const params = useParams();
 	const gameId = params.gameId;
 	const socket = useContext(SocketContext);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const { gameInfo, setGameInfo } = useGameInfo();
-	// const [gameInfo, setGameInfo] = useState(null);
-	const [meInfo, setMeInfo] = useState({});
-	const [opponentInfo, setOpponentInfo] = useState({});
-	const [endGameInfo, setEndGameInfo] = useState(null);
+	const [meInfo, setMeInfo] = useState<ILocalGameInfo['players'][0] | null>(null);
+	const [opponentInfo, setOpponentInfo] = useState<ILocalGameInfo['players'][0] | null>(null);
+	const [endGameInfo, setEndGameInfo] = useState<{
+		winner: {
+			user: IUser;
+			score: number;
+		};
+		score: number | undefined; // On normal game
+		creator_score: number | undefined; // On watch game
+		opponent_score: number;
+	} | null>(null);
 	const { auth } = useAuth();
 
 	const closeModal = () => {
@@ -296,60 +306,46 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 	};
 
 	const [gameScore, setGameScore] = React.useState<{
-		you: number;
+		you: number | undefined; // On normal game
+		creator: number | undefined; // On watch game
 		opponent: number;
 	}>({
 		you: 0,
+		creator: 0,
 		opponent: 0,
 	});
 
 	window.socket = socket;
 
 	useEffect(() => {
-		if (!gameInfo.players || gameInfo.players.length !== 2) return;
+		if (!gameInfo || !gameInfo.players || gameInfo.players.length !== 2) return;
 
 		if (gameInfo.isWatching) {
 			setMeInfo(gameInfo.players[0]);
 			setOpponentInfo(gameInfo.players[1]);
 		} else {
-			setMeInfo(gameInfo.players.filter((p: any) => p.user.username === auth.user.username)[0]);
-			setOpponentInfo(gameInfo.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
+			setMeInfo(gameInfo.players.filter((p: any) => p.user.id === auth.user?.id)[0]);
+			setOpponentInfo(gameInfo.players.filter((p: any) => p.user.id !== auth.user?.id)[0]);
 		}
-		// if (!gameInfo.isWatching) {
-		// 	socket.emit('games_info', { id: gameId }, (data: any) => {
-		// 		console.log('games_info', data);
-		// 		if (!data) {
-		// 			message.error('Game not found');
-		// 		}
-		// 		setGameInfo(data);
-		// 		// setOpponentName()
-		// 		setOpponentInfo(data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
-		// 		console.log('opponentInfo', data.players.filter((p: any) => p.user.username !== auth.user.username)[0]);
-		// 	});
-		// }
 	}, []);
 
 	socket.off('games_score');
 	socket.on('games_score', (data: any) => {
 		setGameScore(data);
-		console.log('games_score', data);
 	});
 	socket.off('games_end'); // Unbind previous event
 	socket.on('games_end', (data: any) => {
 		setEndGameInfo(data);
 		setIsModalOpen(true);
-		console.log('games_end', data);
 	});
 
 	// Watchers events
 	socket.off('games_watch_score'); // Unbind previous event
 	socket.on('games_watch_score', (data: any) => {
-		console.log('games_watch_score', data);
 		setGameScore(data);
 	});
 	socket.off('games_watch_end'); // Unbind previous event
 	socket.on('games_watch_end', (data: any) => {
-		console.log('games_watch_end', data);
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 	});
@@ -376,7 +372,6 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 				}
 			}
 			setGameInfo(null);
-			console.log('unmount');
 		};
 	}, []);
 
@@ -388,7 +383,9 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 						<img src={opponentInfo?.user?.profile_picture} alt="User image" />
 						<p>{opponentInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameInfo.isWatching ? gameScore.opponent : gameScore.opponent}</span>
+					<span className="score">
+						{gameInfo && gameInfo.isWatching ? gameScore.opponent : gameScore.opponent}
+					</span>
 				</div>
 				<span>-</span>
 				<div className="me">
@@ -396,7 +393,7 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 						<img src={meInfo?.user?.profile_picture} />
 						<p>{meInfo?.user?.username}</p>
 					</div>
-					<span className="score">{gameInfo.isWatching ? gameScore.creator : gameScore.you}</span>
+					<span className="score">{gameInfo && gameInfo.isWatching ? gameScore.creator : gameScore.you}</span>
 				</div>
 			</div>
 			<div className="pong-wrapper" id="game-container">
@@ -419,21 +416,21 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 						</p>
 						<div className="game-score">
 							<p className="opponent">
-								{opponentInfo.user.username}
+								{opponentInfo?.user.username}
 								<span className="score">{endGameInfo.opponent_score}</span>
 							</p>
 							<span>-</span>
 							<p className="me">
 								<span className="score">
-									{gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}
+									{gameInfo && gameInfo.isWatching ? endGameInfo.creator_score : endGameInfo.score}
 								</span>
-								{meInfo.user.username}
+								{meInfo?.user.username}
 							</p>
 						</div>
 					</div>
 				</Modal>
 			)}
-			{gameInfo.isWatching ? (
+			{gameInfo && gameInfo.isWatching ? (
 				<button className="nes-btn quit-button is-error" onClick={stopWatching}>
 					Stop watching
 				</button>
@@ -449,13 +446,14 @@ const Pong = (props: { user: IUser; auth: IAuth }) => {
 				<div className="divider"></div>
 				{/* convert unix timestamp to date */}
 				<p>
-					<span className="title">Started at</span> : {new Date(gameInfo.startAt).toLocaleString()}
+					<span className="title">Started at</span> :{' '}
+					{new Date(gameInfo && gameInfo.startAt ? gameInfo.startAt : Date.now()).toLocaleString()}
 				</p>
 				<div className="divider"></div>
 				<div className="players-list">
 					<p className="title">Players : </p>
 					<div className="list">
-						{gameInfo.players
+						{gameInfo
 							? gameInfo.players.map((player: any) => (
 									<div className="player" key={player.user.username}>
 										<img src={player.user.profile_picture} alt="User image" />

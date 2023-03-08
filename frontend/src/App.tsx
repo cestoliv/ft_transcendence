@@ -9,7 +9,6 @@ import Menu from './components/Menu/Menu';
 import Home from './pages/Home';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
-import OtherUserProfile from './pages/OtherUserProfile';
 import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
@@ -50,10 +49,10 @@ function App() {
 		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
 			// User need to enter a TOTP
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== false)
-				setAuth({ bearer: cookies.bearer, otp_ok: false });
+				setAuth({ bearer: cookies.bearer, otp_ok: false, user: null });
 		} else if (response.status === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 		} else console.error(data);
 	};
 
@@ -71,7 +70,7 @@ function App() {
 		console.log('Socket error:', error);
 		if (error.code === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 		}
 	});
 
@@ -86,8 +85,6 @@ function App() {
 		});
 	};
 
-
-
 	socket.off();
 	socket.on('games_start', (data: any) => {
 		console.log('games_start', data);
@@ -99,19 +96,17 @@ function App() {
 		message.info(
 			<div className="invite-notification">
 				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button className="nes-btn" onClick={() => joinGame(data)}>Join</button>
+				<button className="nes-btn" onClick={() => joinGame(data)}>
+					Join
+				</button>
 			</div>,
 			10,
 		);
 	});
 
 	useEffect(() => {
-		setGameInfo('test');
-	}, [])
-
-	useEffect(() => {
-		console.log(gameInfo)
-	}, [gameInfo])
+		console.log(gameInfo);
+	}, [gameInfo]);
 
 	useEffect(() => {
 		console.log(auth);

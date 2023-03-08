@@ -73,7 +73,7 @@ const Login = (props: ILogin) => {
 				sameSite: 'strict',
 				domain: process.env.REACT_APP_COOKIE_DOMAIN,
 			});
-			setAuth({ bearer: data.bearer, otp_ok: true });
+			setAuth({ bearer: data.bearer, otp_ok: true, user: auth.user });
 			window.location.replace('/');
 		} else {
 			message.error(data.error);
@@ -103,7 +103,11 @@ const Login = (props: ILogin) => {
 			domain: process.env.REACT_APP_COOKIE_DOMAIN,
 		});
 		if (response.status === 200) {
-			setAuth({ bearer: data.bearer });
+			setAuth({
+				bearer: data.bearer,
+				otp_ok: false,
+				user: null,
+			});
 		} else {
 			message.error(data.error);
 		}
