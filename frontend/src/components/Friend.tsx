@@ -280,29 +280,32 @@ export const Friend = (props: FriendProps) => {
 				>
 					<Box className="friend-action-modal background-modal">
 						{props.user.status === 'online' && (
-							<button className="discord-blue" onClick={OpenInviteGameModal}>
-								Inviter à jouer
+							<button className="nes-btn is-primary" onClick={OpenInviteGameModal}>
+								Invite to play
 							</button>
 						)}
-						{props.user.status === 'playing' && (
-							<button className="discord-blue" onClick={showGame}>
+						{/* {props.user.status === 'playing' && (
+							<button className="nes-btn is-primary" onClick={showGame}>
 								Regarder la partie
 							</button>
-						)}
-						<button className="discord-blue" onClick={handleRedirect}>
+						)} */}
+						<button className="nes-btn is-primary" onClick={showGame}>
+							Regarder la partie
+						</button>
+						<button className="nes-btn is-primary" onClick={handleRedirect}>
 							Profil
 						</button>
-						<button className="discord-blue" onClick={OpenChanListModal}>
-							Inviter channel
+						<button className="nes-btn is-primary" onClick={OpenChanListModal}>
+							Invite to channel
 						</button>
-						<button className="discord-blue" onClick={OpenMuteTimeModal}>
+						<button className="nes-btn is-primary" onClick={OpenMuteTimeModal}>
 							Mute
 						</button>
-						<button className="discord-blue" onClick={OpenBanTimeModal}>
+						<button className="nes-btn is-primary" onClick={OpenBanTimeModal}>
 							Ban
 						</button>
-						<button className="discord-blue" onClick={removeFriendClick}>
-							Suprrimer
+						<button className="nes-btn is-primary" onClick={removeFriendClick}>
+							Delete
 						</button>
 					</Box>
 				</Modal>

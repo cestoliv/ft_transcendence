@@ -77,11 +77,6 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
-	if (!gameInfo) {
-		console.log('gameInfo', gameInfo);
-	}
-	console.log('inMatchmaking', inMatchmaking);
-
 	const joinMatchmaking = () => {
 		socket.emit('games_joinMatchmaking', (data: any) => {
 			console.log(data);
