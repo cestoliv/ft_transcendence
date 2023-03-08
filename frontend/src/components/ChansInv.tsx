@@ -29,10 +29,7 @@ export const ChansInv = (props: ChansInvProps) => {
 			<div className="">
 				<div className="chan-list-item modal-item pixel-font">
 					<span className="pixel-font">{props.chan?.name}</span>
-					<span
-						className="e-icons e-medium e-plus modal-e-plus"
-						onClick={handleJoinClick}
-					></span>
+					<span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
 				</div>
 			</div>
 		</div>

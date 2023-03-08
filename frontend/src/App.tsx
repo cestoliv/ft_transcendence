@@ -9,7 +9,6 @@ import Menu from './components/Menu/Menu';
 import Home from './pages/Home';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
-import OtherUserProfile from './pages/OtherUserProfile';
 import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
@@ -29,17 +28,16 @@ function App() {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
+	const maxRetry = 5;
+	let retry = 0;
 
 	const fetchUser = async () => {
-		const response = await fetch(
-			process.env.REACT_APP_API_URL + '/users/me',
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${cookies.bearer}`,
-				},
+		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${cookies.bearer}`,
 			},
-		);
+		});
 		const data = await response.json();
 		console.log(data);
 		setUserLoading(false);
@@ -53,65 +51,93 @@ function App() {
 		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
 			// User need to enter a TOTP
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== false)
-				setAuth({ bearer: cookies.bearer, otp_ok: false });
+				setAuth({ bearer: cookies.bearer, otp_ok: false, user: null });
 		} else if (response.status === 401) {
 			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false)
-				setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 		} else console.error(data);
 	};
 
-	socket.off(); // Unbind all previous events
-	socket.on('connect', () => {
-		console.log('Socket connected');
-	});
-	socket.on('disconnect', () => {
-		console.log('Socket disconnected');
-	});
-	socket.on('connect_error', (error: any) => {
-		console.log('Socket connect_error:', error);
-	});
-	socket.on('error', (error: any) => {
-		console.log('Socket error:', error);
-		if (error.code === 401) {
-			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false)
-				setAuth({ bearer: null, otp_ok: false });
+	useEffect(() => {
+		socket.on('connect', () => {
+			console.log('Socket connected');
+		});
+		socket.on('disconnect', () => {
+			console.log('Socket disconnected');
+		});
+		// if the user can't connect to the server after 3 tries, he will be disconnected
+		socket.on('connect_error', (error: any) => {
+			console.log('Socket connect_failed:', error);
+			if (retry < maxRetry) {
+				retry++;
+				socket.connect();
+			} else {
+				socket.disconnect();
+				setAuth({ bearer: null, otp_ok: false, user: null });
+				message.error('Connection failed');
+			}
+		});
+		// socket.on('connect_error', (error: any) => {
+		// 	console.log('Socket connect_error:', error);
+		// });
+		socket.on('error', (error: any) => {
+			console.log('Socket error:', error);
+			if (error.code === 401) {
+				// User is not connected
+				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+			}
+		});
+		socket.on('games_start', (data: any) => {
+			console.log('games_start', data);
+			setGameInfo(data);
+			navigate(`/pong/${data.id}`);
+		});
+		socket.on('game_invitation', (data: any) => {
+			console.log('game_invitation', data);
+			message.info(
+				<div className="invite-notification">
+					<p>You receive an invitation from {data.players[0].user.username}</p>
+					<button className="nes-btn" onClick={() => joinGame(data)}>
+						Join
+					</button>
+				</div>,
+				10,
+			);
+		});
+		return () => {
+			socket.off();
 		}
-	});
+	}, [])
 
 	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
 			console.log('games_join', data);
 			if (data?.statusCode) {
-				message.error(data.message);
+				message.error(data.error);
 			} else {
 				navigate(`/pong/${gameInfo.id}`);
 			}
 		});
 	};
 
-	socket.off();
-	socket.on('games_start', (data: any) => {
-		console.log('games_start', data);
-		setGameInfo(data);
-		navigate(`/pong/${data.id}`);
-	});
-	socket.on('game_invitation', (data: any) => {
-		console.log('game_invitation', data);
-		message.info(
-			<div className="invite-notification">
-				<p>
-					You receive an invitation from{' '}
-					{data.players[0].user.username}
-				</p>
-				<button className="nes-btn" onClick={() => joinGame(data)}>
-					Join
-				</button>
-			</div>,
-			10,
-		);
-	});
+	// socket.off();
+	// socket.on('games_start', (data: any) => {
+	// 	console.log('games_start', data);
+	// 	setGameInfo(data);
+	// 	navigate(`/pong/${data.id}`);
+	// });
+	// socket.on('game_invitation', (data: any) => {
+	// 	console.log('game_invitation', data);
+	// 	message.info(
+	// 		<div className="invite-notification">
+	// 			<p>You receive an invitation from {data.players[0].user.username}</p>
+	// 			<button className="nes-btn" onClick={() => joinGame(data)}>
+	// 				Join
+	// 			</button>
+	// 		</div>,
+	// 		10,
+	// 	);
+	// });
 
 	useEffect(() => {
 		console.log(gameInfo);
@@ -148,44 +174,17 @@ function App() {
 				<Routes>
 					<Route
 						path="/login"
-						element={
-							<Login
-								fetchUser={fetchUser}
-								setCookie={setCookie}
-								removeCookie={removeCookie}
-							/>
-						}
+						element={<Login fetchUser={fetchUser} setCookie={setCookie} removeCookie={removeCookie} />}
 					/>
 					<Route element={<RequireAuth />}>
-						<Route
-							path="/"
-							element={<Home user={user} auth={auth} />}
-						/>
-						<Route
-							path="/friends"
-							element={<Friends user_me={user} />}
-						/>
-						<Route
-							path="/searchGame"
-							element={<SearchGame user_me={user} />}
-						/>
-						<Route
-							path="/stats"
-							element={<Stats user_me={user} />}
-						/>
-						<Route
-							path="/searchGame"
-							element={<SearchGame user_me={user} />}
-						/>
-						<Route
-							path="/stats/:userId"
-							element={<Stats user_me={user} />}
-						/>
+						<Route path="/" element={<Home user={user} auth={auth} />} />
+						<Route path="/friends" element={<Friends user_me={user} />} />
+						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
+						<Route path="/stats" element={<Stats user_me={user} />} />
+						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
+						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
-						<Route
-							path="/settings"
-							element={<Settings user_me={user} auth={auth} />}
-						/>
+						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />

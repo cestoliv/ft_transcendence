@@ -75,13 +75,11 @@ export const Friend = (props: FriendProps) => {
 	const closeMuteTimeModal = () => setOpenMuteTimeModal(false);
 
 	const handleChangeBantime = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'ban-time-input')
-			setBanTimeValue(event.target.value);
+		if (event.target.name === 'ban-time-input') setBanTimeValue(event.target.value);
 	};
 
 	const handleChangeMutetime = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'mute-time-input')
-			setMuteTimeValue(event.target.value);
+		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
 	};
 
 	const removeFriendClick = (): void => {
@@ -96,7 +94,7 @@ export const Friend = (props: FriendProps) => {
 
 	const muteFriend = async (event: any) => {
 		event.preventDefault();
-		let now = new Date();
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
 		socket.emit(
 			'users_mute',
@@ -126,19 +124,15 @@ export const Friend = (props: FriendProps) => {
 					message.error(data.messages);
 					return;
 				}
-				socket.emit(
-					'games_invite',
-					{ id: data.id, user_id: props.user.id },
-					(data: any) => {
-						console.log(data);
-						if (data?.statusCode) {
-							message.error(data.messages);
-							// TODO: delete game if needed
-							return;
-						}
-						message.success('Invitation sent');
-					},
-				);
+				socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+					console.log(data);
+					if (data?.statusCode) {
+						message.error(data.messages);
+						// TODO: delete game if needed
+						return;
+					}
+					message.success('Invitation sent');
+				});
 			},
 		);
 	};
@@ -173,10 +167,12 @@ export const Friend = (props: FriendProps) => {
 
 	useEffect(() => {
 		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
-		if (props.chanList)
-		{
-			let privateChanNotJoined = props.chanList.filter(channel =>
-				channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
+		if (props.chanList) {
+			const privateChanNotJoined = props.chanList.filter(
+				(channel) =>
+					channel.visibility === 'private' &&
+					!channel.members.some((member) => member.id === props.user.id) &&
+					!channel.invited.some((member) => member.userId === props.user.id),
 			);
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
@@ -202,33 +198,29 @@ export const Friend = (props: FriendProps) => {
 		// 		navigate(`/pong/${data.id}`)
 		// 	});
 		// });
-		socket.emit(
-			'games_startWatching',
-			{ id: props.user.id },
-			(data: any) => {
-				console.log(data);
-				if (data?.statusCode) {
-					message.error(data.messages);
-					return;
-				}
-				setGameInfo({ ...data, isWatching: true });
-				navigate(`/pong/${data.id}`);
-			},
-		);
+		socket.emit('games_startWatching', { id: props.user.id }, (data: any) => {
+			console.log(data);
+			if (data?.statusCode) {
+				message.error(data.messages);
+				return;
+			}
+			setGameInfo({ ...data, isWatching: true });
+			navigate(`/pong/${data.id}`);
+		});
 		console.log(gameInfo);
 	};
 
 	function getBadgeStyle() {
-		if (props.user.status === "online") {
-		  return { backgroundColor: 'green' };
-		} else if (props.user.status === "offline") {
-		  return { backgroundColor: 'red' };
-		} else if (props.user.status === "playing") {
-		  return { backgroundColor: 'orange' };
+		if (props.user.status === 'online') {
+			return { backgroundColor: 'green' };
+		} else if (props.user.status === 'offline') {
+			return { backgroundColor: 'red' };
+		} else if (props.user.status === 'playing') {
+			return { backgroundColor: 'orange' };
 		} else {
-		  return {}; // Retourne un objet vide pour utiliser le style par défaut
+			return {}; // Retourne un objet vide pour utiliser le style par défaut
 		}
-	  }
+	}
 
 	return (
 		<div
@@ -239,9 +231,16 @@ export const Friend = (props: FriendProps) => {
 		>
 			{renderRedirect()}
 			<Badge dot={true} className="badge wrapper-active-conv" data-id={props.user.id} style={getBadgeStyle()}>
-				<img className='avatar wrapper-active-conv-img' src={props.user.profile_picture} alt="" onClick={props.activeConv}/>
+				<img
+					className="avatar wrapper-active-conv-img"
+					src={props.user.profile_picture}
+					alt=""
+					onClick={props.activeConv}
+				/>
 			</Badge>
-			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.user.displayName}</span>
+			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>
+				{props.user.displayName}
+			</span>
 			<div className="friendsList-settings">
 				<img
 					src="https://static.thenounproject.com/png/2758640-200.png"
@@ -256,16 +255,33 @@ export const Friend = (props: FriendProps) => {
 				>
 					<Box className="friend-action-modal background-modal">
 						{props.user.status === 'online' && (
-							<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
+							<button className="nes-btn is-primary" onClick={OpenInviteGameModal}>
+								Invite to play
+							</button>
 						)}
-						{props.user.status === 'playing' && (
-							<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
-						)}
-						<button className='discord-blue' onClick={handleRedirect}>Profil</button>
-						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
-						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
-						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>
-						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
+						{/* {props.user.status === 'playing' && (
+							<button className="nes-btn is-primary" onClick={showGame}>
+								Regarder la partie
+							</button>
+						)} */}
+						<button className="nes-btn is-primary" onClick={showGame}>
+							Regarder la partie
+						</button>
+						<button className="nes-btn is-primary" onClick={handleRedirect}>
+							Profil
+						</button>
+						<button className="nes-btn is-primary" onClick={OpenChanListModal}>
+							Invite to channel
+						</button>
+						<button className="nes-btn is-primary" onClick={OpenMuteTimeModal}>
+							Mute
+						</button>
+						<button className="nes-btn is-primary" onClick={OpenBanTimeModal}>
+							Ban
+						</button>
+						<button className="nes-btn is-primary" onClick={removeFriendClick}>
+							Delete
+						</button>
 					</Box>
 				</Modal>
 				<Modal
@@ -279,18 +295,13 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="mode_select">Mode</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(
-									e: React.ChangeEvent<HTMLSelectElement>,
-								) => setMode(e.target.value)}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value)}
 								required
 								id="mode_select"
 							>
 								{modeOptions.map((option) => {
 									return (
-										<option
-											key={option.value}
-											value={option.value}
-										>
+										<option key={option.value} value={option.value}>
 											{option.label}
 										</option>
 									);
@@ -300,18 +311,13 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="time-select">Time</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(
-									e: React.ChangeEvent<HTMLSelectElement>,
-								) => setTime(e.target.value)}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTime(e.target.value)}
 								required
 								id="time_select"
 							>
 								{timeOptions.map((option) => {
 									return (
-										<option
-											key={option.value}
-											value={option.value}
-										>
+										<option key={option.value} value={option.value}>
 											{option.label}
 										</option>
 									);
@@ -321,18 +327,13 @@ export const Friend = (props: FriendProps) => {
 						<label htmlFor="points_select">Points</label>
 						<div className="nes-select is-dark">
 							<select
-								onChange={(
-									e: React.ChangeEvent<HTMLSelectElement>,
-								) => setPoints(e.target.value)}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPoints(e.target.value)}
 								required
 								id="points_select"
 							>
 								{pointsOptions.map((option) => {
 									return (
-										<option
-											key={option.value}
-											value={option.value}
-										>
+										<option key={option.value} value={option.value}>
 											{option.label}
 										</option>
 									);

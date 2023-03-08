@@ -31,11 +31,7 @@ export const ChanList = (props: ChanListProps) => {
 
 	return (
 		<div className="ChanList-wrapper">
-			<span
-				className="close-chan-list"
-				id="close-chan-list"
-				onClick={closeChanList}
-			>
+			<span className="close-chan-list" id="close-chan-list" onClick={closeChanList}>
 				close
 			</span>
 			{props.chanList.map((chan: any) => (

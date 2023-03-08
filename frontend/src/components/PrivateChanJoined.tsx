@@ -23,10 +23,7 @@ export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
 
 	return (
 		<div className="wrapper-private-chan-joined-item">
-			<div
-				className="private-chan-joined-item discord-blue"
-				onClick={chanInvit}
-			>
+			<div className="private-chan-joined-item discord-blue" onClick={chanInvit}>
 				{props.chan.name}
 			</div>
 		</div>

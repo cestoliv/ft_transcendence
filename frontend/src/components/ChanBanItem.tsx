@@ -28,8 +28,7 @@ export const ChanBanItem = (props: ChanBanItemProps) => {
 		if (props.chan) {
 			let x = 0;
 			while (x < props.chan.banned.length) {
-				if (props.chan.banned[x].userId === props.user_me.id)
-					return true;
+				if (props.chan.banned[x].userId === props.user_me.id) return true;
 				x++;
 			}
 			return false;
@@ -45,11 +44,7 @@ export const ChanBanItem = (props: ChanBanItemProps) => {
 		});
 	});
 
-	return (
-		<div>
-			{isBan() && <div className="pixel-font">{props.chan.name}</div>}
-		</div>
-	);
+	return <div>{isBan() && <div className="pixel-font">{props.chan.name}</div>}</div>;
 };
 
 export default ChanBanItem;

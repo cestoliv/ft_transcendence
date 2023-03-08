@@ -7,12 +7,7 @@ type SearchSettingsProps = {
 	setPoints: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const SearchSettings = ({
-	setVisibility,
-	setMode,
-	setTime,
-	setPoints,
-}: SearchSettingsProps) => {
+export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: SearchSettingsProps) => {
 	const visibilityOptions = [
 		{ value: 'public', label: 'Public' },
 		{ value: 'private', label: 'Private' },
@@ -37,9 +32,7 @@ export const SearchSettings = ({
 			<label htmlFor="visibility_select">Visibility</label>
 			<div className="nes-select is-dark">
 				<select
-					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-						setVisibility(e.target.value)
-					}
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setVisibility(e.target.value)}
 					required
 					id="visibility_select"
 				>
@@ -55,9 +48,7 @@ export const SearchSettings = ({
 			<label htmlFor="mode_select">Mode</label>
 			<div className="nes-select is-dark">
 				<select
-					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-						setMode(e.target.value)
-					}
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value)}
 					required
 					id="mode_select"
 				>
@@ -74,9 +65,7 @@ export const SearchSettings = ({
 			<label htmlFor="time-select">Time</label>
 			<div className="nes-select is-dark">
 				<select
-					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-						setTime(e.target.value)
-					}
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTime(e.target.value)}
 					required
 					id="time_select"
 				>
@@ -93,9 +82,7 @@ export const SearchSettings = ({
 			<label htmlFor="points_select">Points</label>
 			<div className="nes-select is-dark">
 				<select
-					onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-						setPoints(e.target.value)
-					}
+					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPoints(e.target.value)}
 					required
 					id="points_select"
 				>

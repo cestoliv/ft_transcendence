@@ -18,8 +18,8 @@ type PersonListProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
-	refuse_friend_request : (inviter_id : number) => void;
-	banFriend : (banTime : string, friend_id : number) => void;
+	refuse_friend_request: (inviter_id: number) => void;
+	banFriend: (banTime: string, friend_id: number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
 };
@@ -33,8 +33,7 @@ export const FriendsList = (props: PersonListProps) => {
 	const CloseListFriendRequest = () => setOpenListFriendRequest(false);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'add-friend-input')
-			setAddFriendValue(event.target.value);
+		if (event.target.name === 'add-friend-input') setAddFriendValue(event.target.value);
 	};
 
 	const handleAddFriendSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -58,11 +57,7 @@ export const FriendsList = (props: PersonListProps) => {
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
-			<span
-				className="close-friend-list"
-				id="close-friend-list"
-				onClick={closeFriendList}
-			>
+			<span className="close-friend-list" id="close-friend-list" onClick={closeFriendList}>
 				close
 			</span>
 			<div className="friendsList-wrapper">
@@ -80,10 +75,7 @@ export const FriendsList = (props: PersonListProps) => {
 					))}
 			</div>
 			<div className="add-accept-friend">
-				<button
-					className="en-attente-button nes-btn is-primary"
-					onClick={OpenListFriendRequest}
-				>
+				<button className="en-attente-button nes-btn is-primary" onClick={OpenListFriendRequest}>
 					En attente
 				</button>
 				<Modal
@@ -108,10 +100,7 @@ export const FriendsList = (props: PersonListProps) => {
 							))}
 					</Box>
 				</Modal>
-				<form
-					className="add-friend-form"
-					onSubmit={handleAddFriendSubmit}
-				>
+				<form className="add-friend-form" onSubmit={handleAddFriendSubmit}>
 					<input
 						value={addFriendValue}
 						name="add-friend-input"

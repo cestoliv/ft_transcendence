@@ -1,14 +1,13 @@
-import React, { ChangeEvent, useEffect, useContext } from 'react';
-import { useState } from 'react';
+import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import { message } from 'antd';
+import { message, Badge } from 'antd';
 
 import { IChannel, IUser, IUserFriend } from '../interfaces';
 
 import { SocketContext } from '../context/socket';
 
-import Checkbox from '@mui/material/Checkbox';
+import Modal from '@mui/material/Modal';
 
 type SettingsProps = {
 	user_me: IUser;
@@ -17,6 +16,10 @@ type SettingsProps = {
 
 export const Settings = (props: SettingsProps) => {
 	const socket = useContext(SocketContext);
+
+	const [isOpenPictureModal, setIsOpenPictureModal] = useState(false);
+	const openPictureModalHandler = () => setIsOpenPictureModal(true);
+	const closePictureModalHandler = () => setIsOpenPictureModal(false);
 
 	const [displayname, setDisplayName] = useState<string>('');
 
@@ -57,15 +60,12 @@ export const Settings = (props: SettingsProps) => {
 	};
 
 	const submit42ProfilPicture = async (event: any) => {
-		const response = await fetch(
-			'http://api.transcendence.local/api/v1/users/profile-picture/fetch42',
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${props.auth.bearer}`,
-				},
+		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${props.auth.bearer}`,
 			},
-		);
+		});
 		if (response.ok) {
 			message.success('Profil Picture uploaded');
 		}
@@ -73,21 +73,18 @@ export const Settings = (props: SettingsProps) => {
 
 	const submitRandomProfilPicture = async (event: any) => {
 		event.preventDefault();
-		const response = await fetch(
-			'http://api.transcendence.local/api/v1/users/profile-picture/generate',
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${props.auth.bearer}`,
-				},
+		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/generate', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${props.auth.bearer}`,
 			},
-		);
+		});
 		if (response.ok) {
 			message.success('Profil Picture uploaded');
 		}
 	};
 
-	  const changeSettings = (event: any): void => {
+	const changeSettings = (event: any): void => {
 		event?.preventDefault();
 		socket.emit(
 			'users_update',
@@ -99,7 +96,7 @@ export const Settings = (props: SettingsProps) => {
 				if (data.messages) alert(data.messages);
 				else {
 					message.success('Username uploaded');
-					setDisplayName("");
+					setDisplayName('');
 				}
 			},
 		);
@@ -108,47 +105,45 @@ export const Settings = (props: SettingsProps) => {
 	return (
 		<div className="settings-wrapper">
 			<div className="settings">
-				<h3>Profil Picture</h3>
-				<button
-					className="profilPicture-button"
-					onClick={submit42ProfilPicture}
-				>
-					42 Profil Picture
-				</button>
-				<button
-					className="profilPicture-button"
-					onClick={submitRandomProfilPicture}
-				>
-					Random Profil Picture
-				</button>
-				<form
-					className="form-file-profil-picture"
-					onSubmit={submitProfilPicture}
-				>
-					<input
-						type="file"
-						name="file"
-						id="file"
-						className="inputfile"
-						onChange={handleFileChange}
-					/>
-					<label htmlFor="file">{fileName || 'Choose a file'}</label>
-					<input
-						type="submit"
-						className="form-file-profil-picture-submit-button"
-					/>
-				</form>
-				<h3>Name</h3>
+				<Badge onClick={openPictureModalHandler} count={<img className="edit-icon" src="https://static.thenounproject.com/png/2758640-200.png" />}>
+					<img className="profile-picture" src={props.user_me.profile_picture} />
+				</Badge>
+				<div className="user-name">
+					<p>{props.user_me.displayName}</p>
+					<p>@{props.user_me.username}</p>
+				</div>
+				<Modal open={isOpenPictureModal} onClose={closePictureModalHandler}>
+					<div className="modal-picture modal">
+						<button className="profilPicture-button" onClick={submit42ProfilPicture}>
+							42 Profil Picture
+						</button>
+						<button className="profilPicture-button" onClick={submitRandomProfilPicture}>
+							Random Profil Picture
+						</button>
+						<form className="form-file-profil-picture" onSubmit={submitProfilPicture}>
+							<input type="file" name="file" id="file" className="inputfile" onChange={handleFileChange} />
+							<label htmlFor="file">{fileName || 'Choose a file'}</label>
+							<input type="submit" className="form-file-profil-picture-submit-button" />
+						</form>
+					</div>
+				</Modal>
+				<div className="divider"></div>
+				{/* <h3>Name</h3> */}
 				<form className="form-change-name" onSubmit={changeSettings}>
-							<input
-								type="text"
-								name="name"
-								placeholder="change display name"
-								value={displayname}
-								className="input-change-name"
-								onChange={handleChange}
-							/>
+					<input
+						type="text"
+						name="name"
+						placeholder="change display name"
+						value={displayname}
+						className="nes-input is-dark"
+						onChange={handleChange}
+					/>
 				</form>
+				<div className="divider"></div>
+				<label>
+					<input type="checkbox" class="nes-checkbox is-dark" />
+					<span>2FA</span>
+				</label>
 			</div>
 		</div>
 	);

@@ -39,16 +39,13 @@ const Login = (props: ILogin) => {
 			message.error('Please enter a username');
 			return;
 		}
-		const response = await fetch(
-			`${process.env.REACT_APP_API_URL}/auth/register`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ username: newUsername }),
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		);
+			body: JSON.stringify({ username: newUsername }),
+		});
 		const data = await response.json();
 		if (response.status === 201) {
 			message.success('Account created, you can now log in');
@@ -56,20 +53,17 @@ const Login = (props: ILogin) => {
 			setTotpUrl(data.url);
 			setNewUsername('');
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 	};
 
 	const handleOtp = async () => {
-		const response = await fetch(
-			`${process.env.REACT_APP_API_URL}/auth/totp/${otpCode}`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${auth.bearer}`,
-				},
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/${otpCode}`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${auth.bearer}`,
 			},
-		);
+		});
 
 		const data = await response.json();
 
@@ -79,10 +73,10 @@ const Login = (props: ILogin) => {
 				sameSite: 'strict',
 				domain: process.env.REACT_APP_COOKIE_DOMAIN,
 			});
-			setAuth({ bearer: data.bearer, otp_ok: true });
+			setAuth({ bearer: data.bearer, otp_ok: true, user: auth.user });
 			window.location.replace('/');
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 	};
 
@@ -96,15 +90,12 @@ const Login = (props: ILogin) => {
 			message.error('Please enter a username');
 			return;
 		}
-		const response = await fetch(
-			`${process.env.REACT_APP_API_URL}/auth/login?username=${username}`,
-			{
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login?username=${username}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		);
+		});
 		const data = await response.json();
 		props.setCookie('bearer', data.bearer, {
 			path: '/',
@@ -112,9 +103,13 @@ const Login = (props: ILogin) => {
 			domain: process.env.REACT_APP_COOKIE_DOMAIN,
 		});
 		if (response.status === 200) {
-			setAuth({ bearer: data.bearer });
+			setAuth({
+				bearer: data.bearer,
+				otp_ok: false,
+				user: null,
+			});
 		} else {
-			message.error(data.message);
+			message.error(data.error);
 		}
 		setConfirmLoading(false);
 		console.log(data);

@@ -53,16 +53,10 @@ export const ChatMessages = (props: ChatMessagesProps) => {
 					.map((message, index) => (
 						<div key={index} className="display-message">
 							<div className="message-name-date">
-								<p className="message-name pixel-font">
-									{message?.sender.username}
-								</p>
-								<p className="message-date pixel-font">
-									{formatDate(new Date(message.sentAt))}
-								</p>
+								<p className="message-name pixel-font">{message?.sender.username}</p>
+								<p className="message-date pixel-font">{formatDate(new Date(message.sentAt))}</p>
 							</div>
-							<p className="message pixel-font">
-								{message?.message}
-							</p>
+							<p className="message pixel-font">{message?.message}</p>
 						</div>
 					))}
 		</div>

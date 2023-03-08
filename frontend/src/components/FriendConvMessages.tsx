@@ -48,10 +48,8 @@ export const FriendConvMessages = (props: FriendConvMessagesProps) => {
 				props.allPrivateConvMessages
 					.filter((message) => {
 						if (
-							(props.chan_id === message.receiverId &&
-								message.senderId === props.user_me.id) ||
-							(props.chan_id === message.senderId &&
-								message.receiverId === props.user_me.id)
+							(props.chan_id === message.receiverId && message.senderId === props.user_me.id) ||
+							(props.chan_id === message.senderId && message.receiverId === props.user_me.id)
 						)
 							return true;
 						return false;
@@ -59,16 +57,10 @@ export const FriendConvMessages = (props: FriendConvMessagesProps) => {
 					.map((message, index) => (
 						<div key={index} className="display-message">
 							<div className="message-name-date">
-								<p className="message-name pixel-font">
-									{message?.sender.username}
-								</p>
-								<p className="message-date pixel-font">
-									{formatDate(new Date(message.sentAt))}
-								</p>
+								<p className="message-name pixel-font">{message?.sender.username}</p>
+								<p className="message-date pixel-font">{formatDate(new Date(message.sentAt))}</p>
 							</div>
-							<p className="message pixel-font">
-								{message?.message}
-							</p>
+							<p className="message pixel-font">{message?.message}</p>
 						</div>
 					))}
 		</div>

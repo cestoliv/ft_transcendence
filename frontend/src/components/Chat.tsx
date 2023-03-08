@@ -76,10 +76,42 @@ export default function Chat(props: ChatProps) {
 	return (
 		<div className="chat-wrapper">
 			<div className="chat-nav chat-nav-chan" id="chat-nav">
-				{props.activeChan ? <p className="chan-name">{props.activeChan.name} <span className="chan-code">#{props.activeChan.code}</span></p> : <p>Unknown channel</p>}
+				{props.activeChan ? (
+					<p className="chan-name">
+						{props.activeChan.name} <span className="chan-code">#{props.activeChan.code}</span>
+					</p>
+				) : (
+					<p>Unknown channel</p>
+				)}
 				{isOwner() && (
 					<div className="chat-nav-right">
-						<Modal open={OpenSettingsChanModal} onClose={handleCloseSettingsChanModal}
+						{/* <div className="wrapper-settings hidden pixel-font">
+							<Checkbox
+								handleChange={isChecked}
+								isChecked={
+									props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
+										? false
+										: true
+								}
+								label="Private"
+							/>
+							<form className="mpd-form" onSubmit={addPassWord}>
+								<label htmlFor="mdp" id="mdp-label" className='pixel-font'>
+									mdp :
+								</label>
+								<input
+									className='change-password-input pixel-font'
+									name='password-input'
+									type="text"
+									id="mdp"
+									value={passWord}
+									onChange={handleChange}
+								/>
+							</form>
+						</div> */}
+						<Modal
+							open={OpenSettingsChanModal}
+							onClose={handleCloseSettingsChanModal}
 							aria-labelledby="modal-modal-title"
 							aria-describedby="modal-modal-description"
 						>
@@ -87,16 +119,24 @@ export default function Chat(props: ChatProps) {
 								<h2 id="modal-modal-title">Settings</h2>
 								<div className="divider"></div>
 								<label>
-									<input type="checkbox" className="nes-checkbox is-dark" onChange={isChecked} checked={props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
-										? false
-										: true} />
+									<input
+										type="checkbox"
+										className="nes-checkbox is-dark"
+										onChange={isChecked}
+										checked={
+											props.activeChan?.visibility === 'public' ||
+											props.activeChan?.visibility === 'password-protected'
+												? false
+												: true
+										}
+									/>
 									<span>Private</span>
 								</label>
 								<form className="mpd-form" onSubmit={addPassWord}>
 									<input
-										className='nes-input is-dark'
-										placeholder='Password'
-										name='password-input'
+										className="nes-input is-dark"
+										placeholder="Password"
+										name="password-input"
 										type="text"
 										id="mdp"
 										value={passWord}
@@ -105,7 +145,11 @@ export default function Chat(props: ChatProps) {
 								</form>
 							</div>
 						</Modal>
-						<img onClick={toggleHidden} src="https://static.thenounproject.com/png/2758640-200.png" className='settings-icon' />
+						<img
+							onClick={toggleHidden}
+							src="https://static.thenounproject.com/png/2758640-200.png"
+							className="settings-icon"
+						/>
 					</div>
 				)}
 			</div>
@@ -120,7 +164,12 @@ export default function Chat(props: ChatProps) {
 					onChange={handleChange}
 					required
 				/>
-				<img src="https://cdn-icons-png.flaticon.com/512/408/408161.png" className="send-button" alt="Send" onClick={submitMessage} />
+				<img
+					src="https://cdn-icons-png.flaticon.com/512/408/408161.png"
+					className="send-button"
+					alt="Send"
+					onClick={submitMessage}
+				/>
 			</form>
 		</div>
 	);

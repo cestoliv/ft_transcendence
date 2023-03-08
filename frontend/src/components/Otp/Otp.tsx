@@ -21,15 +21,12 @@ const Otp = (props: IOtp) => {
 		// 	props.setCookie,
 		// 	props.removeCookie,
 		// );
-		const response = await fetch(
-			`${process.env.REACT_APP_API_URL}/auth/totp/${totp}`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${auth.bearer}`,
-				},
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/${totp}`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${auth.bearer}`,
 			},
-		);
+		});
 
 		const data = await response.json();
 		//console.log(data);
@@ -49,8 +46,7 @@ const Otp = (props: IOtp) => {
 		} else {
 			// This will bring the user back to the login page
 			props.removeCookie('bearer');
-			if (auth.bearer !== null || auth.otp_ok !== false)
-				setAuth({ bearer: null, otp_ok: false });
+			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			console.error(data);
 		}
 	};

@@ -46,6 +46,7 @@ export interface IUserFriend {
 export interface IAuth {
 	bearer: string | null;
 	otp_ok: boolean;
+	user: IUser | null;
 }
 
 export interface IChannel {

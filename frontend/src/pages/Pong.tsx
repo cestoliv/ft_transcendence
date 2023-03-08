@@ -1,11 +1,4 @@
-import React, {
-	useRef,
-	useEffect,
-	useState,
-	useContext,
-	useCallback,
-	useDebugValue,
-} from 'react';
+import React, { useRef, useEffect, useState, useContext, useCallback, useDebugValue } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import Modal from '@mui/material/Modal';
@@ -30,12 +23,8 @@ const Pong: React.FC = () => {
 	// game var
 
 	const [racketHeight, setRacketHeight] = useState(canvasHeight / 6);
-	const [leftRacketY, setLeftRacketY] = useState(
-		canvasHeight / 2 - racketHeight / 2,
-	);
-	const [rightRacketY, setRightRacketY] = useState(
-		canvasHeight / 2 - racketHeight / 2,
-	);
+	const [leftRacketY, setLeftRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
+	const [rightRacketY, setRightRacketY] = useState(canvasHeight / 2 - racketHeight / 2);
 
 	const [ballX, setBallX] = useState(canvasWidth / 2);
 	const [ballY, setBallY] = useState(canvasHeight / 2);
@@ -87,9 +76,7 @@ const Pong: React.FC = () => {
 
 	/* Sockets */
 	// const [isHost, setIsHost] = useState<boolean | undefined>(undefined);
-	const [isHost, setIsHost, setIsHostCallback] = useStateCallback<
-		boolean | undefined
-	>(undefined);
+	const [isHost, setIsHost, setIsHostCallback] = useStateCallback<boolean | undefined>(undefined);
 
 	// Racket move
 	useEffect(() => {
@@ -112,14 +99,10 @@ const Pong: React.FC = () => {
 		if (gameStarted && isHost === undefined)
 			setIsHostCallback(true, (newState) => {
 				console.log('game started', isHost, newState);
-				socket.emit(
-					'games_start',
-					{ started: gameStarted },
-					(data: any) => {
-						console.log(data);
-						setGameStarted(data.started);
-					},
-				);
+				socket.emit('games_start', { started: gameStarted }, (data: any) => {
+					console.log(data);
+					setGameStarted(data.started);
+				});
 			});
 	}, [gameStarted]);
 
@@ -179,16 +162,7 @@ const Pong: React.FC = () => {
 
 	useEffect(() => {
 		draw();
-	}, [
-		leftRacketY,
-		rightRacketY,
-		ballX,
-		ballY,
-		gameStarted,
-		canvasHeight,
-		canvasWidth,
-		racketHeight,
-	]);
+	}, [leftRacketY, rightRacketY, ballX, ballY, gameStarted, canvasHeight, canvasWidth, racketHeight]);
 
 	useEffect(() => {
 		let animationId: any;
@@ -244,10 +218,7 @@ const Pong: React.FC = () => {
 				}
 			}
 			// Rebounds on top and bottom
-			if (
-				ballY + ballSpeedY + 5 > canvasHeight ||
-				ballY + ballSpeedY + 5 < 0
-			) {
+			if (ballY + ballSpeedY + 5 > canvasHeight || ballY + ballSpeedY + 5 < 0) {
 				setBallSpeedY(ballSpeedY * -1);
 			}
 			// goal
@@ -270,16 +241,7 @@ const Pong: React.FC = () => {
 		if (gameStarted && !gameEnd) {
 			animationId = window.requestAnimationFrame(gameLoop);
 		}
-	}, [
-		gameStarted,
-		gameEnd,
-		rightRacketY,
-		leftRacketY,
-		ballX,
-		ballY,
-		ballSpeedX,
-		ballSpeedY,
-	]);
+	}, [gameStarted, gameEnd, rightRacketY, leftRacketY, ballX, ballY, ballSpeedX, ballSpeedY]);
 
 	// useEffect(() => {
 	// 	if (gameStarted && !gameEnd) {
@@ -300,17 +262,13 @@ const Pong: React.FC = () => {
 				setRightRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 40:
-				setRightRacketY((prevY) =>
-					Math.min(canvasHeight - racketHeight, prevY + 20),
-				);
+				setRightRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
 				break;
 			case 90:
 				setLeftRacketY((prevY) => Math.max(0, prevY - 20));
 				break;
 			case 83:
-				setLeftRacketY((prevY) =>
-					Math.min(canvasHeight - racketHeight, prevY + 20),
-				);
+				setLeftRacketY((prevY) => Math.min(canvasHeight - racketHeight, prevY + 20));
 				break;
 			default:
 				break;
@@ -353,20 +311,13 @@ const Pong: React.FC = () => {
 	return (
 		<div className="pong-wrapper">
 			{renderRedirect()}
-			<Modal
-				open={open}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
+			<Modal open={open} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
 				<Box className="end-game-modal">
 					<h1>Score</h1>
 					<h3>
 						hadrien {leftScore} - {rightScore} Olivier
 					</h3>
-					<button
-						className="redirect-game-button"
-						onClick={handleRedirect}
-					>
+					<button className="redirect-game-button" onClick={handleRedirect}>
 						Continuer
 					</button>
 				</Box>

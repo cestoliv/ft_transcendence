@@ -23,10 +23,8 @@ export default function FriendConv(props: FriendConvProps) {
 	const [talkTo, setTalkto] = useState<IUser>();
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'password-input')
-			setPassWord(event.target.value);
-		if (event.target.name === 'message-input')
-			setMessage(event.target.value);
+		if (event.target.name === 'password-input') setPassWord(event.target.value);
+		if (event.target.name === 'message-input') setMessage(event.target.value);
 	};
 
 	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
