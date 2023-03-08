@@ -15,11 +15,8 @@ type ChanListProps = {
 };
 
 export const ChanList = (props: ChanListProps) => {
-	const socket = useContext(SocketContext);
 
-	const [chanList, setChanList] = useState<any>([]);
-
-	const closeChanList = (event: any): void => {
+	const closeChanList = (): void => {
 		const sidenav = document.getElementById('chan-list');
 		sidenav?.classList.remove('active-chan-list');
 

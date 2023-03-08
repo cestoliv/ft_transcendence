@@ -19,7 +19,6 @@ type ChansInvProps = {
 };
 
 export const ChansInv = (props: ChansInvProps) => {
-	const socket = useContext(SocketContext);
 
 	const handleJoinClick = () => {
 		props.chanListJoin(props.chan?.code);

@@ -90,7 +90,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 
 	useEffect(() => {
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			setChanJoined(data);
+			setChanJoined(data as IChannel[]);
 		});
 	}, [props.chanList]);
 

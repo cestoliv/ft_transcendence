@@ -86,9 +86,9 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	useEffect(() => {
-		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
+		socket.emit('users_get', { id: props.user_me.id }, (data: IUser) => {
 			console.log(data);
-			setUser(data);
+			setUser(data as IUser);
 		});
 	}, []);
 
@@ -105,7 +105,7 @@ export default function Friends(props: FriendsProps) {
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-					else setChanList((prevChanList) => [...prevChanList, data]);
+					else setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 				},
 			);
 			setChanName('');
@@ -121,7 +121,7 @@ export default function Friends(props: FriendsProps) {
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
-					else setChanList((prevChanList) => [...prevChanList, data]);
+					else setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 				},
 			);
 			setJoinChanName('');
@@ -160,7 +160,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else setChanList((prevChanList) => [...prevChanList, data]);
+				else setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 			},
 		);
 	};
@@ -181,7 +181,7 @@ export default function Friends(props: FriendsProps) {
 						alert(data.messages);
 						reject(new Error(data.messages));
 					} else {
-						setChanList((prevChanList) => [...prevChanList, data]);
+						setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 						resolve(data);
 					}
 				},
@@ -210,7 +210,7 @@ export default function Friends(props: FriendsProps) {
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
 							setChanList(updatedChanList);
-							setActiveChan(data);
+							setActiveChan(data as IChannel);
 						}
 					}
 				},
@@ -236,7 +236,7 @@ export default function Friends(props: FriendsProps) {
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
 							setChanList(updatedChanList);
-							setActiveChan(data);
+							setActiveChan(data as IChannel);
 						}
 					}
 				},
@@ -301,7 +301,7 @@ export default function Friends(props: FriendsProps) {
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
 							setChanList(updatedChanList);
-							setActiveChan(data);
+							setActiveChan(data as IChannel);
 						}
 					}
 				},
@@ -326,7 +326,7 @@ export default function Friends(props: FriendsProps) {
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
 							setChanList(updatedChanList);
-							setActiveChan(data);
+							setActiveChan(data as IChannel);
 						}
 					}
 				},
@@ -355,8 +355,8 @@ export default function Friends(props: FriendsProps) {
 			(data: any) => {
 				if (data.messages) alert(data.messages);
 				else {
-					setFriends((prevFriends) => [...prevFriends, data.inviter]);
-					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId)));
+					setFriends((prevFriends) => [...prevFriends, data.inviter as IUser]);
+					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId as number)));
 				} 
 			},
 		);
@@ -371,7 +371,7 @@ export default function Friends(props: FriendsProps) {
 			(data: any) => {
 				if (data.messages) alert(data.messages);
 				else {
-					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId)));
+					setFriendOf((prevList) => prevList.filter((item) => (item.inviteeId !== data.inviteeId as number)));
 				} 
 			},
 		);
@@ -433,7 +433,7 @@ export default function Friends(props: FriendsProps) {
 					id: parseInt(newId),
 				},
 				(data: any) => {
-					setActiveChan(data);
+					setActiveChan(data as IChannel);
 				},
 			);
 			setActivConvId(parseInt(newId));
@@ -481,13 +481,13 @@ export default function Friends(props: FriendsProps) {
 	socket.off('channels_join'); // Unbind previous event
 	socket.on('channels_join', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		const index = chanList.findIndex((channel) => channel.id === data.id as number);
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
@@ -495,25 +495,45 @@ export default function Friends(props: FriendsProps) {
 	socket.off('channels_leave'); // Unbind previous event
 	socket.on('channels_leave', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		const index = chanList.findIndex((channel) => channel.id === data.id as number);
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
 
 	socket.off('channels_addAdmin'); // Unbind previous event
 	socket.on('channels_addAdmin', (data: any) => {
-		if (data.id === activeChan?.id) setActiveChan(data);
+		if (data.id === activeChan?.id) setActiveChan(data as IChannel);
+
+		const index = chanList.findIndex((channel) => channel.id === data.id as number);
+
+		if (index !== -1) {
+			let updatedChanList: IChannel[];
+			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+			updatedChanList = [...chanList];
+			updatedChanList[index] = data as IChannel;
+			setChanList(updatedChanList);
+		}
 	});
 
 	socket.off('channels_removeAdmin'); // Unbind previous event
 	socket.on('channels_removeAdmin', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
+
+		const index = chanList.findIndex((channel) => channel.id === data.id as number);
+
+		if (index !== -1) {
+			let updatedChanList: IChannel[];
+			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+			updatedChanList = [...chanList];
+			updatedChanList[index] = data as IChannel;
+			setChanList(updatedChanList);
+		}
 	});
 
 	socket.off('channels_banUser'); // Unbind previous event
@@ -526,11 +546,11 @@ export default function Friends(props: FriendsProps) {
 			setActiveChan(newActiveChan);
 		}
 		const index = chanList.findIndex(
-			(channel) => channel.id === data.channelId,
+			(channel) => channel.id === data.channelId as number,
 		);
 
 		if (data.userId === user?.id) {
-			setChanList((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+			setChanList((prevList) => prevList.filter((chan) => chan.id !== data.channelId as number));
 			if (activeChan?.id === data.channelId)
 			{
 				setActivConvId(-1);
@@ -542,7 +562,7 @@ export default function Friends(props: FriendsProps) {
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			const newMembers = updatedChanList[index].members.filter(
-				(member) => member.id !== data.userId,
+				(member) => member.id !== data.userId as number,
 			);
 			updatedChanList[index].members = newMembers;
 			setChanList(updatedChanList);
@@ -552,20 +572,20 @@ export default function Friends(props: FriendsProps) {
 	socket.off('channels_update'); // Unbind previous event
 	socket.on('channels_update', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		const index = chanList.findIndex((channel) => channel.id === data.id as number);
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
 
 	socket.off('channels_message'); // Unbind previous event
 	socket.on('channels_message', (data: any) => {
-		setAllChanMessages((prevMessages) => [data, ...prevMessages]);
+		setAllChanMessages((prevMessages) => [data as IChannelMessage, ...prevMessages]);
 	});
 
 	// end socket.on channel
@@ -574,36 +594,36 @@ export default function Friends(props: FriendsProps) {
 
 	socket.off('users_update'); // Unbind previous event
 	socket.on('users_update', (data: any) => {
-		const index = friends.findIndex(friend => friend.id === data.id);
+		const index = friends.findIndex(friend => friend.id === data.id as number);
 
 		if (index !== -1) {
 			let updatedFriendList: IUser[];
 
 			updatedFriendList = [...friends];
-			updatedFriendList[index] = data;
+			updatedFriendList[index] = data as IUser;
 			setFriends(updatedFriendList);
 		}
 	});
 
 	socket.off('users_friendshipInvitation'); // Unbind previous event
 	socket.on('users_friendshipInvitation', (data: any) => {
-		setFriendOf((prevList) => [...prevList, data]);
+		setFriendOf((prevList) => [...prevList, data as IUserFriend]);
 	});
 
 	socket.off('users_friendshipAccepted'); // Unbind previous event
 	socket.on('users_friendshipAccepted', (data: any) => {
-		setFriends((prevList) => [...prevList, data.invitee]);
+		setFriends((prevList) => [...prevList, data.invitee as IUser]);
 	});
 
 	socket.off('users_friendshipRemoved'); // Unbind previous event
 	socket.on('users_friendshipRemoved', (data: any) => {
-		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.invitee.id)));
-		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.inviter.id)));
+		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.invitee.id as number)));
+		setFriends((prevList) => prevList.filter((friend) => (friend.id !== data.inviter.id as number)));
 	});
 
 	socket.off('users_banned'); // Unbind previous event
 	socket.on('users_banned', (data: any) => {
-		setFriends((prevList) => prevList.filter((user) => user.id !== data.userId));
+		setFriends((prevList) => prevList.filter((user) => user.id !== data.userId as number));
 	});	
 
 	// end socket.on user
@@ -613,7 +633,7 @@ export default function Friends(props: FriendsProps) {
 		console.log('setAllChanMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			const messagesFromAllChannels: any[] = []; // variable temporaire pour stocker les messages
+			const messagesFromAllChannels: IChannelMessage[] = []; // variable temporaire pour stocker les messages
 			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "messagesFromAllChannels"
 			data.forEach((channel: any) => {
 				socket.emit(
@@ -624,7 +644,7 @@ export default function Friends(props: FriendsProps) {
 							alert(messages.errors);
 						} else {
 							// Ajouter les messages du channel à "messagesFromAllChannels"
-							messages.forEach((message: any) => {
+							messages.forEach((message: IChannelMessage) => {
 								messagesFromAllChannels.push(message);
 							});
 						}
@@ -639,15 +659,15 @@ export default function Friends(props: FriendsProps) {
 	socket.off('users_message'); // Unbind previous event
 	socket.on('users_message', (data: any) => {
 		console.log('Socket users_message:');
-		setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
-		message.info(`Message receive from ${data.message.sender.username}`);
+		setAllPrivateConvMessages((prevMessages) => [data.message as IUserMessage, ...prevMessages]);
+		message.info(`Message receive from ${data.message.sender.username as string}`);
 	});
 
 	useEffect(() => {
 		console.log('AllPrivateConvMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-			const messagesFromAllConversations: any[] = []; // variable temporaire pour stocker les messages
+			const messagesFromAllConversations: IUserMessage[] = []; // variable temporaire pour stocker les messages
 			// Pour chaque conversation privée, récupérer les messages et les ajouter à "messagesFromAllConversations"
 			data.friends?.forEach((friend: any) => {
 				// console.log(channel);
@@ -660,7 +680,7 @@ export default function Friends(props: FriendsProps) {
 						} else {
 							// Ajouter les messages de la conversation à "messagesFromAllConversations"
 							if (messages) {
-								messages.forEach((message: any) => {
+								messages.forEach((message: IUserMessage) => {
 									messagesFromAllConversations.push(message);
 								});
 							}
@@ -704,8 +724,8 @@ export default function Friends(props: FriendsProps) {
 			(data: any) => {
 				if (data.messages) alert(data.messages);
 				else {
-					setFriendOf(data.friendOf);
-					setFriends(data.friends);
+					setFriendOf(data.friendOf as IUserFriend[]);
+					setFriends(data.friends as IUser[]);
 				}
 			},
 		);

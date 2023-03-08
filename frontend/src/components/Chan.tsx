@@ -14,19 +14,10 @@ type ChanProps = {
 };
 
 export const Chan = (props: ChanProps) => {
-	let [chanId, setchanId] = useState<number>(1);
 
 	const handleLeaveClick = () => {
-		props.leaveChan(parseInt(props.chan_id)); // ici, nous supposons que l'ID du canal est 'myChannelId'
+		props.leaveChan(parseInt(props.chan_id));
 	};
-
-	useEffect(() => {
-		let x;
-
-		let idchan = props.chan_id;
-		x = +idchan;
-		setchanId(x);
-	}, []);
 
 	return (
 		<div
@@ -42,7 +33,6 @@ export const Chan = (props: ChanProps) => {
 			>
 				{props.chan_name}
 			</span>
-			{/* <span className="e-icons e-medium e-close modal-e-close" onClick={handleLeaveClick}></span> */}
 			<img
 				src="https://cdn-icons-png.flaticon.com/128/391/391372.png"
 				onClick={handleLeaveClick}

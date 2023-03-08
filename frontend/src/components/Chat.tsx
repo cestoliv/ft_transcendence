@@ -32,7 +32,7 @@ export default function Chat(props: ChatProps) {
 		if (event.target.name === 'message-input') setMessage(event.target.value);
 	};
 
-	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+	const submitMessage = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLImageElement>) => {
 		event.preventDefault();
 		if (message != '') {
 			socket.emit(
@@ -45,7 +45,7 @@ export default function Chat(props: ChatProps) {
 					if (data.messages) alert(data.messages);
 					else {
 						setMessage('');
-						props.messages.unshift(data);
+						props.messages.unshift(data as IChannelMessage);
 					}
 				},
 			);
@@ -62,7 +62,7 @@ export default function Chat(props: ChatProps) {
 		props.togglePrivateChan(props.activeChan);
 	};
 
-	const toggleHidden = (event: any) => {
+	const toggleHidden = () => {
 		setOpenSettingsChanModal(true);
 		const active_elem = document.getElementsByClassName('wrapper-settings')[0];
 		if (active_elem) active_elem.classList.toggle('hidden');
@@ -76,33 +76,9 @@ export default function Chat(props: ChatProps) {
 	return (
 		<div className="chat-wrapper">
 			<div className="chat-nav chat-nav-chan" id="chat-nav">
-				{props.activeChan ? <p className="chan-name">{props.activeChan.name} <span className="chan-code">#{props.activeChan.code}</span></p> : <p>>Unknown channel</p>}
+				{props.activeChan ? <p className="chan-name">{props.activeChan.name} <span className="chan-code">#{props.activeChan.code}</span></p> : <p>Unknown channel</p>}
 				{isOwner() && (
 					<div className="chat-nav-right">
-						{/* <div className="wrapper-settings hidden pixel-font">
-							<Checkbox
-								handleChange={isChecked}
-								isChecked={
-									props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
-										? false
-										: true
-								}
-								label="Private"
-							/>
-							<form className="mpd-form" onSubmit={addPassWord}>
-								<label htmlFor="mdp" id="mdp-label" className='pixel-font'>
-									mdp :
-								</label>
-								<input
-									className='change-password-input pixel-font'
-									name='password-input'
-									type="text"
-									id="mdp"
-									value={passWord}
-									onChange={handleChange}
-								/>
-							</form>
-						</div> */}
 						<Modal open={OpenSettingsChanModal} onClose={handleCloseSettingsChanModal}
 							aria-labelledby="modal-modal-title"
 							aria-describedby="modal-modal-description"
@@ -110,15 +86,6 @@ export default function Chat(props: ChatProps) {
 							<div className="settings-modal modal">
 								<h2 id="modal-modal-title">Settings</h2>
 								<div className="divider"></div>
-								{/* <Checkbox
-									handleChange={isChecked}
-									isChecked={
-										props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
-											? false
-											: true
-									}
-									label="Private"
-								/> */}
 								<label>
 									<input type="checkbox" className="nes-checkbox is-dark" onChange={isChecked} checked={props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
 										? false
@@ -126,9 +93,6 @@ export default function Chat(props: ChatProps) {
 									<span>Private</span>
 								</label>
 								<form className="mpd-form" onSubmit={addPassWord}>
-									{/* <label htmlFor="mdp" id="mdp-label" className='pixel-font'>
-										mdp :
-									</label> */}
 									<input
 										className='nes-input is-dark'
 										placeholder='Password'

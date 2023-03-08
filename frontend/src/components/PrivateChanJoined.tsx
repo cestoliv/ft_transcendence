@@ -16,9 +16,8 @@ type PrivateChanJoinedProps = {
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
-	const socket = useContext(SocketContext);
 
-	const chanInvit = (event: any): void => {
+	const chanInvit = (): void => {
 		props.chanInvit(props.chan.id, props.userToInviteId);
 	};
 

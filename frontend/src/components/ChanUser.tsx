@@ -81,7 +81,7 @@ export const ChanUser = (props: ChanUserProps) => {
 							'users_get',
 							{ id: props.member_id },
 							(data: any) => {
-								props.chan_admins.push(data);
+								props.chan_admins.push(data as IUser);
 							},
 						);
 						CloseChanUserModal();
