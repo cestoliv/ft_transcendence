@@ -71,9 +71,13 @@ export const ChanUser = (props: ChanUserProps) => {
 				(data: any) => {
 					if (data.messages) alert(data.messages);
 					else {
-						socket.emit('users_get', { id: props.member_id }, (data: any) => {
-							props.chan_admins.push(data);
-						});
+						socket.emit(
+							'users_get',
+							{ id: props.member_id },
+							(data: any) => {
+								props.chan_admins.push(data as IUser);
+							},
+						);
 						CloseChanUserModal();
 					}
 				},

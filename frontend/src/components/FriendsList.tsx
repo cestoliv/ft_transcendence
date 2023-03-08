@@ -25,12 +25,8 @@ type PersonListProps = {
 };
 
 export const FriendsList = (props: PersonListProps) => {
-	const socket = useContext(SocketContext);
 
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
-
-	// const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
-	// const[friends, setFriends] = useState<IUser[]>([]);
 
 	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
 	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
@@ -46,7 +42,7 @@ export const FriendsList = (props: PersonListProps) => {
 		setAddFriendValue('');
 	};
 
-	const closeFriendList = (event: any): void => {
+	const closeFriendList = (): void => {
 		const sidenav = document.getElementById('priv-conv-list');
 		sidenav?.classList.remove('active-friend-list');
 
@@ -58,11 +54,6 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 		button3?.classList.remove('hidden-button');
 	};
-
-	// useEffect(() => {
-	// 	console.log("hello56");
-	// 	console.log(props.friends);
-	// }, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">

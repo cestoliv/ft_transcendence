@@ -34,7 +34,6 @@ export const Friend = (props: FriendProps) => {
 	const [muteTimeValue, setMuteTimeValue] = useState<string>('');
 
 	const [privateChanJoined, setPrivateChanJoined] = useState<IChannel[]>([]);
-	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
 	const [openInviteGameModal, setOpenInviteGameModal] = React.useState(false);
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
 	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
@@ -83,7 +82,7 @@ export const Friend = (props: FriendProps) => {
 		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
 	};
 
-	const removeFriendClick = (event: any): void => {
+	const removeFriendClick = (): void => {
 		props.removeFriend(props.user.id);
 	};
 
@@ -109,32 +108,6 @@ export const Friend = (props: FriendProps) => {
 			},
 		);
 	};
-
-	// const muteFriend = (event: any): void => {
-	// 	socket.emit(
-	// 		'users_mute',
-	// 		{
-	// 			id: props.user.id,
-	// 			until: new Date().toISOString(),
-	// 		},
-	// 		(data: any) => {
-	// 			if (data.messages) alert(data.messages);
-	// 		},
-	// 	);
-	// };
-
-	// const banFriend = (event: any): void => {
-	// 	socket.emit(
-	// 		'users_ban',
-	// 		{
-	// 			id: props.user.id,
-	// 			until: new Date().toISOString(),
-	// 		},
-	// 		(data: any) => {
-	// 			if (data.messages) alert(data.messages);
-	// 		},
-	// 	);
-	// };
 
 	const inviteFriend = () => {
 		socket.emit(
@@ -174,7 +147,9 @@ export const Friend = (props: FriendProps) => {
 			(data: any) => {
 				if (data.messages) alert(data.messages);
 				else {
-					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+					setPrivateChanJoined((prevList) =>
+						prevList.filter((chan) => chan.id !== data.channelId as number),
+					);
 				}
 			},
 		);

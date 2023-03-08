@@ -36,7 +36,7 @@ export const AllChan = (props: AllChanProps) => {
 			},
 			(data: any) => {
 				if (data.message) alert(data.errors);
-				else setChansInv((prev) => [data, ...prev]);
+				else setChansInv((prev) => [data as IChannel, ...prev]);
 			},
 		);
 	});
@@ -83,14 +83,9 @@ export const AllChan = (props: AllChanProps) => {
 			{chans?.map((chan) => (
 				<ChansBan key={chan.id} chan={chan} user_me={props.user_me} />
 			))}
-			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
-            {chans?.map((channel: IChannel) => {
-                channel.invited.map((invitedUser : IChannelInvitedUser) => {
-                    if (invitedUser.user === props.user_me)
-                      <ChansInv chan={channel} user_me={props.user_me} chanListJoin={props.chanListJoin}/>
-                });
-            })} */}
-			{!loading && <h3 className="display-chan-title pixel-font">invit chan</h3>}
+			{!loading && (
+				<h3 className="display-chan-title pixel-font">invit chan</h3>
+			)}
 			{chansInv?.map((chan) => (
 				<ChansInv
 					key={chan.id}
@@ -100,10 +95,6 @@ export const AllChan = (props: AllChanProps) => {
 					chanListJoin={props.chanListJoin}
 				/>
 			))}
-			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
-            {chans?.map(chan => (
-						  <ChansInv chan={chan} user_me={props.user_me} chanListJoin={props.chanListJoin}/>
-					  ))} */}
 		</div>
 	);
 };
