@@ -28,6 +28,8 @@ function App() {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
+	const maxRetry = 5;
+	let retry = 0;
 
 	const fetchUser = async () => {
 		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
@@ -56,23 +58,56 @@ function App() {
 		} else console.error(data);
 	};
 
-	socket.off(); // Unbind all previous events
-	socket.on('connect', () => {
-		console.log('Socket connected');
-	});
-	socket.on('disconnect', () => {
-		console.log('Socket disconnected');
-	});
-	socket.on('connect_error', (error: any) => {
-		console.log('Socket connect_error:', error);
-	});
-	socket.on('error', (error: any) => {
-		console.log('Socket error:', error);
-		if (error.code === 401) {
-			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+	useEffect(() => {
+		socket.on('connect', () => {
+			console.log('Socket connected');
+		});
+		socket.on('disconnect', () => {
+			console.log('Socket disconnected');
+		});
+		// if the user can't connect to the server after 3 tries, he will be disconnected
+		socket.on('connect_error', (error: any) => {
+			console.log('Socket connect_failed:', error);
+			if (retry < maxRetry) {
+				retry++;
+				socket.connect();
+			} else {
+				socket.disconnect();
+				setAuth({ bearer: null, otp_ok: false, user: null });
+				message.error('Connection failed');
+			}
+		});
+		// socket.on('connect_error', (error: any) => {
+		// 	console.log('Socket connect_error:', error);
+		// });
+		socket.on('error', (error: any) => {
+			console.log('Socket error:', error);
+			if (error.code === 401) {
+				// User is not connected
+				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+			}
+		});
+		socket.on('games_start', (data: any) => {
+			console.log('games_start', data);
+			setGameInfo(data);
+			navigate(`/pong/${data.id}`);
+		});
+		socket.on('game_invitation', (data: any) => {
+			console.log('game_invitation', data);
+			message.info(
+				<div className="invite-notification">
+					<p>You receive an invitation from {data.players[0].user.username}</p>
+					<button className="nes-btn" onClick={() => joinGame(data)}>
+						Join
+					</button>
+				</div>,
+				10,
+			);
+		});
+		return () => {
+			socket.off();
 		}
-	});
+	}, [])
 
 	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
@@ -85,24 +120,24 @@ function App() {
 		});
 	};
 
-	socket.off();
-	socket.on('games_start', (data: any) => {
-		console.log('games_start', data);
-		setGameInfo(data);
-		navigate(`/pong/${data.id}`);
-	});
-	socket.on('game_invitation', (data: any) => {
-		console.log('game_invitation', data);
-		message.info(
-			<div className="invite-notification">
-				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button className="nes-btn" onClick={() => joinGame(data)}>
-					Join
-				</button>
-			</div>,
-			10,
-		);
-	});
+	// socket.off();
+	// socket.on('games_start', (data: any) => {
+	// 	console.log('games_start', data);
+	// 	setGameInfo(data);
+	// 	navigate(`/pong/${data.id}`);
+	// });
+	// socket.on('game_invitation', (data: any) => {
+	// 	console.log('game_invitation', data);
+	// 	message.info(
+	// 		<div className="invite-notification">
+	// 			<p>You receive an invitation from {data.players[0].user.username}</p>
+	// 			<button className="nes-btn" onClick={() => joinGame(data)}>
+	// 				Join
+	// 			</button>
+	// 		</div>,
+	// 		10,
+	// 	);
+	// });
 
 	useEffect(() => {
 		console.log(gameInfo);
