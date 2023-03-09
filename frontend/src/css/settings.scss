@@ -35,6 +35,23 @@
 	}
 }
 
+.modal-2fa-check {
+	text-align: center;
+	h3 {
+		margin-bottom: 15px;
+	}
+	.button-wrapper {
+		display: flex;
+		justify-content: center;
+		gap: 15px;
+	}
+}
+
+.modal-picture {
+	display: flex;
+	align-items: center;
+}
+
 .settings {
 	background-color: var(--light-grey);
 	border-radius: 30px;
