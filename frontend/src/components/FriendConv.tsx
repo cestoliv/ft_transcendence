@@ -27,9 +27,12 @@ export default function FriendConv(props: FriendConvProps) {
 		if (event.target.name === 'message-input') setMessage(event.target.value);
 	};
 
-	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+	const submitMessage = async (
+		event:
+			| React.FormEvent<HTMLFormElement>
+			| React.MouseEvent<HTMLImageElement>,
+	) => {
 		event.preventDefault();
-		console.log(props.activeConvId);
 		if (message != '') {
 			socket.emit(
 				'users_sendMessage',
@@ -38,12 +41,10 @@ export default function FriendConv(props: FriendConvProps) {
 					message: message,
 				},
 				(data: any) => {
-					if (data.messages)
-					{
-						console.log("buzz");
+					if (data.messages) {
+						console.log('buzz');
 						alert(data.messages);
-					}
-					else {
+					} else {
 						props.allPrivateConvMessages.unshift(data);
 						setMessage('');
 					}

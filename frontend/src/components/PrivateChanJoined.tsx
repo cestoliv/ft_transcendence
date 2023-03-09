@@ -16,7 +16,6 @@ type PrivateChanJoinedProps = {
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
-
 	const chanInvit = (): void => {
 		props.chanInvit(props.chan.id, props.userToInviteId);
 	};

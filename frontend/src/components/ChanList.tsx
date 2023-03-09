@@ -15,7 +15,6 @@ type ChanListProps = {
 };
 
 export const ChanList = (props: ChanListProps) => {
-
 	const closeChanList = (): void => {
 		const sidenav = document.getElementById('chan-list');
 		sidenav?.classList.remove('active-chan-list');

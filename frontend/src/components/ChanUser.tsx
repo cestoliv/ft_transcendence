@@ -140,14 +140,81 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper list-item discord-background-three">
-			{amIAdmin() && props.user_me_id != props.member_id && props.member_id != props.chan_owner.id && (
-				<h3 onClick={OpenChanUserModal}>{props.username}</h3>
-			)}
-			{amIAdmin() && props.member_id === props.chan_owner.id && props.user_me_id != props.chan_owner.id && (
+			{amIAdmin() &&
+				props.user_me_id != props.member_id &&
+				props.member_id != props.chan_owner.id && (
+					<h3 onClick={OpenChanUserModal}>{props.username}</h3>
+				)}
+			{amIAdmin() &&
+				props.member_id === props.chan_owner.id &&
+				props.user_me_id != props.chan_owner.id && (
+					<h3>{props.username}</h3>
+				)}
+			{amIAdmin() && props.user_me_id === props.member_id && (
 				<h3>{props.username}</h3>
 			)}
-			{amIAdmin() && props.user_me_id === props.member_id && <h3>{props.username}</h3>}
 			{!amIAdmin() && <h3>{props.username}</h3>}
+			<Modal
+				open={openChanUserModal}
+				onClose={CloseChanUserModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="chan-user-modal background-modal">
+					{!isAdmin() && (
+						<button
+							name="button-add-admin"
+							className="infosConv-modal-buttons pixel-font discord-blue"
+							onClick={setAdmin}
+						>
+							Set Admin
+						</button>
+					)}
+					{isAdmin() && (
+						<button
+							name="button-remove-admin"
+							className="infosConv-modal-buttons pixel-font discord-blue"
+							onClick={setAdmin}
+						>
+							Remove Admin
+						</button>
+					)}
+					<button
+						name="button-ban_user"
+						className="infosConv-modal-buttons pixel-font discord-blue"
+						onClick={OpenBanTimeModal}
+					>
+						Ban
+					</button>
+					<button
+						name="button-mute_user"
+						className="infosConv-modal-buttons pixel-font discord-blue"
+						onClick={OpenMuteTimeModal}
+					>
+						Mute
+					</button>
+				</Box>
+			</Modal>
+			<Modal
+				open={openBanTimeModal}
+				onClose={closeBanTimeModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box className="ban-time-modal background-modal">
+					<form className="ban-time-form" onSubmit={banUser}>
+						<input
+							value={banTimeValue}
+							name="ban-time-input"
+							type="message"
+							placeholder="Ban time in mintues"
+							onChange={handleChangeBantime}
+							required
+							className="ban-time-input"
+						/>
+					</form>
+				</Box>
+			</Modal>
 			<Modal
 				open={openChanUserModal}
 				onClose={CloseChanUserModal}
