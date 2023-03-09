@@ -1,3 +1,9 @@
+.create-title {
+	font-size: 1.3em;
+	margin: 15px 0 25px 0;
+	text-align: center;
+}
+
 .searchGame-wrapper {
 	flex-grow: 1;
 	display: flex;
@@ -15,6 +21,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		flex-direction: column;
 		// .searchButton {
 		// 	background-color: black;
 		// 	color: white;
@@ -30,6 +37,10 @@
 		// 		border: 1px solid #3c89e8;
 		// 	}
 		// }
+
+		.available-games-wrapper {
+			margin-bottom: 25px;
+		}
 	}
 	.searchGame-settings {
 		width: 15%;

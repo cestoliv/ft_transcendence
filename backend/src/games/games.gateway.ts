@@ -3,7 +3,7 @@ import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj, isWsResponse } from 'src/utils';
-import { LocalGameInfo } from './game.class';
+import { LocalGame, LocalGameInfo } from './game.class';
 import { Game } from './entities/game.entity';
 import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 
@@ -335,6 +335,15 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.getUserStats(payload.id)
 			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_available')
+	async available(): Promise<LocalGameInfo[] | WSResponse> {
+		// Get Available games
+		return this.gamesService
+			.getAvailableGamesInfo()
+			.then((games) => games)
 			.catch((err) => exceptionToObj(err));
 	}
 }
