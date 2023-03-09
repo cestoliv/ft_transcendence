@@ -154,7 +154,9 @@ export const Friend = (props: FriendProps) => {
 				if (data.messages) alert(data.messages);
 				else {
 					setPrivateChanJoined((prevList) =>
-						prevList.filter((chan) => chan.id !== data.channelId as number),
+						prevList.filter(
+							(chan) => chan.id !== (data.channelId as number),
+						),
 					);
 				}
 			},
@@ -173,10 +175,16 @@ export const Friend = (props: FriendProps) => {
 
 	useEffect(() => {
 		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
-		if (props.chanList)
-		{
-			let privateChanNotJoined = props.chanList.filter(channel =>
-				channel.visibility === 'private' && !channel.members.some(member => member.id === props.user.id) && !channel.invited.some(member => member.userId === props.user.id)
+		if (props.chanList) {
+			let privateChanNotJoined = props.chanList.filter(
+				(channel) =>
+					channel.visibility === 'private' &&
+					!channel.members.some(
+						(member) => member.id === props.user.id,
+					) &&
+					!channel.invited.some(
+						(member) => member.userId === props.user.id,
+					),
 			);
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
@@ -219,16 +227,16 @@ export const Friend = (props: FriendProps) => {
 	};
 
 	function getBadgeStyle() {
-		if (props.user.status === "online") {
-		  return { backgroundColor: 'green' };
-		} else if (props.user.status === "offline") {
-		  return { backgroundColor: 'red' };
-		} else if (props.user.status === "playing") {
-		  return { backgroundColor: 'orange' };
+		if (props.user.status === 'online') {
+			return { backgroundColor: 'green' };
+		} else if (props.user.status === 'offline') {
+			return { backgroundColor: 'red' };
+		} else if (props.user.status === 'playing') {
+			return { backgroundColor: 'orange' };
 		} else {
-		  return {}; // Retourne un objet vide pour utiliser le style par défaut
+			return {}; // Retourne un objet vide pour utiliser le style par défaut
 		}
-	  }
+	}
 
 	return (
 		<div
@@ -238,10 +246,25 @@ export const Friend = (props: FriendProps) => {
 			onClick={props.activeConv}
 		>
 			{renderRedirect()}
-			<Badge dot={true} className="badge wrapper-active-conv" data-id={props.user.id} style={getBadgeStyle()}>
-				<img className='avatar wrapper-active-conv-img' src={props.user.profile_picture} alt="" onClick={props.activeConv}/>
+			<Badge
+				dot={true}
+				className="badge wrapper-active-conv"
+				data-id={props.user.id}
+				style={getBadgeStyle()}
+			>
+				<img
+					className="avatar wrapper-active-conv-img"
+					src={props.user.profile_picture}
+					alt=""
+					onClick={props.activeConv}
+				/>
 			</Badge>
-			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>{props.user.displayName}</span>
+			<span
+				className="wrapper-active-conv-span pixel-font"
+				onClick={props.activeConv}
+			>
+				{props.user.displayName}
+			</span>
 			<div className="friendsList-settings">
 				<img
 					src="https://static.thenounproject.com/png/2758640-200.png"
@@ -256,16 +279,48 @@ export const Friend = (props: FriendProps) => {
 				>
 					<Box className="friend-action-modal background-modal">
 						{props.user.status === 'online' && (
-							<button className='discord-blue' onClick={OpenInviteGameModal}>Inviter à jouer</button>
+							<button
+								className="discord-blue"
+								onClick={OpenInviteGameModal}
+							>
+								Inviter à jouer
+							</button>
 						)}
 						{props.user.status === 'playing' && (
-							<button className='discord-blue' onClick={showGame}>Regarder la partie</button>
+							<button className="discord-blue" onClick={showGame}>
+								Regarder la partie
+							</button>
 						)}
-						<button className='discord-blue' onClick={handleRedirect}>Profil</button>
-						<button className='discord-blue' onClick={OpenChanListModal}>Inviter channel</button>
-						<button className='discord-blue' onClick={OpenMuteTimeModal}>Mute</button>
-						<button className='discord-blue' onClick={OpenBanTimeModal}>Ban</button>
-						<button className='discord-blue' onClick={removeFriendClick}>Suprrimer</button>
+						<button
+							className="discord-blue"
+							onClick={handleRedirect}
+						>
+							Profil
+						</button>
+						<button
+							className="discord-blue"
+							onClick={OpenChanListModal}
+						>
+							Inviter channel
+						</button>
+						<button
+							className="discord-blue"
+							onClick={OpenMuteTimeModal}
+						>
+							Mute
+						</button>
+						<button
+							className="discord-blue"
+							onClick={OpenBanTimeModal}
+						>
+							Ban
+						</button>
+						<button
+							className="discord-blue"
+							onClick={removeFriendClick}
+						>
+							Suprrimer
+						</button>
 					</Box>
 				</Modal>
 				<Modal

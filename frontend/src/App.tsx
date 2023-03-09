@@ -9,7 +9,6 @@ import Menu from './components/Menu/Menu';
 import Home from './pages/Home';
 import { SocketContext } from './context/socket';
 import Friends from './pages/Friends';
-import OtherUserProfile from './pages/OtherUserProfile';
 import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';

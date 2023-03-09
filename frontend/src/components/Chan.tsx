@@ -14,7 +14,6 @@ type ChanProps = {
 };
 
 export const Chan = (props: ChanProps) => {
-
 	const handleLeaveClick = () => {
 		props.leaveChan(parseInt(props.chan_id));
 	};

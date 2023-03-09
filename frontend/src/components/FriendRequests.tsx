@@ -9,9 +9,9 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
 type FriendRequestsProps = {
-	friend_request : IUserFriend,
-    accept_friend_request : (inviter_id : number) => void;
-    refuse_friend_request : (inviter_id : number) => void;
+	friend_request: IUserFriend;
+	accept_friend_request: (inviter_id: number) => void;
+	refuse_friend_request: (inviter_id: number) => void;
 };
 
 export const FriendRequests = (props: FriendRequestsProps) => {
@@ -21,9 +21,9 @@ export const FriendRequests = (props: FriendRequestsProps) => {
 		props.accept_friend_request(props.friend_request.inviter.id);
 	};
 
-    const refuse_friend_request = (event: any): void => {
-        props.refuse_friend_request(props.friend_request.inviter.id);
-    }
+	const refuse_friend_request = (event: any): void => {
+		props.refuse_friend_request(props.friend_request.inviter.id);
+	};
 
 	return (
 		<div className="FriendRequests-wrapper modal-item">

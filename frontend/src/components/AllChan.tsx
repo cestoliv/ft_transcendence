@@ -115,10 +115,6 @@ export const AllChan = (props: AllChanProps) => {
 					chanListJoin={props.chanListJoin}
 				/>
 			))}
-			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
-            {chans?.map(chan => (
-						  <ChansInv chan={chan} user_me={props.user_me} chanListJoin={props.chanListJoin}/>
-					  ))} */}
 		</div>
 	);
 };

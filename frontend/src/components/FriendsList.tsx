@@ -18,17 +18,17 @@ type PersonListProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
 	accept_friend_request: (inviter_id: number) => void;
-	refuse_friend_request : (inviter_id : number) => void;
-	banFriend : (banTime : string, friend_id : number) => void;
+	refuse_friend_request: (inviter_id: number) => void;
+	banFriend: (banTime: string, friend_id: number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
 };
 
 export const FriendsList = (props: PersonListProps) => {
-
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
-	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
+	const [OpenLFriendRequest, setOpenListFriendRequest] =
+		React.useState(false);
 	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
 	const CloseListFriendRequest = () => setOpenListFriendRequest(false);
 
@@ -102,8 +102,12 @@ export const FriendsList = (props: PersonListProps) => {
 								<FriendRequests
 									key={friend_request.inviterId}
 									friend_request={friend_request}
-									accept_friend_request={props.accept_friend_request}
-									refuse_friend_request={props.refuse_friend_request}
+									accept_friend_request={
+										props.accept_friend_request
+									}
+									refuse_friend_request={
+										props.refuse_friend_request
+									}
 								/>
 							))}
 					</Box>
