@@ -38,11 +38,15 @@
 }
 
 .info-2fa {
+	width: 295px !important;
 	margin-top: 20px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	gap: 15px;
+	p {
+		text-align: center;
+	}
 	.title {
 		font-weight: bold;
 	}
@@ -50,6 +54,7 @@
 		font-weight: bold;
 	}
 	.code {
+		font-size: 12px;
 		font-weight: bold;
 	}
 }

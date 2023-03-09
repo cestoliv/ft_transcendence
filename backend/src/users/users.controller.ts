@@ -61,6 +61,20 @@ export class UsersController {
 	}
 
 	/*
+	 * Fetch if the 2fa is enabled for the logged in user
+	 * (Jwt guard)
+	 * @returns {boolean} true if 2fa is enable
+	 * @returns {boolean} false if 2fa is not enabled
+	 */
+	@Get('/2fa')
+	@UseGuards(JwtAuthGuard)
+	async get2fa(@Res() response, @Req() request) {
+		const user = await this.usersService.findOne(request.user.id, { withTotp: true});
+		if (!user) throw new NotFoundException('User not found');
+
+		return response.send(user.otp ? true : false);
+	}
+	/*
 	 * Fetch the 42 profile picture
 	 * (Jwt guard)
 	 */

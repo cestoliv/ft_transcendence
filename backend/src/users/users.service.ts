@@ -182,6 +182,16 @@ export class UsersService {
 		return { secret, url };
 	}
 
+	async disableTotp(user: User): Promise<void> {
+		// Update user TOTP secret
+		if(!user.id42) {
+			throw new ForbiddenException('You can\'t disable TOTP if you don\'t have a 42 account');
+		}
+		await this.update(user.id, user.id, {
+			otp: null,
+		});
+	}
+
 	async getUserFromSocket(socket: any): Promise<User> {
 		const cookie = socket.handshake.headers.cookie;
 		if (!cookie)
