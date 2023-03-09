@@ -13,6 +13,7 @@ import {
 	IUserMessage,
 	IChannelInvitedUser,
 	IChannelBannedUser,
+	ILocalGameInfo,
 } from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
@@ -33,8 +34,11 @@ export const SearchGame = (props: FriendsProps) => {
 	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	const [friends, setFriends] = useState<IUser[]>([]);
 
+	// list of available games
+	const [availableGames, setAvailableGames] = useState<ILocalGameInfo[]>([]);
+
 	// Search Filter
-	const [visibility, setVisibility] = useState('public');
+	// const [visibility, setVisibility] = useState('public');
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
 	const [points, setPoints] = useState('5');
@@ -63,12 +67,13 @@ export const SearchGame = (props: FriendsProps) => {
 				maxDuration: parseInt(time),
 				maxScore: parseInt(points),
 				mode: mode,
-				visibility: visibility,
+				visibility: 'public',
 			},
 			(data: any) => {
-				console.log(data);
+				// console.log(data);
 				if (data?.statusCode) {
-					message.error(data.message);
+					message.error(data.error);
+					console.error(data.messages);
 					return;
 				}
 				message.success('Game created');
@@ -77,30 +82,29 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
-	if (!gameInfo) {
-		console.log('gameInfo', gameInfo);
-	}
-	console.log('inMatchmaking', inMatchmaking);
-
 	const joinMatchmaking = () => {
 		socket.emit('games_joinMatchmaking', (data: any) => {
-			console.log(data);
-			console.log(gameInfo);
+			// console.log(data);
+			// console.log(gameInfo);
 			setInMatchmaking(data);
 		});
 	};
 
 	const quitGame = () => {
-		console.log(gameInfo.id);
+		if (!gameInfo || !gameInfo.id) {
+			setGameInfo(null);
+			return;
+		}
+		console.log('quit game');
 		socket.emit(
 			'games_quit',
 			{
 				id: gameInfo.id,
 			},
 			(data: any) => {
-				console.log(data);
+				// console.log(data);
 				if (data?.statusCode) {
-					message.error(data.message);
+					message.error(data.error);
 					return;
 				}
 				setGameInfo(null);
@@ -110,9 +114,9 @@ export const SearchGame = (props: FriendsProps) => {
 
 	const quitMatchmaking = () => {
 		socket.emit('games_quitMatchmaking', (data: any) => {
-			console.log(data);
+			// console.log(data);
 			if (data?.statusCode) {
-				message.error(data.message);
+				message.error(data.error);
 				return;
 			}
 			setInMatchmaking(data);
@@ -153,16 +157,13 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else
-					setFriends((prevFriends) => [...prevFriends, data.inviter]);
+				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
 			},
 		);
 		const indexToUpdate = friendOf.findIndex(
 			(friend) =>
-				(friend.inviterId === inviter_id &&
-					friend.inviteeId === user?.id) ||
-				(friend.inviterId === user?.id &&
-					friend.inviteeId === inviter_id),
+				(friend.inviterId === inviter_id && friend.inviteeId === user?.id) ||
+				(friend.inviterId === user?.id && friend.inviteeId === inviter_id),
 		);
 		if (indexToUpdate !== -1) {
 			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
@@ -189,16 +190,13 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else
-					setFriends((prevList) =>
-						prevList.filter((user) => user.id !== user_id),
-					);
+				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
 			},
 		);
 	};
 
 	const banFriend = (banTime: string, friend_id: number): void => {
-		let now = new Date();
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(banTime));
 		socket.emit(
 			'users_ban',
@@ -208,10 +206,7 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else
-					setFriends((prevList) =>
-						prevList.filter((user) => user.id !== friend_id),
-					);
+				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
 			},
 		);
 	};
@@ -242,11 +237,8 @@ export const SearchGame = (props: FriendsProps) => {
 	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-			let chanJoined: IChannel[];
-			chanJoined = data.filter((channel) =>
-				channel.members.some(
-					(member) => member.id === props.user_me.id,
-				),
+			const chanJoined = data.filter((channel) =>
+				channel.members.some((member) => member.id === props.user_me.id),
 			);
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
@@ -271,6 +263,20 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	}, []);
+
+	useEffect(() => {
+		console.log('Available games useEffect');
+		socket.emit('games_available', {}, (data: any) => {
+			if (data.statusCode) message.error(data.error);
+			else setAvailableGames(data);
+		});
+	}, []);
+
+	socket.off('games_available');
+	socket.on('games_available', (data: any) => {
+		if (data.statusCode) message.error(data.error);
+		else setAvailableGames(data);
+	});
 
 	return (
 		<div className="searchGame-wrapper">
@@ -305,20 +311,29 @@ export const SearchGame = (props: FriendsProps) => {
 						</button>
 					</div>
 				) : (
-					<div className="button-wrapper">
-						<button
-							className="searchButton nes-btn"
-							onClick={createGame}
-						>
-							Create a game
-						</button>
-						<button
-							className="searchButton nes-btn"
-							onClick={joinMatchmaking}
-						>
-							Search a game
-						</button>
-					</div>
+					<>
+						<div className="available-games-wrapper">
+							{availableGames.length > 0 ? (
+								<p>
+									<span className="nes-text is-primary">{availableGames.length}</span> games available
+								</p>
+							) : (
+								<p className="nes-text is-disabled">
+									no game available,
+									<br />
+									you should create one!
+								</p>
+							)}
+						</div>
+						<div className="button-wrapper">
+							{/* <button className="searchButton nes-btn" onClick={createGame}>
+								Create a game
+							</button> */}
+							<button className="searchButton nes-btn" onClick={joinMatchmaking}>
+								Search a game
+							</button>
+						</div>
+					</>
 				)}
 				{/* <Modal
 					open={open}
@@ -333,12 +348,7 @@ export const SearchGame = (props: FriendsProps) => {
 					</Box>
 				</Modal> */}
 			</div>
-			<SearchSettings
-				setVisibility={setVisibility}
-				setMode={setMode}
-				setTime={setTime}
-				setPoints={setPoints}
-			/>
+			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} createGame={createGame} />
 			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>

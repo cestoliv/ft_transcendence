@@ -27,18 +27,10 @@ export const FriendRequests = (props: FriendRequestsProps) => {
 
 	return (
 		<div className="FriendRequests-wrapper modal-item">
-			<span className="pixel-font">
-				{props.friend_request.inviter.username}
-			</span>
+			<span className="pixel-font">{props.friend_request.inviter.username}</span>
 			<div className="accept-refuse-friend-request">
-				<span
-					className="e-icons e-medium e-plus modal-e-plus"
-					onClick={accept_friend_requestClick}
-				></span>
-				<span
-					className="e-icons e-medium e-close modal-e-close"
-					onClick={refuse_friend_request}
-				></span>
+				<span className="e-icons e-medium e-plus modal-e-plus" onClick={accept_friend_requestClick}></span>
+				<span className="e-icons e-medium e-close modal-e-close" onClick={refuse_friend_request}></span>
 			</div>
 		</div>
 	);

@@ -16,10 +16,7 @@ type ChansOtherProps = {
 	user_me: IUser;
 	chanList: IChannel[];
 	chanListJoin: (chan_code: string | undefined) => void;
-	chanListJoinPassWord: (
-		chan_code: string | undefined,
-		psswrd: string,
-	) => Promise<any>;
+	chanListJoinPassWord: (chan_code: string | undefined, psswrd: string) => Promise<any>;
 };
 
 export const ChansOther = (props: ChansOtherProps) => {
@@ -33,24 +30,19 @@ export const ChansOther = (props: ChansOtherProps) => {
 	const closePassWordProtectedModal = () => setOpenPassWordModal(false);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'chan-password-input')
-			setPasswordValue(event.target.value);
+		if (event.target.name === 'chan-password-input') setPasswordValue(event.target.value);
 	};
 
 	const handleJoinClick = () => {
 		if (props.chan?.visibility != 'password-protected') {
 			props.chanListJoin(props.chan?.code);
-		} else if (props.chan?.visibility === 'password-protected')
-			openPassWordProtectedModal();
+		} else if (props.chan?.visibility === 'password-protected') openPassWordProtectedModal();
 	};
 
 	const handleJoinPassWordSubmit = async (event: any) => {
 		event.preventDefault();
 		try {
-			const data = await props.chanListJoinPassWord(
-				props.chan?.code,
-				passwordValue,
-			);
+			const data = await props.chanListJoinPassWord(props.chan?.code, passwordValue);
 			if (data) {
 				closePassWordProtectedModal();
 				setPasswordValue('');
@@ -70,11 +62,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 			}
 			x = 0;
 			while (x < props.chan.banned.length) {
-				if (
-					props.chan.banned[x].userId === props.user_me.id &&
-					props.chan.banned[x].until > new Date()
-				)
-					i += 1;
+				if (props.chan.banned[x].userId === props.user_me.id && props.chan.banned[x].until > new Date()) i += 1;
 				x++;
 			}
 			x = 0;
@@ -103,10 +91,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 				aria-describedby="modal-modal-description"
 			>
 				<Box className="password-chan-modal background-modal">
-					<form
-						className="chan-password-form"
-						onSubmit={handleJoinPassWordSubmit}
-					>
+					<form className="chan-password-form" onSubmit={handleJoinPassWordSubmit}>
 						<input
 							value={passwordValue}
 							name="chan-password-input"
@@ -122,10 +107,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 			{display() && (
 				<div className="chan-list-item modal-item pixel-font">
 					<span className="pixel-font">{props.chan?.name}</span>
-					<span
-						className="e-icons e-medium e-plus modal-e-plus"
-						onClick={handleJoinClick}
-					></span>
+					<span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
 				</div>
 			)}
 		</div>

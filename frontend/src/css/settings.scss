@@ -4,6 +4,52 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	.divider {
+		width: 80%;
+		margin: 15px 0;
+		background-color: #595959;
+		height: 1px;
+	}
+	.edit-icon {
+		filter: invert(1);
+		height: 20px;
+	}
+	.profile-picture {
+		width: 100px;
+		border-radius: 50%;
+		border: 1px solid white;
+		margin-bottom: 15px;
+	}
+	.user-name {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		font-size: 12px;
+		gap: 5px;
+	}
+	.form-change-name {
+		width: 70%;
+		input {
+			font-size: 8px;
+		}
+	}
+}
+
+.modal-2fa-check {
+	text-align: center;
+	h3 {
+		margin-bottom: 15px;
+	}
+	.button-wrapper {
+		display: flex;
+		justify-content: center;
+		gap: 15px;
+	}
+}
+
+.modal-picture {
+	display: flex;
+	align-items: center;
 }
 
 .settings {
@@ -94,11 +140,7 @@
 	outline: -webkit-focus-ring-color auto 5px;
 }
 
-.form-change-name {
-	background-color: red;
-	background-color: green;
-	width: 70%;
-}
+
 
 .input-change-name {
 	width: 100%;

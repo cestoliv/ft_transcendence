@@ -1,7 +1,7 @@
 .game-wrapper {
 	.pong-wrapper {
 		flex-grow: 1;
-		background-color: brown;
+		margin: 20px;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -97,6 +97,8 @@
 .canvas-wrapper {
 	margin: 0 auto;
 	overflow: hidden;
+	border: 4px solid white;
+	background-color: white;
 }
 
 .end-game-modal {

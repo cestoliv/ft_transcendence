@@ -3,16 +3,11 @@ import { IAuth, IUser, IUserFriend, IChannel } from '../interfaces';
 import { useCookies } from 'react-cookie';
 
 interface AuthContextType {
-	auth: Record<string, unknown>;
-	setAuth: (auth: Record<string, unknown>) => void;
-	user: IUser;
+	auth: IAuth;
+	setAuth: (auth: IAuth) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-	auth: {},
-	setAuth: () => {},
-	user: {} as IUser,
-});
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 interface AuthProviderProps {
 	children: ReactNode;
@@ -20,17 +15,13 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
-	const [auth, setAuth] = useState({
+	const [auth, setAuth] = useState<IAuth>({
 		bearer: cookies.bearer,
 		otp_ok: false,
-		user: {} as IUser,
-	} as IAuth);
+		user: null,
+	});
 
-	return (
-		<AuthContext.Provider value={{ auth, setAuth }}>
-			{children}
-		</AuthContext.Provider>
-	);
+	return <AuthContext.Provider value={{ auth, setAuth }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

@@ -96,7 +96,7 @@ export const Friend = (props: FriendProps) => {
 
 	const muteFriend = async (event: any) => {
 		event.preventDefault();
-		let now = new Date();
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
 		socket.emit(
 			'users_mute',

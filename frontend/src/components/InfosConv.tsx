@@ -18,12 +18,8 @@ type InfosConvProps = {
 export default function InfosConv(props: InfosConvProps) {
 	const socket = useContext(SocketContext);
 
-	const muteUser = (
-		muteTime: string,
-		chan_id: number,
-		member_id: number,
-	): Promise<any> => {
-		let now = new Date();
+	const muteUser = (muteTime: string, chan_id: number, member_id: number): Promise<any> => {
+		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(muteTime));
 		return new Promise((resolve, reject) => {
 			socket.emit(
@@ -60,11 +56,7 @@ export default function InfosConv(props: InfosConvProps) {
 
 	return (
 		<div className="i-conv-wrapper discord-background-three">
-			<span
-				className="close-infos-conv"
-				id="close-infos-conv"
-				onClick={closeInfosConv}
-			>
+			<span className="close-infos-conv" id="close-infos-conv" onClick={closeInfosConv}>
 				close
 			</span>
 			{props.activeChan && (

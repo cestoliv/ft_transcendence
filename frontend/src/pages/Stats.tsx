@@ -18,7 +18,7 @@ export const Stats = (props: StatsProps) => {
 	const [is_friend, setIs_friend] = useState(false);
 	const [is_block, setIs_block] = useState(false);
 	const [rerender, setRerender] = useState(false);
-	const rerendUseEffect: boolean = true;
+	const rerendUseEffect = true;
 	const displayScores: IScore[] = [
 		{ me: 2, op: 1, op_name: 'NOOB' },
 		{ me: 2, op: 1, op_name: 'NOOB' },
@@ -60,12 +60,7 @@ export const Stats = (props: StatsProps) => {
 	}, [rerender, rerendUseEffect]);
 
 	const initIsfriend = () => {
-		if (
-			myUser &&
-			user &&
-			user.id !== myUser.id &&
-			(myUser.friends || myUser.invitedFriends)
-		) {
+		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.friends[i].id === user.id) {
@@ -83,7 +78,7 @@ export const Stats = (props: StatsProps) => {
 	};
 	const initBlocked = () => {
 		if (myUser && user && user.id !== myUser.id && myUser.blocked) {
-			let l: number = myUser.blocked.length;
+			const l: number = myUser.blocked.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.blocked[i].id === user.id) {
 					return setIs_block(true);
@@ -172,8 +167,7 @@ export const Stats = (props: StatsProps) => {
 			);
 	};
 	const percentWinrate = () => {
-		if (user.wins + user.loses > 0)
-			return Math.trunc(100 * (user.wins / (user.loses + user.wins)));
+		if (user.wins + user.loses > 0) return Math.trunc(100 * (user.wins / (user.loses + user.wins)));
 		else return 0;
 	};
 	const onChangeFriend = () => {
@@ -306,9 +300,7 @@ export const Stats = (props: StatsProps) => {
 						<h1>Stats</h1>
 						<div className="stats-item">
 							<span>Nombre de parties</span>
-							<span className="score">
-								{user.wins + user.loses}
-							</span>
+							<span className="score">{user.wins + user.loses}</span>
 						</div>
 						<div className="stats-item">
 							<span>Gagnées</span>
@@ -364,10 +356,7 @@ export const Stats = (props: StatsProps) => {
 						id="myCheckbox"
 						checked={is_friend}
 					></input>
-					<label
-						className="addfiendlabel"
-						htmlFor="myCheckbox"
-					></label>
+					<label className="addfiendlabel" htmlFor="myCheckbox"></label>
 					<input
 						className="block"
 						type="Checkbox"
@@ -375,10 +364,7 @@ export const Stats = (props: StatsProps) => {
 						id="myblockCheckbox"
 						checked={is_block}
 					></input>
-					<label
-						className="blocklabel"
-						htmlFor="myblockCheckbox"
-					></label>
+					<label className="blocklabel" htmlFor="myblockCheckbox"></label>
 				</div>
 			</div>
 			<div className="historic-wrapper">
