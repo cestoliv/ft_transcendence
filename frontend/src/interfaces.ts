@@ -1,22 +1,53 @@
 import { SetCookie, RemoveCookie } from './types';
 
 export interface IUser {
-	id: number;
-	id42: number; // null for non-42 users
-	username: string;
-	displayName: string;
-	status: 'online' | 'offline' | 'playing';
-	elo: number;
-	invitedFriends: IUserFriend[];
-	friendOf: IUserFriend[];
-	friends: IUser[];
-	profile_picture: string;
+
+	id: number,
+	id42: number, // null for non-42 users
+	username: string,
+	displayName: string,
+	status: 'online' | 'offline' | 'playing',
+	elo: number,
+	invitedFriends: IUserFriend[],
+	friendOf: IUserFriend[],
+	friends: IUser[],
+	profile_picture: string,
+	muted: IMutedUser[],
 }
 
-export interface IScore {
-	me: number;
-	op: number;
-	op_name: string;
+export interface IMutedUser {
+	userId: number,
+	user: IUser,
+
+	mutedId: number,
+	muted: IUser,
+	until: Date
+	
+}
+
+export interface IGame {
+
+	id: number,
+	visibility: 'public' | 'private',
+	mode: 'classic' | 'hardcore',
+	maxDuration: 1 | 2 | 3;
+	maxScore: 5 | 10 | 30 | null,
+	
+	winner: IUser,
+	winnerScore: number,
+	
+	loser: IUser,
+	loserScore: number,
+}
+
+export interface IStat{
+	user: IUser,
+	stats: {
+		games: number,
+		wins: number,
+		losses: number,
+		winrate: number,
+	},
 }
 
 export interface IUserMessage {
