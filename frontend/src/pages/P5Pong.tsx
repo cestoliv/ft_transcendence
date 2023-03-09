@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Modal } from 'antd';
+import { message, Modal } from 'antd';
 import Sketch from 'react-p5';
 import p5Types from 'p5'; //Import this for typechecking and intellisense
 import { IUser, ILocalGameInfo } from '../interfaces';
@@ -9,11 +9,12 @@ import useAuth from '../hooks/useAuth';
 import { throttle } from '../utils';
 import { useNavigate } from 'react-router-dom';
 import useGameInfo from '../hooks/useGameInfo';
+import NotFound from './NotFound';
 
 const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;
-	console.log('Canvas', gameId);
 	const socket = useContext(SocketContext);
+	const navigate = useNavigate();
 	const { gameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');
@@ -22,13 +23,16 @@ const Canvas = (gameId: any) => {
 		let height = parent.clientHeight - 8; // -8 for padding
 		// Apply 1:2 ratio
 		height = Math.floor(width / 2);
-		// Cap height to 80% of the screen
-		if (height > window.innerHeight * 0.8) {
-			height = Math.floor(window.innerHeight * 0.8);
+		// Cap height to 70% of the screen
+		if (height > window.innerHeight * 0.7) {
+			height = Math.floor(window.innerHeight * 0.7);
 			width = Math.floor(height * 2);
 		}
 		return { width, height };
 	};
+
+	// If !gameInfo, go back with an error
+	if (!gameInfo) return <></>;
 
 	// Vars
 	const serverScreen = {
@@ -39,10 +43,12 @@ const Canvas = (gameId: any) => {
 	let mP5: p5Types;
 	let started = false;
 
-	// useEffect(() => {
-	// 	canvasSize = computeCanvasSize();
-	// 	console.log('Canvas size', canvasSize);
-	// }, []);
+	// Start the game at the right time
+	let delay = (gameInfo.startAt || 0) - Date.now();
+	if (delay < 0) delay = 0;
+	setTimeout(() => {
+		started = true;
+	}, delay);
 
 	const ball = {
 		// Server coordinates
@@ -211,7 +217,7 @@ const Canvas = (gameId: any) => {
 		p5.background(0);
 
 		//If pos changed, send it to the server
-		if ((gameInfo && !gameInfo.isWatching) || !gameInfo) {
+		if (!gameInfo.isWatching && started) {
 			if (me.y != me.computePosition(p5.mouseY)) {
 				const serverMouseY = p5.mouseY * (serverScreen.height / canvasSize.height);
 				me.position(serverMouseY);
@@ -223,6 +229,16 @@ const Canvas = (gameId: any) => {
 		me.draw();
 		opponent.draw();
 		ball.draw();
+
+		// Show counter if game not started
+		if (!started) {
+			const counter = Math.ceil(((gameInfo.startAt || Date.now()) - Date.now()) / 1000);
+			p5.textSize(32);
+			p5.textAlign(p5.CENTER, p5.CENTER);
+			p5.textFont('Roboto');
+			p5.fill(255);
+			p5.text('Game starting in ' + counter, canvasSize.width / 2, canvasSize.height / 2);
+		}
 	};
 
 	const windowResized = () => {
@@ -239,18 +255,6 @@ const Canvas = (gameId: any) => {
 	window.removeEventListener('resize', windowResized);
 	window.addEventListener('resize', windowResized);
 
-	socket.off('games_start'); // Unbind previous event
-	socket.on('games_start', (data: any) => {
-		console.log('games_start', data);
-		if (mP5) {
-			// Start the game at the right time
-			let delay = data.startAt - Date.now();
-			if (delay < 0) delay = 0;
-			setTimeout(() => {
-				started = true;
-			}, delay);
-		}
-	});
 	socket.off('games_opponentMove'); // Unbind previous event
 	socket.on('games_opponentMove', (data: any) => {
 		if (mP5) opponent.position(data.y);
@@ -301,10 +305,6 @@ const Pong = () => {
 	} | null>(null);
 	const { auth } = useAuth();
 
-	const closeModal = () => {
-		setIsModalOpen(false);
-	};
-
 	const [gameScore, setGameScore] = React.useState<{
 		you: number | undefined; // On normal game
 		creator: number | undefined; // On watch game
@@ -316,6 +316,12 @@ const Pong = () => {
 	});
 
 	window.socket = socket;
+
+	// If no game info
+	if (!gameInfo) {
+		message.error('No game info');
+		return <NotFound />;
+	}
 
 	useEffect(() => {
 		if (!gameInfo || !gameInfo.players || gameInfo.players.length !== 2) return;
@@ -356,6 +362,15 @@ const Pong = () => {
 
 	const quitGame = () => {
 		navigate(-1);
+	};
+
+	const closeModal = () => {
+		setIsModalOpen(false);
+	};
+
+	const closeAndQuitGame = () => {
+		closeModal();
+		quitGame();
 	};
 
 	useEffect(() => {
@@ -399,16 +414,18 @@ const Pong = () => {
 			<div className="pong-wrapper" id="game-container">
 				<Canvas gameId={gameId} />
 			</div>
-			{endGameInfo && (
+			{endGameInfo ? (
 				<Modal
 					style={{ padding: '0.5rem 0.3rem' }}
 					className="nes-dialog is-dark is-rounded"
 					open={isModalOpen}
-					onOk={closeModal}
 					onCancel={closeModal}
-					okButtonProps={{ className: 'nes-btn is-primary' }}
-					cancelButtonProps={{ className: 'nes-btn is-error' }}
 					wrapClassName="end-game-wrapper"
+					footer={[
+						<button key="quit" onClick={closeAndQuitGame} className="nes-btn is-primary">
+							OK
+						</button>,
+					]}
 				>
 					<div className="end-game">
 						<p className="winner">
@@ -429,7 +446,7 @@ const Pong = () => {
 						</div>
 					</div>
 				</Modal>
-			)}
+			) : null}
 			{gameInfo && gameInfo.isWatching ? (
 				<button className="nes-btn quit-button is-error" onClick={stopWatching}>
 					Stop watching
@@ -439,31 +456,6 @@ const Pong = () => {
 					Quit
 				</button>
 			)}
-			<div className="game-info">
-				<p>
-					<span className="title">Game ID</span> : {gameId}
-				</p>
-				<div className="divider"></div>
-				{/* convert unix timestamp to date */}
-				<p>
-					<span className="title">Started at</span> :{' '}
-					{new Date(gameInfo && gameInfo.startAt ? gameInfo.startAt : Date.now()).toLocaleString()}
-				</p>
-				<div className="divider"></div>
-				<div className="players-list">
-					<p className="title">Players : </p>
-					<div className="list">
-						{gameInfo
-							? gameInfo.players.map((player: any) => (
-									<div className="player" key={player.user.username}>
-										<img src={player.user.profile_picture} alt="User image" />
-										<p>{player.user.username}</p>
-									</div>
-							  ))
-							: null}
-					</div>
-				</div>
-			</div>
 		</div>
 	);
 };

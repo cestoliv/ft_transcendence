@@ -121,9 +121,9 @@ export class GamesService {
 
 		if (game.players.length == 1) game.end();
 		else if (game.players[0].user.id == quitterId)
-			game.giveUp(game.players[1].user.id);
+			await game.giveUp(game.players[1].user.id);
 		else if (game.players[1].user.id == quitterId)
-			game.giveUp(game.players[0].user.id);
+			await game.giveUp(game.players[0].user.id);
 		else throw new NotFoundException('Player not found');
 
 		return game.getInfo();
@@ -184,14 +184,22 @@ export class GamesService {
 		});
 	}
 
-	async matchmake(userId: number) {
-		// Find public games, in waiting state and with space
-		const publicGames = Array.from(this.games.values()).filter(
+	async getAvailableGames() {
+		return Array.from(this.games.values()).filter(
 			(game) =>
 				game.options.visibility === 'public' &&
 				game.state === 'waiting' &&
 				game.players.length < 2,
 		);
+	}
+
+	async getAvailableGamesInfo() {
+		return (await this.getAvailableGames()).map((game) => game.getInfo());
+	}
+
+	async matchmake(userId: number) {
+		// Find public games, in waiting state and with space
+		const publicGames = await this.getAvailableGames();
 
 		// If there are public games, join the first one
 		if (publicGames.length > 0) {
