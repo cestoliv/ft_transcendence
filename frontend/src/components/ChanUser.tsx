@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+import { message } from 'antd';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
@@ -69,7 +70,7 @@ export const ChanUser = (props: ChanUserProps) => {
 					user_id: props.member_id,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						socket.emit(
 							'users_get',
@@ -93,7 +94,7 @@ export const ChanUser = (props: ChanUserProps) => {
 					user_id: props.member_id,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						const index = props.chan_admins.findIndex((admin) => admin.id === props.member_id);
 						if (index !== -1) {

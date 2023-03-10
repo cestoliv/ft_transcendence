@@ -103,7 +103,7 @@ export default function Friends(props: FriendsProps) {
 						chanMdp === '' ? 'public' : 'password-protected',
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else
 						setChanList((prevChanList) => [
 							...prevChanList,
@@ -123,7 +123,7 @@ export default function Friends(props: FriendsProps) {
 					password: joinChanMdp,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else
 						setChanList((prevChanList) => [
 							...prevChanList,
@@ -145,7 +145,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 				} else {
 					// Remove the channel with the given chan_id from the chanList array
 					setChanList((prevList) =>
@@ -167,7 +167,7 @@ export default function Friends(props: FriendsProps) {
 				code: chan_code,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else
 					setChanList((prevChanList) => [
 						...prevChanList,
@@ -190,7 +190,7 @@ export default function Friends(props: FriendsProps) {
 				},
 				(data: any) => {
 					if (data.messages) {
-						alert(data.messages);
+						message.error(data.messages);
 						reject(new Error(data.messages));
 					} else {
 						setChanList((prevChanList) => [
@@ -213,7 +213,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'public',
 				},
 				(data: any) => {
-					if (data.message) alert(data.errors);
+					if (data.message) message.error(data.messages);
 					else {
 						const index = chanList.findIndex(
 							(channel) => channel.id === chan_id,
@@ -239,7 +239,7 @@ export default function Friends(props: FriendsProps) {
 					password: passWord,
 				},
 				(data: any) => {
-					if (data.message) alert(data.errors);
+					if (data.message) message.error(data.messages);
 					else {
 						const index = chanList.findIndex(
 							(channel) => channel.id === chan_id,
@@ -275,7 +275,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 				} else {
 					if (activeChan) {
 						const newMembers = activeChan.members.filter(
@@ -304,7 +304,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'private',
 				},
 				(data: any) => {
-					if (data.message) alert(data.errors);
+					if (data.message) message.error(data.messages);
 					else {
 						const index = chanList.findIndex(
 							(channel) => channel.id === activeChan.id,
@@ -329,7 +329,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'public',
 				},
 				(data: any) => {
-					if (data.message) alert(data.errors);
+					if (data.message) message.error(data.messages);
 					else {
 						const index = chanList.findIndex(
 							(channel) => channel.id === activeChan.id,
@@ -356,7 +356,7 @@ export default function Friends(props: FriendsProps) {
 				username: username,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 			},
 		);
 	};
@@ -368,7 +368,7 @@ export default function Friends(props: FriendsProps) {
 				id: inviter_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					setFriends((prevFriends) => [
 						...prevFriends,
@@ -392,7 +392,7 @@ export default function Friends(props: FriendsProps) {
 				id: inviter_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					setFriendOf((prevList) =>
 						prevList.filter(
@@ -412,7 +412,7 @@ export default function Friends(props: FriendsProps) {
 				id: user_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else
 					setFriends((prevList) =>
 						prevList.filter((user) => user.id !== user_id),
@@ -431,7 +431,7 @@ export default function Friends(props: FriendsProps) {
 				until: now,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else
 					setFriends((prevList) =>
 						prevList.filter((user) => user.id !== friend_id),
@@ -802,7 +802,7 @@ export default function Friends(props: FriendsProps) {
 				id: props.user_me.id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					setFriendOf(data.friendOf as IUserFriend[]);
 					setFriends(data.friends as IUser[]);

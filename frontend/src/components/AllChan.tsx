@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { message } from 'antd';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -44,7 +45,7 @@ export const AllChan = (props: AllChanProps) => {
 				id: data.channelId,
 			},
 			(data: any) => {
-				if (data.message) alert(data.errors);
+				if (data.message) message.error(data.messages);
 				else setChansInv((prev) => [data as IChannel, ...prev]);
 			},
 		);
