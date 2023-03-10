@@ -42,7 +42,6 @@ export default function FriendConv(props: FriendConvProps) {
 				},
 				(data: any) => {
 					if (data.messages) {
-						console.log('buzz');
 						alert(data.messages);
 					} else {
 						props.allPrivateConvMessages.unshift(data);

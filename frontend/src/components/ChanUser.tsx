@@ -160,128 +160,6 @@ export const ChanUser = (props: ChanUserProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="chan-user-modal background-modal">
-					{!isAdmin() && (
-						<button
-							name="button-add-admin"
-							className="infosConv-modal-buttons pixel-font discord-blue"
-							onClick={setAdmin}
-						>
-							Set Admin
-						</button>
-					)}
-					{isAdmin() && (
-						<button
-							name="button-remove-admin"
-							className="infosConv-modal-buttons pixel-font discord-blue"
-							onClick={setAdmin}
-						>
-							Remove Admin
-						</button>
-					)}
-					<button
-						name="button-ban_user"
-						className="infosConv-modal-buttons pixel-font discord-blue"
-						onClick={OpenBanTimeModal}
-					>
-						Ban
-					</button>
-					<button
-						name="button-mute_user"
-						className="infosConv-modal-buttons pixel-font discord-blue"
-						onClick={OpenMuteTimeModal}
-					>
-						Mute
-					</button>
-				</Box>
-			</Modal>
-			<Modal
-				open={openBanTimeModal}
-				onClose={closeBanTimeModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box className="ban-time-modal background-modal">
-					<form className="ban-time-form" onSubmit={banUser}>
-						<input
-							value={banTimeValue}
-							name="ban-time-input"
-							type="message"
-							placeholder="Ban time in mintues"
-							onChange={handleChangeBantime}
-							required
-							className="ban-time-input"
-						/>
-					</form>
-				</Box>
-			</Modal>
-			<Modal
-				open={openChanUserModal}
-				onClose={CloseChanUserModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box className="chan-user-modal background-modal">
-					{!isAdmin() && (
-						<button
-							name="button-add-admin"
-							className="infosConv-modal-buttons pixel-font discord-blue"
-							onClick={setAdmin}
-						>
-							Set Admin
-						</button>
-					)}
-					{isAdmin() && (
-						<button
-							name="button-remove-admin"
-							className="infosConv-modal-buttons pixel-font discord-blue"
-							onClick={setAdmin}
-						>
-							Remove Admin
-						</button>
-					)}
-					<button
-						name="button-ban_user"
-						className="infosConv-modal-buttons pixel-font discord-blue"
-						onClick={OpenBanTimeModal}
-					>
-						Ban
-					</button>
-					<button
-						name="button-mute_user"
-						className="infosConv-modal-buttons pixel-font discord-blue"
-						onClick={OpenMuteTimeModal}
-					>
-						Mute
-					</button>
-				</Box>
-			</Modal>
-			<Modal
-				open={openBanTimeModal}
-				onClose={closeBanTimeModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box className="ban-time-modal background-modal">
-					<form className="ban-time-form" onSubmit={banUser}>
-						<input
-							value={banTimeValue}
-							name="ban-time-input"
-							type="message"
-							placeholder="Ban time in mintues"
-							onChange={handleChangeBantime}
-							required
-							className="ban-time-input"
-						/>
-					</form>
-				</Box>
-			</Modal>
-			<Modal
-				open={openChanUserModal}
-				onClose={CloseChanUserModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
 				<Box className="chan-user-modal modal background-modal">
 					{!isAdmin() && (
 						<button name="button-add-admin" className="nes-btn is-primary" onClick={setAdmin}>
@@ -307,28 +185,27 @@ export const ChanUser = (props: ChanUserProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="ban-time-modal background-modal">
+				<Box className="ban-time-modal modal background-modal">
 					<form className="ban-time-form" onSubmit={banUser}>
 						<input
 							value={banTimeValue}
 							name="ban-time-input"
 							type="message"
-							placeholder="Ban time in mintues"
+							placeholder="Ban time in minutes"
 							onChange={handleChangeBantime}
 							required
-							className="ban-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
 			</Modal>
-
 			<Modal
 				open={openMuteTimeModal}
 				onClose={closeMuteTimeModal}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="mute-time-modal background-modal">
+				<Box className="mute-time-modal modal background-modal">
 					<form className="mute-time-form" onSubmit={muteUser}>
 						<input
 							value={muteTimeValue}
@@ -337,7 +214,7 @@ export const ChanUser = (props: ChanUserProps) => {
 							placeholder="Mute time in minutes"
 							onChange={handleChangeMutetime}
 							required
-							className="mute-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
