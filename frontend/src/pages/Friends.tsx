@@ -109,6 +109,7 @@ export default function Friends(props: FriendsProps) {
 							...prevChanList,
 							data as IChannel,
 						]);
+					console.log(data);
 				},
 			);
 			setChanName('');
