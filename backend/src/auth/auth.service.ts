@@ -4,7 +4,6 @@ import {
 	forwardRef,
 	Inject,
 	Injectable,
-	InternalServerErrorException,
 	NotFoundException,
 	Req,
 	UnauthorizedException,
@@ -200,7 +199,7 @@ export class AuthService {
 			if (error.code === '23505')
 				throw new ConflictException('Username already taken');
 			else
-				throw new InternalServerErrorException(
+				throw new BadRequestException(
 					'An error occured while creating user',
 				);
 		}
