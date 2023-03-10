@@ -69,7 +69,9 @@ export class UsersController {
 	@Get('/2fa')
 	@UseGuards(JwtAuthGuard)
 	async get2fa(@Res() response, @Req() request) {
-		const user = await this.usersService.findOne(request.user.id, { withTotp: true});
+		const user = await this.usersService.findOne(request.user.id, {
+			withTotp: true,
+		});
 		if (!user) throw new NotFoundException('User not found');
 
 		return response.send(user.otp ? true : false);
