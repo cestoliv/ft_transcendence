@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-
+import { message } from 'antd';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import Checkbox from './Checkbox';
 
@@ -19,7 +19,7 @@ export default function FriendConv(props: FriendConvProps) {
 	const socket = useContext(SocketContext);
 
 	const [passWord, setPassWord] = useState<string>('');
-	const [message, setMessage] = useState<string>('');
+	const [messageValue, setMessage] = useState<string>('');
 	const [talkTo, setTalkto] = useState<IUser>();
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -33,16 +33,16 @@ export default function FriendConv(props: FriendConvProps) {
 			| React.MouseEvent<HTMLImageElement>,
 	) => {
 		event.preventDefault();
-		if (message != '') {
+		if (messageValue != '') {
 			socket.emit(
 				'users_sendMessage',
 				{
 					id: props.activeConvId,
-					message: message,
+					message: messageValue,
 				},
 				(data: any) => {
 					if (data.messages) {
-						alert(data.messages);
+						message.error(data.messages);
 					} else {
 						props.allPrivateConvMessages.unshift(data);
 						setMessage('');
@@ -59,7 +59,7 @@ export default function FriendConv(props: FriendConvProps) {
 				id: props.activeConvId,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setTalkto(data as IUser);
 			},
 		);
@@ -78,7 +78,7 @@ export default function FriendConv(props: FriendConvProps) {
 			/>
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
-					value={message}
+					value={messageValue}
 					name="message-input"
 					id="message-input"
 					type="message"

@@ -4,7 +4,7 @@ import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
-
+import { message } from 'antd';
 import { IChannel, IUser, IChannelMessage } from '../interfaces';
 import Modal from '@mui/material/Modal';
 import ChatMessages from './ChatMessages';
@@ -21,7 +21,7 @@ export default function Chat(props: ChatProps) {
 	const socket = useContext(SocketContext);
 
 	const [passWord, setPassWord] = useState<string>('');
-	const [message, setMessage] = useState<string>('');
+	const [messageValue, setMessage] = useState<string>('');
 
 	const [OpenSettingsChanModal, setOpenSettingsChanModal] = useState(false);
 	const handleOpenSettingsChanModal = () => setOpenSettingsChanModal(true);
@@ -40,15 +40,15 @@ export default function Chat(props: ChatProps) {
 			| React.MouseEvent<HTMLImageElement>,
 	) => {
 		event.preventDefault();
-		if (message != '') {
+		if (messageValue != '') {
 			socket.emit(
 				'channels_sendMessage',
 				{
 					id: props.activeChan?.id,
-					message: message,
+					message: messageValue,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						setMessage('');
 						props.messages.unshift(data as IChannelMessage);
@@ -151,7 +151,7 @@ export default function Chat(props: ChatProps) {
 			/>
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
-					value={message}
+					value={messageValue}
 					name="message-input"
 					id="message-input"
 					type="message"

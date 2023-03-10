@@ -106,7 +106,7 @@ export const Friend = (props: FriendProps) => {
 				until: now,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					closeMuteTimeModal();
 					setMuteTimeValue('');
@@ -134,7 +134,6 @@ export const Friend = (props: FriendProps) => {
 					'games_invite',
 					{ id: data.id, user_id: props.user.id },
 					(data: any) => {
-						console.log(data);
 						if (data?.statusCode) {
 							message.error(data.messages);
 							// TODO: delete game if needed
@@ -155,7 +154,7 @@ export const Friend = (props: FriendProps) => {
 				user_id: invited_user_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					setPrivateChanJoined((prevList) =>
 						prevList.filter(

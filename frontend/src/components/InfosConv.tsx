@@ -1,8 +1,6 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-
-// import { InfosConvProps } from '../interface';
+import { message } from 'antd';
 import { SocketContext } from '../context/socket';
 
 import { IChannel, IChannelMutedUser, IUser } from '../interfaces';
@@ -31,7 +29,7 @@ export default function InfosConv(props: InfosConvProps) {
 				},
 				(data: any) => {
 					if (data.messages) {
-						alert(data.messages);
+						message.error(data.messages);
 						reject(new Error(data.messages));
 					} else {
 						resolve(data as IChannelMutedUser);
