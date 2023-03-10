@@ -1,15 +1,7 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-
-import { SocketContext } from '../context/socket';
-
 import { IChannel, IUser } from '../interfaces';
-
-import ChanBanItem from './ChanBanItem';
 
 type ChansBanProps = {
 	chan: IChannel | null;
@@ -21,7 +13,12 @@ export const ChansBan = (props: ChansBanProps) => {
 		if (props.chan) {
 			let x = 0;
 			while (x < props.chan.banned.length) {
-				if (props.chan.banned[x].userId === props.user_me.id && props.chan.banned[x].until > new Date())
+				const now = Date.now();
+				const isoDate = new Date(props.chan.banned[x].until);
+				if (
+					props.chan.banned[x].userId === props.user_me.id &&
+					isoDate.getTime() > now
+				)
 					return true;
 				x++;
 			}

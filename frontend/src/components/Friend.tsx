@@ -92,6 +92,7 @@ export const Friend = (props: FriendProps) => {
 		event.preventDefault();
 		props.banFriend(banTimeValue, props.user.id);
 		closeBanTimeModal();
+		setBanTimeValue('');
 	};
 
 	const muteFriend = async (event: any) => {
@@ -106,7 +107,10 @@ export const Friend = (props: FriendProps) => {
 			},
 			(data: any) => {
 				if (data.messages) alert(data.messages);
-				else closeBanTimeModal();
+				else {
+					closeMuteTimeModal();
+					setMuteTimeValue('');
+				}
 			},
 		);
 	};
@@ -280,43 +284,43 @@ export const Friend = (props: FriendProps) => {
 					<Box className="friend-action-modal background-modal">
 						{props.user.status === 'online' && (
 							<button
-								className="discord-blue"
+								className="nes-btn is-primary"
 								onClick={OpenInviteGameModal}
 							>
 								Inviter à jouer
 							</button>
 						)}
 						{props.user.status === 'playing' && (
-							<button className="discord-blue" onClick={showGame}>
+							<button className="nes-btn is-primary" onClick={showGame}>
 								Regarder la partie
 							</button>
 						)}
 						<button
-							className="discord-blue"
+							className="nes-btn is-primary"
 							onClick={handleRedirect}
 						>
 							Profil
 						</button>
 						<button
-							className="discord-blue"
+							className="nes-btn is-primary"
 							onClick={OpenChanListModal}
 						>
 							Inviter channel
 						</button>
 						<button
-							className="discord-blue"
+							className="nes-btn is-primary"
 							onClick={OpenMuteTimeModal}
 						>
 							Mute
 						</button>
 						<button
-							className="discord-blue"
+							className="nes-btn is-primary"
 							onClick={OpenBanTimeModal}
 						>
 							Ban
 						</button>
 						<button
-							className="discord-blue"
+							className="nes-btn is-primary"
 							onClick={removeFriendClick}
 						>
 							Suprrimer
@@ -406,7 +410,7 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="chan-user-modal">
+				<Box className="chan-user-modal modal">
 					{privateChanJoined.map((chan) => (
 						<PrivateChanJoined
 							key={chan.id}
@@ -424,16 +428,16 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="ban-time-modal background-modal">
+				<Box className="ban-time-modal modal background-modal">
 					<form className="ban-time-form" onSubmit={banFriend}>
 						<input
 							value={banTimeValue}
 							name="ban-time-input"
 							type="message"
-							placeholder="Ban time in mintues"
+							placeholder="Ban time in minutes"
 							onChange={handleChangeBantime}
 							required
-							className="ban-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
@@ -445,7 +449,7 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="mute-time-modal background-modal">
+				<Box className="mute-time-modal modal background-modal">
 					<form className="mute-time-form" onSubmit={muteFriend}>
 						<input
 							value={muteTimeValue}
@@ -454,7 +458,7 @@ export const Friend = (props: FriendProps) => {
 							placeholder="Mute time in minutes"
 							onChange={handleChangeMutetime}
 							required
-							className="mute-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
