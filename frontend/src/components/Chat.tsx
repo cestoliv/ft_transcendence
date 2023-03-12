@@ -14,7 +14,7 @@ type ChatProps = {
 	activeChan: IChannel;
 	messages: IChannelMessage[];
 	addPassword: (passWord: string, chan_id: number) => void;
-	togglePrivateChan: (activeChan: IChannel) => void;
+	setChanVisibility: (activeChan: IChannel, oldVisibility: string, newVisibility: string, passWord: string | null) => void;
 };
 
 export default function Chat(props: ChatProps) {
@@ -65,7 +65,12 @@ export default function Chat(props: ChatProps) {
 	};
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-		props.togglePrivateChan(props.activeChan);
+		if (e.target.name === 'public')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'public', null);
+		if (e.target.name === 'private')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'private', null);
+		if (e.target.name === 'password-protected')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'password-protected', '');
 	};
 
 	const toggleHidden = () => {
@@ -107,18 +112,47 @@ export default function Chat(props: ChatProps) {
 								<label>
 									<input
 										type="checkbox"
+										name='private'
 										className="nes-checkbox is-dark"
 										onChange={isChecked}
 										checked={
 											props.activeChan?.visibility ===
-												'public' ||
-											props.activeChan?.visibility ===
-												'password-protected'
-												? false
-												: true
+												'private'
+												? true
+												: false
 										}
 									/>
 									<span>Private</span>
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										name='public'
+										className="nes-checkbox is-dark"
+										onChange={isChecked}
+										checked={
+											props.activeChan?.visibility ===
+												'public'
+												? true
+												: false
+										}
+									/>
+									<span>Public</span>
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										name='password-protected'
+										className="nes-checkbox is-dark"
+										checked={
+											props.activeChan?.visibility ===
+												'password-protected'
+												? true
+												: false
+										}
+										disabled
+									/>
+									<span>Password-protected</span>
 								</label>
 								<form
 									className="mpd-form"
