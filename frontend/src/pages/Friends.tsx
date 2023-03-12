@@ -651,6 +651,7 @@ export default function Friends(props: FriendsProps) {
 
 	socket.off('users_update'); // Unbind previous event
 	socket.on('users_update', (data: any) => {
+		console.log('users_update', data);
 		const index = friends.findIndex(
 			(friend) => friend.id === (data.id as number),
 		);

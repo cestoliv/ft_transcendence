@@ -28,6 +28,7 @@ export interface LocalGameInfo {
 		user: User;
 		score: number;
 	}>;
+	paddleHeight: number;
 }
 
 export class GameOptions {
@@ -177,6 +178,7 @@ export class LocalGame {
 				user: player.user,
 				score: player.score,
 			})),
+			paddleHeight: this.options.paddleHeight,
 		};
 	}
 
@@ -287,11 +289,11 @@ export class LocalGame {
 						// Ignore error
 					});
 			});
+			console.log(`Game ${this.id} started`);
+			setTimeout(() => {
+				this.end();
+			}, this.options.maxDuration * 1000 * 60);
 		}, 3000);
-
-		setTimeout(() => {
-			this.end();
-		}, this.options.maxDuration * 60 * 1000);
 
 		// Send updated available games to all users
 		this.server.emit(
@@ -301,6 +303,7 @@ export class LocalGame {
 	}
 
 	async end(winner: User | null = null) {
+		console.log(`\n\n\n\nGame ${this.id} ended`);
 		if (this.state === 'ended') return;
 
 		if (this.state === 'waiting') {
@@ -436,6 +439,7 @@ export class LocalGame {
 	}
 
 	movePlayer(playerId: number, y: number) {
+		console.log('movePlayer', playerId, y);
 		if (this.state != 'started') return;
 		const player = this.players.find((p) => p.user.id === playerId);
 
@@ -500,6 +504,7 @@ export class LocalGame {
 	}
 
 	update() {
+		// console.log('update', this.state);
 		if (this.state != 'started') return;
 		// y: keep ball inside of vertical bounds
 		if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {

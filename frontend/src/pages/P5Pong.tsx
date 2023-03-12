@@ -88,7 +88,7 @@ const Canvas = (gameId: any) => {
 		server_x: serverScreen.width - 10,
 		server_y: serverScreen.height / 2,
 		server_width: 2,
-		server_height: 30,
+		server_height: gameInfo.paddleHeight,
 		// Client coordinates
 		x: 0,
 		y: 0,
@@ -125,7 +125,7 @@ const Canvas = (gameId: any) => {
 		server_x: 10 - 2, // -2 for width
 		server_y: serverScreen.height / 2,
 		server_width: 2,
-		server_height: 30,
+		server_height: gameInfo.paddleHeight,
 		// Client coordinates
 		x: 0,
 		y: 0,
@@ -186,6 +186,12 @@ const Canvas = (gameId: any) => {
 		},
 	};
 
+	const preload = (p5: p5Types) => {
+		mP5 = p5;
+		console.log('preload');
+		// p5.textFont(p5.loadFont('Press_Start_2P/PressStart2P-Regular.ttf'));
+	};
+
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
 		mP5 = p5;
 		console.log('setup');
@@ -196,14 +202,11 @@ const Canvas = (gameId: any) => {
 	};
 
 	const sendPaddlePos = (y: number) => {
-		if (y == 0) return;
+		if (y <= 0 || y >= serverScreen.height) return;
 		// console.log('sendPaddlePos', y);
-		socket.emit(
-			'games_playerMove',
-			{ id: gameId, y } /*(res: any) => {
-			console.log('games_playerMove', res);
-		}*/,
-		);
+		socket.emit('games_playerMove', { id: gameId, y }, (res: any) => {
+			console.log('games_playerMove', res, gameId);
+		});
 	};
 	const throttledSendPaddlePos = throttle(sendPaddlePos, 1000 / 30);
 
@@ -218,8 +221,9 @@ const Canvas = (gameId: any) => {
 
 		//If pos changed, send it to the server
 		if (!gameInfo.isWatching && started) {
-			if (me.y != me.computePosition(p5.mouseY)) {
-				const serverMouseY = p5.mouseY * (serverScreen.height / canvasSize.height);
+			const serverMouseY = p5.mouseY * (serverScreen.height / canvasSize.height);
+
+			if (me.server_y != serverMouseY) {
 				me.position(serverMouseY);
 				throttledSendPaddlePos(serverMouseY);
 			}
@@ -228,17 +232,16 @@ const Canvas = (gameId: any) => {
 		game.draw();
 		me.draw();
 		opponent.draw();
-		ball.draw();
 
 		// Show counter if game not started
 		if (!started) {
 			const counter = Math.ceil(((gameInfo.startAt || Date.now()) - Date.now()) / 1000);
-			p5.textSize(32);
+			p5.textSize(128);
 			p5.textAlign(p5.CENTER, p5.CENTER);
-			p5.textFont('Roboto');
+			p5.textFont('Press Start 2P');
 			p5.fill(255);
-			p5.text('Game starting in ' + counter, canvasSize.width / 2, canvasSize.height / 2);
-		}
+			p5.text(counter, canvasSize.width / 2, canvasSize.height / 2);
+		} else ball.draw();
 	};
 
 	const windowResized = () => {
@@ -280,7 +283,7 @@ const Canvas = (gameId: any) => {
 
 	return (
 		<div className="canvas-wrapper">
-			<Sketch setup={setup} draw={draw} />
+			<Sketch preload={preload} setup={setup} draw={draw} />
 		</div>
 	);
 };

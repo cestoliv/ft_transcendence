@@ -306,6 +306,24 @@ export const SearchGame = (props: FriendsProps) => {
 							<span>n</span>
 							<span>g</span>
 						</p>
+						{inMatchmaking ? (
+							<>
+								{availableGames.length > 0 ? (
+									<p>
+										<span className="nes-text is-primary">{availableGames.length}</span> games
+										available
+									</p>
+								) : (
+									<p className="nes-text is-disabled">
+										no game available,
+										<br />
+										you should create one!
+									</p>
+								)}
+							</>
+						) : (
+							<></>
+						)}
 						<button className="quit nes-btn" onClick={handleQuit}>
 							Quit
 						</button>

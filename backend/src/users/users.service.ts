@@ -528,7 +528,7 @@ export class UsersService {
 
 		if (user.status != status) {
 			user.status = status;
-			user = await this.usersRepository.save(user);
+			user = await this.save(user);
 
 			// Propage the new status
 			this.gateway.propagateUserUpdate(user, 'users_update');

@@ -172,7 +172,9 @@ export class GamesService {
 
 	@Interval(1000 / 60)
 	loop(): void {
+		//console.log('loop', this.games.size);
 		this.games.forEach((game) => {
+			//console.log(game.id, game.state);
 			game.update();
 		});
 	}
@@ -203,9 +205,14 @@ export class GamesService {
 
 		// If there are public games, join the first one
 		if (publicGames.length > 0) {
-			await this.join(publicGames[0].id, userId);
-			// Remove the user from the queue
-			this.queue = this.queue.filter((id) => id != userId);
+			await this.join(publicGames[0].id, userId)
+				.then(() => {
+					// Remove the user from the queue
+					this.queue = this.queue.filter((id) => id != userId);
+				})
+				.catch(() => {
+					// Do nothing
+				});
 		}
 	}
 
