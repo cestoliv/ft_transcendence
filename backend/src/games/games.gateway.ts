@@ -3,7 +3,7 @@ import { BaseGateway } from 'src/base.gateway';
 import { ConfigService } from '@nestjs/config';
 import { SocketWithUser, WSResponse } from 'src/types';
 import { exceptionToObj, isWsResponse } from 'src/utils';
-import { LocalGame, LocalGameInfo } from './game.class';
+import { LocalGameInfo } from './game.class';
 import { Game } from './entities/game.entity';
 import { Leaderboards, StatsUser } from './interfaces/leaderboards.interface';
 

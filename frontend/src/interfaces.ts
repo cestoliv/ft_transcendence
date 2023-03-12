@@ -129,4 +129,5 @@ export interface ILocalGameInfo {
 		user: IUser;
 		score: number;
 	}>;
+	paddleHeight: number;
 }

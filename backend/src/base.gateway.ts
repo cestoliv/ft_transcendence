@@ -19,6 +19,7 @@ export class ConnectedClientsService {
 
 	get(userId: number) {
 		if (!this.clients.has(userId)) {
+			// TODO: disconnect the user (give up every games)
 			// User is not connected, so we return an object that will not emit anything
 			return {
 				emit: () => {
