@@ -175,7 +175,7 @@ export class GamesGateway extends BaseGateway {
 
 		// Start watching
 		const game = await this.gamesService
-			.findGame(payload.id || payload.user_id)
+			.findStartedGame(payload.id || payload.user_id)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 		if (isWsResponse(game)) return game;
@@ -207,7 +207,7 @@ export class GamesGateway extends BaseGateway {
 
 		// Stop watching
 		const game = await this.gamesService
-			.findGame(payload.id || payload.user_id)
+			.findStartedGame(payload.id || payload.user_id)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 		if (isWsResponse(game)) return game;
