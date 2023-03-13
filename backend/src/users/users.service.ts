@@ -13,6 +13,7 @@ import { parse } from 'cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticator } from 'otplib';
 import { pipeline, Readable } from 'stream';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
@@ -28,6 +29,7 @@ import { User } from './entities/user.entity';
 import { UserMessage } from './entities/user.message.entity';
 import { BaseGateway } from 'src/base.gateway';
 import { Status } from './enums/status.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -44,6 +46,8 @@ export class UsersService {
 		private readonly userMessagesRepository: Repository<UserMessage>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
+
+		private readonly configService: ConfigService,
 	) {}
 
 	public gateway: BaseGateway = null;
@@ -174,9 +178,23 @@ export class UsersService {
 		const secret = authenticator.generateSecret();
 		const url = authenticator.keyuri('', 'Transcendence', secret);
 
+		// Encrypt TOTP secret
+		const iv = crypto.randomBytes(16);
+		const cipher = crypto.createCipheriv(
+			'aes-256-cbc',
+			Buffer.from(this.configService.get('TOTP_SECRET')),
+			iv,
+		);
+		const encrypted = Buffer.concat([
+			cipher.update(secret),
+			cipher.final(),
+		]);
+		const encryptedSecret =
+			iv.toString('hex') + ':' + encrypted.toString('hex');
+
 		// Update user TOTP secret
 		await this.update(user.id, user.id, {
-			otp: secret,
+			otp: encryptedSecret,
 		});
 
 		return { secret, url };
