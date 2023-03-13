@@ -172,9 +172,7 @@ export class GamesService {
 
 	@Interval(1000 / 60)
 	loop(): void {
-		//console.log('loop', this.games.size);
 		this.games.forEach((game) => {
-			//console.log(game.id, game.state);
 			game.update();
 		});
 	}

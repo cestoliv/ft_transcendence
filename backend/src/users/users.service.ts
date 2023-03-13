@@ -468,14 +468,6 @@ export class UsersService {
 				(err) => {
 					if (err) {
 						if (err.code === 'ENOENT') {
-							console.log(
-								path.join(
-									'./',
-									'uploads',
-									'profile-pictures',
-									filename,
-								),
-							);
 							resolve();
 						} else reject(new BadRequestException(err.message));
 					} else resolve();

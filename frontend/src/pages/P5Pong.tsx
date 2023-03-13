@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { message, Modal } from 'antd';
 import Sketch from 'react-p5';
@@ -14,7 +14,6 @@ import NotFound from './NotFound';
 const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;
 	const socket = useContext(SocketContext);
-	const navigate = useNavigate();
 	const { gameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');
@@ -80,7 +79,6 @@ const Canvas = (gameId: any) => {
 			mP5.stroke(255);
 			mP5.fill(255);
 			mP5.circle(this.x, this.y, this.radius);
-			// console.log('draw ball', this.x, this.y, this.radius);
 		},
 	};
 	const me = {
@@ -151,18 +149,14 @@ const Canvas = (gameId: any) => {
 			this.applyRatio();
 		},
 		draw: function () {
-			// this.server_x = 10 - 2; // -2 for width
-			// this.applyRatio();
 			mP5.stroke(255);
 			mP5.fill(255);
 			// Draw paddle rect
-			// console.log(this.x);
 			mP5.rect(this.x, this.y - this.height / 2, this.width, this.height);
 		},
 	};
 	const game = {
 		reset: function () {
-			console.log(this);
 			ball.reset();
 			me.reset();
 			opponent.reset();
@@ -186,15 +180,14 @@ const Canvas = (gameId: any) => {
 		},
 	};
 
+	const fontRef = useRef<p5Types.Font | null>(null);
 	const preload = (p5: p5Types) => {
 		mP5 = p5;
-		console.log('preload');
-		// p5.textFont(p5.loadFont('Press_Start_2P/PressStart2P-Regular.ttf'));
+		fontRef.current = p5.loadFont('/Press_Start_2P/PressStart2P-Regular.ttf');
 	};
 
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
 		mP5 = p5;
-		console.log('setup');
 		canvasSize = computeCanvasSize();
 
 		p5.createCanvas(canvasSize.width, canvasSize.height).parent(canvasParentRef);
@@ -203,10 +196,7 @@ const Canvas = (gameId: any) => {
 
 	const sendPaddlePos = (y: number) => {
 		if (y <= 0 || y >= serverScreen.height) return;
-		// console.log('sendPaddlePos', y);
-		socket.emit('games_playerMove', { id: gameId, y }, (res: any) => {
-			console.log('games_playerMove', res, gameId);
-		});
+		socket.emit('games_playerMove', { id: gameId, y });
 	};
 	const throttledSendPaddlePos = throttle(sendPaddlePos, 1000 / 30);
 
@@ -238,14 +228,13 @@ const Canvas = (gameId: any) => {
 			const counter = Math.ceil(((gameInfo.startAt || Date.now()) - Date.now()) / 1000);
 			p5.textSize(128);
 			p5.textAlign(p5.CENTER, p5.CENTER);
-			p5.textFont('Press Start 2P');
+			if (fontRef.current) p5.textFont(fontRef.current);
 			p5.fill(255);
 			p5.text(counter, canvasSize.width / 2, canvasSize.height / 2);
 		} else ball.draw();
 	};
 
 	const windowResized = () => {
-		console.log('resize', mP5);
 		canvasSize = computeCanvasSize();
 
 		if (mP5) mP5.resizeCanvas(canvasSize.width, canvasSize.height);
@@ -380,13 +369,9 @@ const Pong = () => {
 		return () => {
 			if (gameInfo) {
 				if (gameInfo.isWatching) {
-					socket.emit('games_watch_stop', { id: gameId }, (data: any) => {
-						console.log('games_watch_stop', data);
-					});
+					socket.emit('games_watch_stop', { id: gameId });
 				} else {
-					socket.emit('games_quit', { id: gameId }, (data: any) => {
-						console.log('games_quit', data);
-					});
+					socket.emit('games_quit', { id: gameId });
 				}
 			}
 			setGameInfo(null);
