@@ -287,12 +287,18 @@
 }
 
 .chan-list-item {
-	background-color: #8fcb9b;
-	border-radius: 15px;
-	padding: 10px;
-	margin-bottom: 3px;
 	display: flex;
-	justify-content: space-between;
+    justify-content: space-between;
+    margin-bottom: 5px;
+	background: white !important;
+    color: #131313;
+	font-size: 10px;
+	box-shadow: inset -6px -6px lightgray;
+    padding: 10px 10px;
+}
+
+.chan-list-item:hover {
+	box-shadow: inset -8px -8px lightgray;
 }
 
 .e-plus:hover {

@@ -18,6 +18,21 @@ export class ConnectedClientsService {
 	}
 
 	get(userId: number) {
+		if (!this.clients.has(userId)) {
+			// TODO: disconnect the user (give up every games)
+			// User is not connected, so we return an object that will not emit anything
+			return {
+				emit: () => {
+					/* Do nothing */
+				},
+				leave: () => {
+					/* Do nothing */
+				},
+				join: () => {
+					/* Do nothing */
+				},
+			} as unknown as SocketWithUser;
+		}
 		return this.clients.get(userId);
 	}
 

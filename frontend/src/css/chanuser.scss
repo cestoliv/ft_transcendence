@@ -55,10 +55,13 @@
 	padding: 10px 0px;
 	display: flex;
 	justify-content: center;
+	align-items: center;
 }
 
 .ban-time-form {
-	width: 80%;
+	width: 60%;
+	display: flex;
+	justify-content: center;
 }
 
 .ban-time-input {
@@ -91,10 +94,13 @@
 	padding: 10px 0px;
 	display: flex;
 	justify-content: center;
+	align-items: center;
 }
 
 .mute-time-form {
-	width: 80%;
+	width: 60%;
+	display: flex;
+	justify-content: center;
 }
 
 .mute-time-input {

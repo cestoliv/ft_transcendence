@@ -337,4 +337,13 @@ export class GamesGateway extends BaseGateway {
 			.then((history) => history)
 			.catch((err) => exceptionToObj(err));
 	}
+
+	@SubscribeMessage('games_available')
+	async available(): Promise<LocalGameInfo[] | WSResponse> {
+		// Get Available games
+		return this.gamesService
+			.getAvailableGamesInfo()
+			.then((games) => games)
+			.catch((err) => exceptionToObj(err));
+	}
 }

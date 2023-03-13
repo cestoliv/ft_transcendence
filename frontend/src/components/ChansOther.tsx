@@ -55,6 +55,8 @@ export const ChansOther = (props: ChansOtherProps) => {
 	const display = (): boolean => {
 		let i = 0;
 		if (props.chan) {
+			// console.log("hello42");
+			// console.log(props.chan);
 			let x = 0;
 			while (x < props.chan.invited.length) {
 				if (props.chan.invited[x].userId === props.user_me.id) i += 1;
@@ -62,7 +64,9 @@ export const ChansOther = (props: ChansOtherProps) => {
 			}
 			x = 0;
 			while (x < props.chan.banned.length) {
-				if (props.chan.banned[x].userId === props.user_me.id && props.chan.banned[x].until > new Date()) i += 1;
+				const now = Date.now();
+				const isoDate = new Date(props.chan.banned[x].until);
+				if (props.chan.banned[x].userId === props.user_me.id && isoDate.getTime() > now) i += 1;
 				x++;
 			}
 			x = 0;
@@ -78,7 +82,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 
 	useEffect(() => {
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			setChanJoined(data);
+			setChanJoined(data as IChannel[]);
 		});
 	}, [props.chanList]);
 
@@ -90,7 +94,7 @@ export const ChansOther = (props: ChansOtherProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="password-chan-modal background-modal">
+				<Box className="password-chan-modal modal background-modal">
 					<form className="chan-password-form" onSubmit={handleJoinPassWordSubmit}>
 						<input
 							value={passwordValue}
@@ -99,13 +103,13 @@ export const ChansOther = (props: ChansOtherProps) => {
 							placeholder="password"
 							onChange={handleChange}
 							required
-							className="chan-password-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
 			</Modal>
 			{display() && (
-				<div className="chan-list-item modal-item pixel-font">
+				<div className="chan-list-item pixel-font">
 					<span className="pixel-font">{props.chan?.name}</span>
 					<span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
 				</div>

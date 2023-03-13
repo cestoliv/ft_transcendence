@@ -1,13 +1,20 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import { message } from 'antd';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser, IChannelBannedUser, IChannelInvitedUser, IChannelMessage } from '../interfaces';
+import {
+	IChannel,
+	IUser,
+	IChannelBannedUser,
+	IChannelInvitedUser,
+	IChannelMessage,
+} from '../interfaces';
 
 import ChansBan from './ChansBan';
 import ChansInv from './ChansInv';
@@ -17,7 +24,10 @@ type AllChanProps = {
 	user_me: IUser;
 	chanList: IChannel[];
 	chanListJoin: (chan_code: string | undefined) => void;
-	chanListJoinPassWord: (chan_code: string | undefined, psswrd: string) => Promise<any>;
+	chanListJoinPassWord: (
+		chan_code: string | undefined,
+		psswrd: string,
+	) => Promise<any>;
 };
 
 export const AllChan = (props: AllChanProps) => {
@@ -35,8 +45,8 @@ export const AllChan = (props: AllChanProps) => {
 				id: data.channelId,
 			},
 			(data: any) => {
-				if (data.message) alert(data.errors);
-				else setChansInv((prev) => [data, ...prev]);
+				if (data.message) message.error(data.messages);
+				else setChansInv((prev) => [data as IChannel, ...prev]);
 			},
 		);
 	});
@@ -47,12 +57,36 @@ export const AllChan = (props: AllChanProps) => {
 			setChans(data);
 			setChansInv(
 				data.filter((channel) =>
-					channel.invited.some((invitedUser) => invitedUser.userId === props.user_me.id),
+					channel.invited.some(
+						(invitedUser) =>
+							invitedUser.userId === props.user_me.id,
+					),
 				),
 			);
 			setLoading(false);
 		});
 	}, [props.chanList]);
+
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			// Appel de l'API ou mise à jour de l'état
+			console.log('AllChan UseEffect every 60s');
+			socket.emit('channels_list', {}, (data: IChannel[]) => {
+				setChans(data);
+				setChansInv(
+					data.filter((channel) =>
+						channel.invited.some(
+							(invitedUser) =>
+								invitedUser.userId === props.user_me.id,
+						),
+					),
+				);
+				setLoading(false);
+			});
+		}, 60000); // 60000 ms = 1 minute
+
+		return () => clearInterval(intervalId);
+	}, []);
 
 	return (
 		<div className="AllChan-wrapper">
@@ -61,11 +95,17 @@ export const AllChan = (props: AllChanProps) => {
 					<div className="loading-spinner"></div>
 				</div>
 			)}
-			{!loading && <h3 className="display-chan-title pixel-font">All Chan</h3>}
+			{!loading && (
+				<h3 className="display-chan-title pixel-font">All Chan</h3>
+			)}
 			<div className="ChansOther-wrapper">
 				{chans
 					?.filter((chan) => {
-						if (chan.visibility === 'public' || chan.visibility == 'password-protected') return true;
+						if (
+							chan.visibility === 'public' ||
+							chan.visibility == 'password-protected'
+						)
+							return true;
 						return false;
 					})
 					.map((chan) => (
@@ -79,18 +119,15 @@ export const AllChan = (props: AllChanProps) => {
 						/>
 					))}
 			</div>
-			{!loading && <h3 className="display-chan-title pixel-font">ban Chan</h3>}
+			{!loading && (
+				<h3 className="display-chan-title pixel-font">ban Chan</h3>
+			)}
 			{chans?.map((chan) => (
 				<ChansBan key={chan.id} chan={chan} user_me={props.user_me} />
 			))}
-			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
-            {chans?.map((channel: IChannel) => {
-                channel.invited.map((invitedUser : IChannelInvitedUser) => {
-                    if (invitedUser.user === props.user_me)
-                      <ChansInv chan={channel} user_me={props.user_me} chanListJoin={props.chanListJoin}/>
-                });
-            })} */}
-			{!loading && <h3 className="display-chan-title pixel-font">invit chan</h3>}
+			{!loading && (
+				<h3 className="display-chan-title pixel-font">invit chan</h3>
+			)}
 			{chansInv?.map((chan) => (
 				<ChansInv
 					key={chan.id}
@@ -100,10 +137,6 @@ export const AllChan = (props: AllChanProps) => {
 					chanListJoin={props.chanListJoin}
 				/>
 			))}
-			{/* <h3 className='display-chan-title pixel-font'>invit chan</h3>
-            {chans?.map(chan => (
-						  <ChansInv chan={chan} user_me={props.user_me} chanListJoin={props.chanListJoin}/>
-					  ))} */}
 		</div>
 	);
 };

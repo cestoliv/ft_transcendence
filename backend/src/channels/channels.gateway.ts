@@ -111,7 +111,7 @@ export class ChannelsGateway extends BaseGateway {
 
 		// Find channel
 		const channel = await this.channelsService.findOne(payload.id);
-		if (channel === undefined)
+		if (channel === undefined || channel === null)
 			return {
 				statusCode: 404,
 				error: 'Not found',

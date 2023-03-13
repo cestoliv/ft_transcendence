@@ -1,15 +1,44 @@
-.FriendRequests-wrapper {
+/* .FriendRequests-wrapper {
     background-color: #8FCB9B;
     display: flex;
     justify-content: space-between;
     padding: 10px;
     border-radius: 20px;
     margin-bottom: 3px;
+} */
+
+/* .FriendRequests-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+} */
+
+.FriendRequests-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+	background: white !important;
+    color: #131313;
+	font-size: 10px;
+	box-shadow: inset -6px -6px lightgray;
+    padding: 10px 10px;
 }
 
-.FriendRequests-wrapper span {
-    font-size: 20px;
+.FriendRequests-wrapper:hover {
+	box-shadow: inset -8px -8px lightgray;
 }
+
+.modal-e-plus:hover {
+    color:#209cee !important;
+}
+
+.modal-e-close:hover {
+    color:#209cee !important;
+}
+
+/* .FriendRequests-wrapper span {
+    font-size: 20px;
+} */
 
 .accept-refuse-friend-request span {
     margin-right: 3px;

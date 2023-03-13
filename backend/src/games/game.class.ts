@@ -15,7 +15,8 @@ interface LocalGamePlayer {
 	paddle: {
 		x: number;
 		y: number;
-		radius: number;
+		width: number;
+		height: number;
 	};
 }
 
@@ -27,6 +28,7 @@ export interface LocalGameInfo {
 		user: User;
 		score: number;
 	}>;
+	paddleHeight: number;
 }
 
 export class GameOptions {
@@ -37,7 +39,7 @@ export class GameOptions {
 	visibility: 'public' | 'private';
 
 	// Computed from mode
-	speed: 2 | 5;
+	speed: 3 | 5;
 	paddleHeight: 10 | 30;
 
 	constructor(
@@ -63,7 +65,7 @@ export class GameOptions {
 		this.visibility = visibility;
 
 		if (this.mode === 'classic') {
-			this.speed = 2;
+			this.speed = 3;
 			this.paddleHeight = 30;
 		} else if (this.mode === 'hardcore') {
 			this.speed = 5;
@@ -146,7 +148,25 @@ export class LocalGame {
 		// Ball
 		this.resetBall();
 
-		this.addPlayer(creatorId);
+		new Promise(async () => {
+			// Add creator to game
+			await this.addPlayer(creatorId);
+			// console.log('Emitting games_available');
+			// console.log(
+			// 	Array.from(await this.gamesService.games).map((game) =>
+			// 		game[1].getInfo(),
+			// 	),
+			// );
+			// console.log(await this.gamesService.getAvailableGamesInfo());
+
+			// Send updated games available to all users
+			this.server.emit(
+				'games_available',
+				await this.gamesService.getAvailableGamesInfo(),
+			);
+		}).then(() => {
+			/* Do nothing */
+		});
 	}
 
 	getInfo(): LocalGameInfo {
@@ -158,6 +178,7 @@ export class LocalGame {
 				user: player.user,
 				score: player.score,
 			})),
+			paddleHeight: this.options.paddleHeight,
 		};
 	}
 
@@ -179,14 +200,16 @@ export class LocalGame {
 	resetPlayers() {
 		// Creator, left side
 		if (this.players.length < 1) return;
-		this.players[0].paddle.x = 10;
+		this.players[0].paddle.x = 10 - 2;
 		this.players[0].paddle.y = this.screen.height / 2;
-		this.players[0].paddle.radius = this.options.paddleHeight;
+		this.players[0].paddle.width = 2;
+		this.players[0].paddle.height = this.options.paddleHeight;
 		// Opponent, right side
 		if (this.players.length < 2) return;
 		this.players[1].paddle.x = this.screen.width - 10;
 		this.players[1].paddle.y = this.screen.height / 2;
-		this.players[1].paddle.radius = this.options.paddleHeight;
+		this.players[1].paddle.width = 2;
+		this.players[1].paddle.height = this.options.paddleHeight;
 	}
 
 	async invite(inviterId: number, inviteeId: number) {
@@ -234,18 +257,18 @@ export class LocalGame {
 		this.players.push({
 			user,
 			score: 0,
-			paddle: { x: 0, y: 0, radius: 0 },
+			paddle: { x: 0, y: 0, width: 0, height: 0 },
 		});
 		this.resetPlayers();
 		// Add user to room
 		this.connectedClientsService.get(joinerId).join(`game_${this.id}`);
 
 		if (this.players.length === 2) {
-			this.start();
+			await this.start();
 		}
 	}
 
-	start() {
+	async start() {
 		// Delay start by 3 seconds
 		this.startAt = new Date();
 		this.startAt.setSeconds(this.startAt.getSeconds() + 3);
@@ -266,15 +289,23 @@ export class LocalGame {
 						// Ignore error
 					});
 			});
+			console.log(`Game ${this.id} started`);
+			setTimeout(() => {
+				this.end();
+			}, this.options.maxDuration * 1000 * 60);
 		}, 3000);
 
-		setTimeout(() => {
-			this.end();
-		}, this.options.maxDuration * 60 * 1000);
+		// Send updated available games to all users
+		this.server.emit(
+			'games_available',
+			await this.gamesService.getAvailableGamesInfo(),
+		);
 	}
 
 	async end(winner: User | null = null) {
+		console.log(`\n\n\n\nGame ${this.id} ended`);
 		if (this.state === 'ended') return;
+
 		if (this.state === 'waiting') {
 			this.state = 'ended';
 			this.winner = null;
@@ -284,6 +315,11 @@ export class LocalGame {
 					.leave(`game_${this.id}`);
 			});
 			this.gamesService.games.delete(this.id);
+			// Send updated available games to all users
+			this.server.emit(
+				'games_available',
+				await this.gamesService.getAvailableGamesInfo(),
+			);
 			return;
 		}
 		this.state = 'ended';
@@ -376,10 +412,24 @@ export class LocalGame {
 
 		// Remove game from games array
 		this.gamesService.games.delete(this.id);
+		// Send updated available games to all users
+		this.server.emit(
+			'games_available',
+			await this.gamesService.getAvailableGamesInfo(),
+		);
 	}
 
-	giveUp(quitterId: number) {
-		if (this.state != 'started') return;
+	async giveUp(quitterId: number) {
+		if (this.state != 'started') {
+			// Delete from games array
+			this.gamesService.games.delete(this.id);
+			// Send updated available games to all users
+			this.server.emit(
+				'games_available',
+				await this.gamesService.getAvailableGamesInfo(),
+			);
+			return;
+		}
 		const player = this.players.find((p) => p.user.id === quitterId);
 		if (!player) throw new NotFoundException('Player not found');
 		const opponent = this.players.find((p) => p.user.id !== quitterId);
@@ -389,6 +439,7 @@ export class LocalGame {
 	}
 
 	movePlayer(playerId: number, y: number) {
+		console.log('movePlayer', playerId, y);
 		if (this.state != 'started') return;
 		const player = this.players.find((p) => p.user.id === playerId);
 
@@ -435,7 +486,25 @@ export class LocalGame {
 		this.resetPlayers();
 	}
 
+	// Return the new ball speed (after bounce on paddle)
+	_paddleBounce(
+		paddle: LocalGame['players'][0]['paddle'],
+		angle1: number,
+		angle2: number,
+	): {
+		x: number;
+		y: number;
+	} {
+		const diff = paddle.y - this.ball.y;
+		const angle = p5Map(diff, 0, paddle.height, angle1, angle2);
+		return {
+			x: Math.cos(angle) * this.options.speed,
+			y: Math.sin(angle) * this.options.speed,
+		};
+	}
+
 	update() {
+		// console.log('update', this.state);
 		if (this.state != 'started') return;
 		// y: keep ball inside of vertical bounds
 		if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {
@@ -443,52 +512,101 @@ export class LocalGame {
 		}
 		this.ball.y += this.ball.speed.y;
 
-		// x: opponent
-		if (this.ball.x - this.ball.radius <= this.players[0].paddle.x) {
-			if (
-				this.ball.y > this.ball.y - this.players[0].paddle.radius &&
-				this.ball.y <
-					this.players[0].paddle.y + this.players[0].paddle.radius
-			) {
-				// opponent hits the ball
-				const diff =
-					this.ball.y -
-					(this.players[0].paddle.y - this.players[0].paddle.radius);
-				const angle = p5Map(
-					diff,
-					0,
-					this.players[0].paddle.radius,
-					degRad(45),
-					degRad(45),
-				);
-				this.ball.speed.x = Math.sin(angle) * this.options.speed;
-				this.ball.speed.y = Math.cos(angle) * this.options.speed;
-			} else this.addScore(this.players[1]);
-		}
+		// check collision between ball and creator paddle
+		let pX = this.players[0].paddle.x - this.players[0].paddle.width / 2;
+		let pY = this.players[0].paddle.y - this.players[0].paddle.height / 2;
+		if (
+			!(
+				this.ball.x + this.ball.radius < pX ||
+				this.ball.x - this.ball.radius >
+					pX + this.players[0].paddle.width ||
+				this.ball.y + this.ball.radius < pY ||
+				this.ball.y - this.ball.radius >
+					pY + this.players[0].paddle.height
+			)
+		)
+			this.ball.speed = this._paddleBounce(
+				this.players[0].paddle,
+				-degRad(45),
+				degRad(45),
+			);
 
-		// // x: me
-		if (this.ball.x + this.ball.radius >= this.players[1].paddle.x) {
-			if (
-				this.ball.y >
-					this.players[1].paddle.y - this.players[1].paddle.radius &&
-				this.ball.y <
-					this.players[1].paddle.y + this.players[1].paddle.radius
-			) {
-				// I hits the ball
-				const diff =
-					this.ball.y -
-					(this.players[1].paddle.y - this.players[1].paddle.radius);
-				const angle = p5Map(
-					diff,
-					0,
-					this.players[0].paddle.radius,
-					degRad(225),
-					degRad(135),
-				);
-				this.ball.speed.x = Math.sin(angle) * this.options.speed;
-				this.ball.speed.y = Math.cos(angle) * this.options.speed;
-			} else this.addScore(this.players[0]);
-		}
+		// check collision between ball and opponent paddle
+		pX = this.players[1].paddle.x - this.players[1].paddle.width / 2;
+		pY = this.players[1].paddle.y - this.players[1].paddle.height / 2;
+		if (
+			!(
+				this.ball.x + this.ball.radius < pX ||
+				this.ball.x - this.ball.radius >
+					pX + this.players[1].paddle.width ||
+				this.ball.y + this.ball.radius < pY ||
+				this.ball.y - this.ball.radius >
+					pY + this.players[1].paddle.height
+			)
+		)
+			this.ball.speed = this._paddleBounce(
+				this.players[1].paddle,
+				degRad(225),
+				degRad(135),
+			);
+
+		// creator scores
+		if (this.ball.x - this.ball.radius <= 0) this.addScore(this.players[1]);
+		// opponent scores
+		if (this.ball.x + this.ball.radius >= this.screen.width)
+			this.addScore(this.players[0]);
+
+		// if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {
+		// 	this.ball.speed.y *= -1;
+		// }
+		// this.ball.y += this.ball.speed.y;
+
+		// // x: opponent
+		// if (this.ball.x - this.ball.radius <= this.players[0].paddle.x) {
+		// 	if (
+		// 		this.ball.y > this.ball.y - this.players[0].paddle.radius &&
+		// 		this.ball.y <
+		// 			this.players[0].paddle.y + this.players[0].paddle.radius
+		// 	) {
+		// 		// opponent hits the ball
+		// 		const diff =
+		// 			this.ball.y -
+		// 			(this.players[0].paddle.y - this.players[0].paddle.radius);
+		// 		const angle = p5Map(
+		// 			diff,
+		// 			0,
+		// 			this.players[0].paddle.radius,
+		// 			degRad(45),
+		// 			degRad(45),
+		// 		);
+		// 		this.ball.speed.x = Math.sin(angle) * this.options.speed;
+		// 		this.ball.speed.y = Math.cos(angle) * this.options.speed;
+		// 	} else this.addScore(this.players[1]);
+		// }
+
+		// // // x: me
+		// if (this.ball.x + this.ball.radius >= this.players[1].paddle.x) {
+		// 	if (
+		// 		this.ball.y >
+		// 			this.players[1].paddle.y - this.players[1].paddle.radius &&
+		// 		this.ball.y <
+		// 			this.players[1].paddle.y + this.players[1].paddle.radius
+		// 	) {
+		// 		// I hits the ball
+		// 		const diff =
+		// 			this.ball.y -
+		// 			(this.players[1].paddle.y - this.players[1].paddle.radius);
+		// 		const angle = p5Map(
+		// 			diff,
+		// 			0,
+		// 			this.players[0].paddle.radius,
+		// 			degRad(225),
+		// 			degRad(135),
+		// 		);
+		// 		this.ball.speed.x = Math.sin(angle) * this.options.speed;
+		// 		this.ball.speed.y = Math.cos(angle) * this.options.speed;
+		// 	} else this.addScore(this.players[0]);
+		// }
 		this.ball.x += this.ball.speed.x;
 
 		this.connectedClientsService

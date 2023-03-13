@@ -60,7 +60,7 @@ export function exceptionToObj(exception: HttpException): WSResponse {
 
 	return {
 		statusCode: 500,
-		error: 'Internal Server Error ()',
+		error: 'Internal Server Error',
 		messages: [exception.message],
 	};
 }

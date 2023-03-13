@@ -182,14 +182,16 @@ export class UsersService {
 		return { secret, url };
 	}
 
-	async disableTotp(user: User): Promise<void> {
+	async disableTotp(user: User): Promise<{ otp: null }> {
 		// Update user TOTP secret
-		if(!user.id42) {
-			throw new ForbiddenException('You can\'t disable TOTP if you don\'t have a 42 account');
-		}
+		if (!user.id42)
+			throw new ForbiddenException(
+				"You can't disable TOTP if you don't have a 42 account",
+			);
 		await this.update(user.id, user.id, {
 			otp: null,
 		});
+		return { otp: null };
 	}
 
 	async getUserFromSocket(socket: any): Promise<User> {
@@ -224,12 +226,19 @@ export class UsersService {
 		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
-		// Check if already invited or already friend
-		if (newFriend.friends.includes(inviter)) {
+		// Check if friendship already exists
+		const friendship = await this.userFriendsRepository.findOne({
+			where: [
+				{ inviterId: inviter.id, inviteeId: newFriend.id },
+				{ inviterId: newFriend.id, inviteeId: inviter.id },
+			],
+		});
+		if (friendship && friendship.accepted)
+			throw new ConflictException('You are already friends');
+		else if (friendship)
 			throw new ConflictException(
-				'User already invited or already friend',
+				'There is already a pending invitation',
 			);
-		}
 
 		// Check if newFriend banned inviter
 		const banned = await this.bannedUsersRepository.findOne({
@@ -258,12 +267,15 @@ export class UsersService {
 		if (!inviter) throw new NotFoundException('User not found');
 
 		const friendship = await this.userFriendsRepository.findOne({
-			where: { inviterId, inviteeId: inviteeId },
+			where: [
+				{ inviterId: inviter.id, inviteeId: inviteeId },
+				{ inviterId: inviteeId, inviteeId: inviter.id },
+			],
 		});
 		if (!friendship)
 			throw new NotFoundException('Friendship request not found');
 		if (friendship.accepted)
-			throw new ConflictException('Friendship already accepted');
+			throw new ConflictException('You are already friends');
 
 		friendship.accepted = true;
 
@@ -516,7 +528,7 @@ export class UsersService {
 
 		if (user.status != status) {
 			user.status = status;
-			user = await this.usersRepository.save(user);
+			user = await this.save(user);
 
 			// Propage the new status
 			this.gateway.propagateUserUpdate(user, 'users_update');

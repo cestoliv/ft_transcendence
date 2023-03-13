@@ -37,13 +37,16 @@ function App() {
 			headers: {
 				Authorization: `Bearer ${cookies.bearer}`,
 			},
+		}).catch((error) => {
+			console.log(error);
+			setAuth({ bearer: null, otp_ok: false, user: null });
 		});
+		if (!response) return;
+
 		const data = await response.json();
-		console.log(data);
 		setUserLoading(false);
 		if (response.ok) {
 			setUser(data);
-			console.log('user', data);
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
 				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
 			// Connect to socket
@@ -55,7 +58,7 @@ function App() {
 		} else if (response.status === 401) {
 			// User is not connected
 			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
-		} else console.error(data);
+		} else console.log(data);
 	};
 
 	useEffect(() => {
