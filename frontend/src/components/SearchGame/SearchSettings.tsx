@@ -29,7 +29,7 @@ export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: Sear
 		{ value: 'null', label: 'No limit' },
 	];
 	return (
-		<div className="searchGame-settings">
+		<div className="searchGame-settings slide-left">
 			<p className="create-title">Create a game</p>
 			{/* <label htmlFor="visibility_select">Visibility</label>
 			<div className="nes-select is-dark">

@@ -14,7 +14,6 @@ import NotFound from './NotFound';
 const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;
 	const socket = useContext(SocketContext);
-	const navigate = useNavigate();
 	const { gameInfo } = useGameInfo();
 	const computeCanvasSize = () => {
 		const parent = document.getElementById('game-container');

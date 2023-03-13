@@ -215,3 +215,20 @@
 .formControl {
 	margin-top: 20px;
 }
+
+@media (max-width: 768px) {
+	.searchGame-wrapper {
+		.searchGame-settings {
+			display: none;
+			position: absolute;
+			width: 200px;
+			right: -200px;
+			height: calc(100% - 10vh);
+			transition: right 3s ease;
+		}
+		.active-searchGame-settings {
+			display: block;
+			right: 0;
+		}
+	}
+}

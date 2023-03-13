@@ -130,4 +130,5 @@ export interface ILocalGameInfo {
 		score: number;
 	}>;
 	paddleHeight: number;
+	isWatching: boolean;
 }

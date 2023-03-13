@@ -1,20 +1,10 @@
 import React, { useEffect, useContext } from 'react';
 import { message } from 'antd';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import {
-	IChannel,
-	IUser,
-	IUserFriend,
-	IChannelMessage,
-	IUserMessage,
-	IChannelInvitedUser,
-	IChannelBannedUser,
-	ILocalGameInfo,
-} from '../interfaces';
+import { IChannel, IUser, IUserFriend, ILocalGameInfo } from '../interfaces';
 
 import FriendsList from '../components/FriendsList';
 import useGameInfo from '../hooks/useGameInfo';
@@ -27,7 +17,6 @@ type FriendsProps = {
 
 export const SearchGame = (props: FriendsProps) => {
 	const socket = useContext(SocketContext);
-	const navigate = useNavigate();
 
 	// for friendlist component
 	const [chanList, setChanList] = useState<IChannel[]>([]);
@@ -56,8 +45,12 @@ export const SearchGame = (props: FriendsProps) => {
 		active_elem = element;
 	};
 
+	const showOptions = () => {
+		document.getElementsByClassName('searchGame-settings')[0]?.classList.toggle('active-searchGame-settings');
+	};
+
 	const createGame = () => {
-		if (gameInfo) {
+		if (gameInfo || inMatchmaking) {
 			message.error('You are already in a game');
 			return;
 		}
@@ -365,6 +358,9 @@ export const SearchGame = (props: FriendsProps) => {
 						</button>
 					</Box>
 				</Modal> */}
+				<button onClick={showOptions} className="nes-btn">
+					Settings
+				</button>
 			</div>
 			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} createGame={createGame} />
 			{/* <div className="searchGame-settings">

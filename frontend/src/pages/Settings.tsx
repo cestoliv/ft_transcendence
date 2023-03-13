@@ -1,9 +1,9 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import { message, Badge } from 'antd'
+import { message, Badge } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
-import { IChannel, IUser, IUserFriend } from '../interfaces';
+import { IUser } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import Modal from '@mui/material/Modal';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,11 @@ import { useNavigate } from 'react-router-dom';
 type SettingsProps = {
 	user_me: IUser;
 	auth: Record<string, unknown>;
+};
+
+type Totp = {
+	secret: string;
+	url: string;
 };
 
 export const Settings = (props: SettingsProps) => {
@@ -22,19 +27,18 @@ export const Settings = (props: SettingsProps) => {
 	const closePictureModalHandler = () => setIsOpenPictureModal(false);
 
 	const [isTotpModalOpen, setIsTotpModalOpen] = useState(false);
-	const openTotpModal = () => setIsTotpModalOpen(true);
 	const closeTotpModal = () => setIsTotpModalOpen(false);
 
 	const [isOpen2FACheckModal, setIsOpen2FACheckModal] = useState(false);
 	const open2FACheckModal = (e: ChangeEvent<HTMLInputElement>) => {
-		setIsOpen2FACheckModal(true)
+		setIsOpen2FACheckModal(true);
 		setIsChecked2FA(e.target.checked);
-	}
+	};
 	const close2FACheckModal = () => {
 		setIsOpen2FACheckModal(false);
-		setIsChecked2FA(prev => !prev);
-	}
-	const [totp, setTotp] = useState(null);
+		setIsChecked2FA((prev) => !prev);
+	};
+	const [totp, setTotp] = useState<Totp | null>(null);
 
 	const [isChecked2FA, setIsChecked2FA] = useState(false);
 
@@ -64,7 +68,7 @@ export const Settings = (props: SettingsProps) => {
 			body: formData,
 		})
 			.then((response) => response.json())
-			.then((result) => {
+			.then(() => {
 				message.success('Profil Picture uploaded');
 			})
 			.catch((error) => {
@@ -82,19 +86,20 @@ export const Settings = (props: SettingsProps) => {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${props.auth.bearer}`,
-				}
-			})
+				},
+			});
 			const data = await response.json();
+			console.log(data);
 			setTotp(data);
 			setIsOpen2FACheckModal(false);
-			setIsTotpModalOpen(true)
+			setIsTotpModalOpen(true);
 		} else if (!isChecked2FA) {
 			const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/disable`, {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${props.auth.bearer}`,
-				}
-			})
+				},
+			});
 			if (response.ok) {
 				message.success('2FA disabled');
 				setTotp(null);
@@ -103,14 +108,9 @@ export const Settings = (props: SettingsProps) => {
 				message.error("You can't disable 2FA on not 42 account.");
 			}
 		}
-	}
+	};
 
-	const cancelCheck2FA = () => {
-		setIsOpen2FACheckModal(false);
-		setIsChecked2FA((prev) => !prev);
-	}
-
-	const submit42ProfilPicture = async (event: any) => {
+	const submit42ProfilPicture = async () => {
 		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
 			method: 'GET',
 			headers: {
@@ -159,24 +159,30 @@ export const Settings = (props: SettingsProps) => {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${props.auth.bearer}`,
-			}
-		})
+			},
+		});
 		if (response.ok) {
 			const data = await response.json();
 			data ? setIsChecked2FA(true) : setIsChecked2FA(false);
 		}
-	}
+	};
 
 	useEffect(() => {
 		fetch2FA();
-	}, [])
+	}, []);
 
 	return (
 		<div className="settings-wrapper">
 			<div className="settings">
-				<Badge onClick={openPictureModalHandler} count={<img className="edit-icon" src="https://static.thenounproject.com/png/2758640-200.png" />}>
-					<img className="profile-picture" src={props.user_me.profile_picture} />
-				</Badge>
+				<div onClick={openPictureModalHandler}>
+					<Badge
+						count={
+							<img className="edit-icon" src="https://static.thenounproject.com/png/2758640-200.png" />
+						}
+					>
+						<img className="profile-picture" src={props.user_me.profile_picture} />
+					</Badge>
+				</div>
 				<div className="user-name">
 					<p>{props.user_me.displayName}</p>
 					<p>@{props.user_me.username}</p>
@@ -190,7 +196,13 @@ export const Settings = (props: SettingsProps) => {
 							Random Profil Picture
 						</button>
 						<form className="form-file-profil-picture" onSubmit={submitProfilPicture}>
-							<input type="file" name="file" id="file" className="inputfile" onChange={handleFileChange} />
+							<input
+								type="file"
+								name="file"
+								id="file"
+								className="inputfile"
+								onChange={handleFileChange}
+							/>
 							<label htmlFor="file">{fileName || 'Choose a file'}</label>
 							<input type="submit" className="form-file-profil-picture-submit-button" />
 						</form>
@@ -210,35 +222,41 @@ export const Settings = (props: SettingsProps) => {
 				</form>
 				<div className="divider"></div>
 				<label>
-					<input checked={isChecked2FA} onChange={open2FACheckModal} type="checkbox" className="nes-checkbox is-dark" />
+					<input
+						checked={isChecked2FA}
+						onChange={open2FACheckModal}
+						type="checkbox"
+						className="nes-checkbox is-dark"
+					/>
 					<span>2FA</span>
 				</label>
 				<Modal open={isOpen2FACheckModal} onClose={close2FACheckModal}>
 					<div className="modal-2fa-check modal">
-						{
-							isChecked2FA ? <h3>Are you sure to activate 2FA ?</h3> : <h3>Are you sure to deactivate 2FA ?</h3>
-						}
+						{isChecked2FA ? (
+							<h3>Are you sure to activate 2FA ?</h3>
+						) : (
+							<h3>Are you sure to deactivate 2FA ?</h3>
+						)}
 						<div className="button-wrapper">
-							<button onClick={close2FACheckModal} className="nes-btn is-error">No</button>
-							<button onClick={handle2FA} className="nes-btn is-success">Yes</button>
+							<button onClick={close2FACheckModal} className="nes-btn is-error">
+								No
+							</button>
+							<button onClick={handle2FA} className="nes-btn is-success">
+								Yes
+							</button>
 						</div>
 					</div>
 				</Modal>
-				{
-					totp && (
-						<Modal
-							open={isTotpModalOpen}
-							onClose={closeTotpModal}
-						>
-							<div className="info-2fa modal">
-								<p className="title">Scan this QR Code : </p>
-								<QRCodeCanvas value={totp.url} />
-								<p>Or enter this code in your 2FA App :</p>
-								<p className="code">{totp.secret}</p>
-							</div>
-						</Modal>
-					)
-				}
+				{totp && (
+					<Modal open={isTotpModalOpen} onClose={closeTotpModal}>
+						<div className="info-2fa modal">
+							<p className="title">Scan this QR Code : </p>
+							<QRCodeCanvas value={totp.url} />
+							<p>Or enter this code in your 2FA App :</p>
+							<p className="code">{totp.secret}</p>
+						</div>
+					</Modal>
+				)}
 			</div>
 		</div>
 	);
