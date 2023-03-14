@@ -424,12 +424,14 @@ export class UsersService {
 							err.message.includes(
 								'Input buffer contains unsupported image format',
 							)
-						)
+						) {
+							console.log('error test')
 							reject(
 								new BadRequestException(
 									'File type not supported',
 								),
 							);
+						}
 						else {
 							reject(
 								new BadRequestException(
@@ -443,8 +445,10 @@ export class UsersService {
 		});
 
 		const deleteOldProfilePicture = new Promise<void>((resolve, reject) => {
+			console.log('HEREEEE no ? !!!')
 			if (!user.profile_picture) resolve();
 			const filename = user.profile_picture.split('/').slice(-1)[0];
+			console.log(filename)
 			fs.unlink(
 				path.join('./', 'uploads', 'profile-pictures', filename),
 				(err) => {
@@ -475,6 +479,7 @@ export class UsersService {
 			this.gateway.propagateUserUpdate(user, 'users_update');
 			return user;
 		} catch (err) {
+			console.log(err)
 			throw err;
 		}
 	}

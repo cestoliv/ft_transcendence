@@ -73,7 +73,7 @@
 } */
 
 #active-conv-bg {
-	background : #424549 !important;
+	background: #424549 !important;
 	opacity: 0.7;
 }
 
@@ -115,7 +115,7 @@
 // }
 
 .chan-list-buttons button:hover {
-	background-color: #4E6AD0;
+	background-color: #4e6ad0;
 	cursor: pointer;
 	color: black;
 }
@@ -288,13 +288,13 @@
 
 .chan-list-item {
 	display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
+	justify-content: space-between;
+	margin-bottom: 5px;
 	background: white !important;
-    color: #131313;
+	color: #131313;
 	font-size: 10px;
 	box-shadow: inset -6px -6px lightgray;
-    padding: 10px 10px;
+	padding: 10px 10px;
 }
 
 .chan-list-item:hover {
@@ -403,6 +403,14 @@
 	}
 }
 
+@media only screen and (max-width: 1000px) {
+	.searchGame-wrapper {
+		.priv-conv-list {
+			width: 200px;
+		}
+	}
+}
+
 @media only screen and (max-width: 1500px) {
 	.burger-menu {
 		position: fixed;
@@ -456,23 +464,24 @@
 		left: 0;
 	}
 
-	.priv-conv-list {
-		position: fixed;
-		z-index: 1;
-		top: 10vh;
-		left: -300px;
-		width: 300px;
-		height: 90vh;
-		max-height: 90vh;
-		padding-top: 20px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		transition: left 0.5s ease;
-	}
-
-	.active-friend-list {
-		left: 0;
+	.friends-wrapper {
+		.priv-conv-list {
+			position: fixed;
+			z-index: 1;
+			top: 10vh;
+			left: -300px;
+			width: 300px;
+			height: 90vh;
+			max-height: 90vh;
+			padding-top: 20px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			transition: left 0.5s ease;
+		}
+		.active-friend-list {
+			left: 0;
+		}
 	}
 
 	.chat {
@@ -507,10 +516,10 @@
 } */
 
 .badge {
-		height: 30px;
-		width: 30px;
-		border-radius: 50%;
-		margin-right: 5px;
+	height: 30px;
+	width: 30px;
+	border-radius: 50%;
+	margin-right: 5px;
 }
 
 .avatar {

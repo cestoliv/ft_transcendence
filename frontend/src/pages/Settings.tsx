@@ -60,20 +60,18 @@ export const Settings = (props: SettingsProps) => {
 		const formData = new FormData();
 		console.log(file);
 		if (file) formData.append('profil_picture', file);
-		fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
+		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${props.auth.bearer}`,
 			},
 			body: formData,
-		})
-			.then((response) => response.json())
-			.then(() => {
-				message.success('Profil Picture uploaded');
-			})
-			.catch((error) => {
-				console.error('Error:', error);
-			});
+		});
+		if (response.ok) {
+			message.success('Profil Picture uploaded');
+		} else {
+			message.error('Profil Picture not uploaded');
+		}
 	};
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

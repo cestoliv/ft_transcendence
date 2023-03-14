@@ -8,6 +8,10 @@
 	flex-grow: 1;
 	display: flex;
 	flex-direction: row;
+	.show-settings,
+	.show-friends {
+		display: none;
+	}
 	.button-wrapper {
 		display: flex;
 		flex-direction: column;
@@ -216,6 +220,14 @@
 	margin-top: 20px;
 }
 
+@media (max-width: 1000px) {
+	.searchGame-wrapper {
+		.searchGame-settings {
+			width: 200px;
+		}
+	}
+}
+
 @media (max-width: 768px) {
 	.searchGame-wrapper {
 		.searchGame-settings {
@@ -229,6 +241,23 @@
 		.active-searchGame-settings {
 			display: block;
 			right: 0;
+		}
+		.priv-conv-list {
+			display: none;
+			position: absolute;
+			width: 200px;
+			left: -200px;
+			height: calc(100% - 10vh);
+			transition: left 3s ease;
+		}
+		.active-friends-list {
+			display: flex;
+			left: 0px;
+		}
+		.show-settings,
+		.show-friends {
+			margin-top: 10px;
+			display: block;
 		}
 	}
 }

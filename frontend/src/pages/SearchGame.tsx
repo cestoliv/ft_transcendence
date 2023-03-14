@@ -6,6 +6,7 @@ import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
 import { IChannel, IUser, IUserFriend, ILocalGameInfo } from '../interfaces';
 
+import useMatchmaking from '../hooks/useMatchmaking';
 import FriendsList from '../components/FriendsList';
 import useGameInfo from '../hooks/useGameInfo';
 import { SocketContext } from '../context/socket';
@@ -33,7 +34,7 @@ export const SearchGame = (props: FriendsProps) => {
 	const [points, setPoints] = useState('5');
 
 	const { gameInfo, setGameInfo } = useGameInfo();
-	const [inMatchmaking, setInMatchmaking] = useState<boolean>(false);
+	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
 
 	const [user, setUser] = useState<IUser>();
 
@@ -47,6 +48,10 @@ export const SearchGame = (props: FriendsProps) => {
 
 	const showOptions = () => {
 		document.getElementsByClassName('searchGame-settings')[0]?.classList.toggle('active-searchGame-settings');
+	};
+
+	const showFriends = () => {
+		document.getElementsByClassName('priv-conv-list')[0]?.classList.toggle('active-friends-list');
 	};
 
 	const createGame = () => {
@@ -358,8 +363,11 @@ export const SearchGame = (props: FriendsProps) => {
 						</button>
 					</Box>
 				</Modal> */}
-				<button onClick={showOptions} className="nes-btn">
+				<button onClick={showOptions} className="show-settings nes-btn">
 					Settings
+				</button>
+				<button onClick={showFriends} className="show-friends nes-btn">
+					Friends
 				</button>
 			</div>
 			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} createGame={createGame} />

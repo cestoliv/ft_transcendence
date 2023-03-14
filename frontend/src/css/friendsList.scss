@@ -1,32 +1,31 @@
 .friendsList-wrapper {
-    display: flex;
-    flex-direction: column;
-    margin: 10px;
-    font-size: 10px;
-    div {
-        border-radius: 5px;
-        border: none;
-        padding: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .friend-list-item-username {
-        color: white;
-    }
+	display: flex;
+	flex-direction: column;
+	margin: 10px;
+	font-size: 10px;
+	div {
+		border-radius: 5px;
+		border: none;
+		padding: 5px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.friend-list-item-username {
+		color: white;
+	}
 }
 
 .add-accept-friend {
-    display: flex;
-    gap: 5px;
-    flex-direction: column;
-    padding: 10px 20px;
-    button {
-        font-size: 8px;
-        border-image-repeat: inherit;
-    }
+	display: flex;
+	gap: 5px;
+	flex-direction: column;
+	padding: 10px 20px;
+	button {
+		font-size: 8px;
+		border-image-repeat: inherit;
+	}
 }
-
 
 /* .en-attente-button{
     background-color: #6477B9;
@@ -40,118 +39,119 @@
 } */
 
 .en-attente-button:hover {
-    background-color: #4C60A9;
-    cursor: pointer;
+	background-color: #4c60a9;
+	cursor: pointer;
 }
 
 .friend-request-modal {
-    max-height: 400px;
-    overflow: scroll;
+	max-height: 400px;
+	overflow: scroll;
 }
 
 .friend-request-modal::-webkit-scrollbar {
-    display: none;
+	display: none;
 }
 
 /* add friend form */
 
 .add-friend-form {
-    input {
-        border-image-repeat: inherit;
-        font-size: 8px;
-        border-image-outset: 1;
-        padding: 0.5rem 0.5rem;
-    }
+	input {
+		border-image-repeat: inherit;
+		font-size: 8px;
+		border-image-outset: 1;
+		padding: 0.5rem 0.5rem;
+	}
 }
 
 .add-friend-form-input::placeholder {
-    color: black;
-    padding-left: 5px;
+	color: black;
+	padding-left: 5px;
 }
 
 .add-friend-form-input:focus {
-    background-color: #4E6AD0;
-    outline: none;
+	background-color: #4e6ad0;
+	outline: none;
 }
 
 .friendsList-settings {
-    span {
-        margin-right: 5px;
-    }
-    img {
-        height: 20px;
-        filter: invert(1);
-    }
+	span {
+		margin-right: 5px;
+	}
+	img {
+		height: 20px;
+		filter: invert(1);
+	}
 }
-
 
 /* friend-action-modal */
 
 .friend-action-modal {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 250px;
-    background-color: rgb(52, 63, 62);
-    border-radius: 20px;
-    box-Shadow: 24;
-    padding: 20px 20px;
-    display: flex;
-    gap: 5px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 250px;
+	background-color: rgb(52, 63, 62);
+	border-radius: 20px;
+	box-shadow: 24;
+	padding: 20px 20px;
+	display: flex;
+	gap: 5px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	color: white;
 	font-family: 'Press Start 2P', sans-serif;
 	font-size: 10px;
 	border-image-source: url('data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8" ?><svg version="1.1" width="5" height="5" xmlns="http://www.w3.org/2000/svg"><path d="M2 1 h1 v1 h-1 z M1 2 h1 v1 h-1 z M3 2 h1 v1 h-1 z M2 3 h1 v1 h-1 z" fill="rgb(255,255,255)" /></svg>');
-    outline-color: #e7e7e7;
-    border-style: solid;
-    border-width: 4px;
-    border-image-slice: 2;
-    button {
-        border-image-repeat: inherit;
-        font-size: 8px;
-        width: 100%;
-    }
+	outline-color: #e7e7e7;
+	border-style: solid;
+	border-width: 4px;
+	border-image-slice: 2;
+	button {
+		border-image-repeat: inherit;
+		font-size: 8px;
+		width: 100%;
+	}
 }
 
 .close-friend-list {
-    display: none;
+	display: none;
 }
 
 .close-friend-list:hover {
-    cursor: pointer;
+	cursor: pointer;
 }
 
-@media only screen and (max-width: 1500px) {
-    .close-friend-list {
-        display: inline;
-        position: absolute;
-        top: 1px;
-        right: 4px;
-    }
+.friends-wrapper {
+	@media only screen and (max-width: 1500px) {
+		.close-friend-list {
+			display: inline;
+			position: absolute;
+			top: 1px;
+			right: 4px;
+		}
+	}
 }
 
 .chan-password-form {
-    width: 80%;
-    margin: 0 auto;
+	width: 80%;
+	margin: 0 auto;
 }
 
 .chan-password-input {
-    width: 100%;
-    background-color: #36393e !important;
-    font-size: 10px;
-    color: white;
-    border-radius: 15px;
-    padding: 5px;
-    border: none;
+	width: 100%;
+	background-color: #36393e !important;
+	font-size: 10px;
+	color: white;
+	border-radius: 15px;
+	padding: 5px;
+	border: none;
 }
 
 .chan-password-input::placeholder {
-    color: white;
-    padding-left: 5px;
+	color: white;
+	padding-left: 5px;
 }
 
 .chan-password-input:focus {
