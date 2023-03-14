@@ -106,7 +106,7 @@ export const Ladder = () => {
 			<div>
 			<input className="selectLadder" type="Checkbox" onChange={() => setSelectedLadder(!selectedLadder)} id="myCheckbox" checked={selectedLadder} >
 			</input>
-				{selectedLadder?"Ladder elo": "Ladder Played"}
+			<label htmlFor="myCheckbox">Ladder: {selectedLadder? <><span className="label-item"> elo</span> Played</>: <> elo<span className="label-item"> Played</span></> } </label>
 			</div>
 			<div className='ladder-items-wrapper'>
 				<div className='podium'>
