@@ -40,7 +40,6 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) {
-					console.log("salut!");
 					alert(data.messages);
 					setRedirect(true);
 				}
@@ -91,23 +90,8 @@ export const Stats = (props: StatsProps) => {
 			);
 		}, [rerender, rerendUseEffect]);
 	
-	if (redirect)
-	{
-		Navigate('/404');
-		setRerender(!rerender);
-	}
-	if (!user || !myUser || !userStat || !displayScores) {
-		setTimeout(() => {
-			setRerender(!rerender);
-		}, 1000);
-		return (
-			<div className="loading-wapper">
-				<div>Loading...</div>
-			</div>
-		);
-	}
-	console.log(user, myUser,userStat,displayScores);
-	const initIsfriend = () => {
+		console.log(user, myUser,userStat,displayScores);
+		const initIsfriend = () => {
 		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
 			for (let i = 0; i < l; i++) {
@@ -136,6 +120,22 @@ export const Stats = (props: StatsProps) => {
 		}
 	};
 
+	if (redirect)
+	{
+		Navigate('/404');
+		setRerender(!rerender);
+	}
+	if (!user || !myUser || !userStat || !displayScores) {
+		setTimeout(() => {
+			setRerender(!rerender);
+		}, 1000);
+		return (
+			<div className="loading-wapper">
+				<div>Loading...</div>
+			</div>
+		);
+	}
+	
 	const statClickHandler= (score: IGame) => {
 		let opponent_profil: string = "/stats/";
 		if (user.id !== score.loser.id){

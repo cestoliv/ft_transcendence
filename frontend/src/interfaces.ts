@@ -22,7 +22,6 @@ export interface IMutedUser {
 	mutedId: number,
 	muted: IUser,
 	until: Date
-	
 }
 
 export interface IGame {
@@ -38,6 +37,11 @@ export interface IGame {
 	
 	loser: IUser,
 	loserScore: number,
+}
+
+export interface ILeaderboards {
+	elo: IUser[],
+	mostPlayed: IStat[]
 }
 
 export interface IStat{

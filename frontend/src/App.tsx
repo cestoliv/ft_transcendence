@@ -19,6 +19,7 @@ import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
 import useGameInfo from './hooks/useGameInfo';
 import NotFound from './pages/NotFound';
+import Ladder from './pages/Ladder';
 
 function App() {
 	const navigate = useNavigate();
@@ -151,6 +152,7 @@ function App() {
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
+						<Route path="/ladder" element={<Ladder />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />
 				</Routes>
