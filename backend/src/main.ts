@@ -2,12 +2,11 @@ import {
 	FastifyAdapter,
 	NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { PayloadTooLargeException, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import fastifyCookie from '@fastify/cookie';
 import fmp from '@fastify/multipart';
-import { FastifyError } from 'fastify';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -26,19 +25,6 @@ async function bootstrap() {
 		fastifyAdapter,
 	);
 	const config = app.get<ConfigService>(ConfigService);
-
-	// Handle Entity too large error
-	// app.getHttpAdapter()
-	// 	.getInstance()
-	// 	.addHook('onError', (req, res, error, done) => {
-	// 		console.log(error);
-	// 		if (error.statusCode === 413) {
-	// 			console.log('413');
-	// 			throw new PayloadTooLargeException('ergerg');
-	// 		} else {
-	// 			done(error);
-	// 		}
-	// 	});
 
 	app.useGlobalPipes(
 		new ValidationPipe({ whitelist: true, transform: true }),

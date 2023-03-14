@@ -444,14 +444,12 @@ export class UsersService {
 								'Input buffer contains unsupported image format',
 							)
 						) {
-							console.log('error test')
 							reject(
 								new BadRequestException(
 									'File type not supported',
 								),
 							);
-						}
-						else {
+						} else {
 							reject(
 								new BadRequestException(
 									'Error while uploading the file',
@@ -469,7 +467,6 @@ export class UsersService {
 		await new Promise<void>((resolve, reject) => {
 			if (!user.profile_picture) return resolve();
 			const filename = user.profile_picture.split('/').slice(-1)[0];
-			console.log(filename)
 			fs.unlink(
 				path.join('./', 'uploads', 'profile-pictures', filename),
 				(err) => {

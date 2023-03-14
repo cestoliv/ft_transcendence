@@ -60,11 +60,10 @@ export const Settings = (props: SettingsProps) => {
 		const formData = new FormData();
 		console.log(file);
 		if (file) formData.append('profil_picture', file);
-		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
+		await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${props.auth.bearer}`,
-				'Content-Type': 'application/json',
 			},
 			body: formData,
 		})
@@ -76,12 +75,15 @@ export const Settings = (props: SettingsProps) => {
 				};
 			})
 			.then((r) => {
+				console.log(r);
 				if (!r) return;
 				if (r.response.ok) message.success('Profil Picture uploaded');
 				else message.error(r.data.message || r.data.messages[0] || 'Error');
 			})
 			.catch((error) => {
-				message.error(error.message || 'Network Error');
+				// We need to handle this better, but now there is a CORS error that I can't manage to fix
+				message.error('File too large');
+				//message.error(error.message || 'Network Error');
 			});
 	};
 
