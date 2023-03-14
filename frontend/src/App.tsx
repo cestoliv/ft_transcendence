@@ -20,7 +20,7 @@ import useAuth from './hooks/useAuth';
 import useGameInfo from './hooks/useGameInfo';
 import useMatchmaking from './hooks/useMatchmaking';
 import NotFound from './pages/NotFound';
-import Ladder from './pages/Ladder';
+import Ladder from './pages/ladder';
 
 function App() {
 	const navigate = useNavigate();

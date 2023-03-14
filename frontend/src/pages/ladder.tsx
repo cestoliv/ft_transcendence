@@ -104,7 +104,12 @@ export const Ladder = () => {
 	return(
 		<div className='ladder-wrapper'>
 			<div>
-				mode: bouton a faire
+			<input
+						className="display-ladder"
+						type="Checkbox"
+						onChange={() => (setSelectedLadder(!selectedLadder))}
+						checked={selectedLadder}></input>
+				{leaderboards?"Ladder elo":"Ladder played"}
 			</div>
 			<div className='ladder-items-wrapper'>
 				<div className='podium'>
