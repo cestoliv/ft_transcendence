@@ -2,6 +2,8 @@
 
 Create an `.env` file at the base of the project (next to the `docker-compose.dev.yml`)
 
+Generate the secrets with `openssl rand -hex 16`.
+
 ```env
 DB_NAME=transcendence
 DB_USER=transcendence
@@ -12,8 +14,10 @@ API42_CLIENT_SECRET=<your 42 app client SECRET>
 API42_REDIRECT_URI=http://api.transcendence.local/api/v1/auth/42oauth
 
 JWT_SECRET=<a random string>
-COOKIE_DOMAIN=.transcendence.local
+TOTP_SECRET=<a random string>
+COOKIE_SECRET=<a random string>
 
+COOKIE_DOMAIN=.transcendence.local
 FRONTEND_URL=http://transcendence.local
 API_URL=http://api.transcendence.local/api/v1
 SOCKET_URL=http://api.transcendence.local

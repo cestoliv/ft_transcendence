@@ -151,14 +151,6 @@ export class LocalGame {
 		new Promise(async () => {
 			// Add creator to game
 			await this.addPlayer(creatorId);
-			// console.log('Emitting games_available');
-			// console.log(
-			// 	Array.from(await this.gamesService.games).map((game) =>
-			// 		game[1].getInfo(),
-			// 	),
-			// );
-			// console.log(await this.gamesService.getAvailableGamesInfo());
-
 			// Send updated games available to all users
 			this.server.emit(
 				'games_available',
@@ -289,7 +281,6 @@ export class LocalGame {
 						// Ignore error
 					});
 			});
-			console.log(`Game ${this.id} started`);
 			setTimeout(() => {
 				this.end();
 			}, this.options.maxDuration * 1000 * 60);
@@ -303,7 +294,6 @@ export class LocalGame {
 	}
 
 	async end(winner: User | null = null) {
-		console.log(`\n\n\n\nGame ${this.id} ended`);
 		if (this.state === 'ended') return;
 
 		if (this.state === 'waiting') {
@@ -336,11 +326,12 @@ export class LocalGame {
 				this.players[0].score > this.players[1].score
 					? this.players[0].user
 					: this.players[1].user;
+			// On draw, the winenr is the creator and the loser is the joiner
 			if (this.players[0].score === this.players[1].score)
-				this.winner = null;
+				this.winner = this.players[0];
 		}
 
-		// Set winner and loser
+		// Set winner score and loser
 		this.winner.score = this.players.find(
 			(player) => player.user.id === this.winner.user.id,
 		).score;
@@ -421,6 +412,7 @@ export class LocalGame {
 
 	async giveUp(quitterId: number) {
 		if (this.state != 'started') {
+			this.state = 'ended';
 			// Delete from games array
 			this.gamesService.games.delete(this.id);
 			// Send updated available games to all users
@@ -439,7 +431,6 @@ export class LocalGame {
 	}
 
 	movePlayer(playerId: number, y: number) {
-		console.log('movePlayer', playerId, y);
 		if (this.state != 'started') return;
 		const player = this.players.find((p) => p.user.id === playerId);
 
@@ -504,7 +495,6 @@ export class LocalGame {
 	}
 
 	update() {
-		// console.log('update', this.state);
 		if (this.state != 'started') return;
 		// y: keep ball inside of vertical bounds
 		if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {
