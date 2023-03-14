@@ -395,7 +395,7 @@ export class LocalGame {
 				await this.gamesService.updateElo(
 					player.user.id,
 					player.user.elo,
-					opponent.user.id,
+					opponent.user.elo,
 					gameResult,
 				);
 			});
