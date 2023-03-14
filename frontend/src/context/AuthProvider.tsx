@@ -1,5 +1,5 @@
 import React, { createContext, useState, ReactNode } from 'react';
-import { IAuth, IUser, IUserFriend, IChannel } from '../interfaces';
+import { IAuth } from '../interfaces';
 import { useCookies } from 'react-cookie';
 
 interface AuthContextType {
@@ -14,7 +14,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
+	const [cookies] = useCookies(['bearer']);
 	const [auth, setAuth] = useState<IAuth>({
 		bearer: cookies.bearer,
 		otp_ok: false,

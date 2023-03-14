@@ -3,7 +3,7 @@ import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import { message, Badge } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
-import { IChannel, IUser, IUserFriend } from '../interfaces';
+import { IUser } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import Modal from '@mui/material/Modal';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,11 @@ import { useNavigate } from 'react-router-dom';
 type SettingsProps = {
 	user_me: IUser;
 	auth: Record<string, unknown>;
+};
+
+type Totp = {
+	secret: string;
+	url: string;
 };
 
 export const Settings = (props: SettingsProps) => {
@@ -22,7 +27,6 @@ export const Settings = (props: SettingsProps) => {
 	const closePictureModalHandler = () => setIsOpenPictureModal(false);
 
 	const [isTotpModalOpen, setIsTotpModalOpen] = useState(false);
-	const openTotpModal = () => setIsTotpModalOpen(true);
 	const closeTotpModal = () => setIsTotpModalOpen(false);
 
 	const [isOpen2FACheckModal, setIsOpen2FACheckModal] = useState(false);
@@ -34,7 +38,7 @@ export const Settings = (props: SettingsProps) => {
 		setIsOpen2FACheckModal(false);
 		setIsChecked2FA((prev) => !prev);
 	};
-	const [totp, setTotp] = useState(null);
+	const [totp, setTotp] = useState<Totp | null>(null);
 
 	const [isChecked2FA, setIsChecked2FA] = useState(false);
 
@@ -56,7 +60,7 @@ export const Settings = (props: SettingsProps) => {
 		const formData = new FormData();
 		console.log(file);
 		if (file) formData.append('profil_picture', file);
-		fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
+		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${props.auth.bearer}`,
@@ -94,6 +98,7 @@ export const Settings = (props: SettingsProps) => {
 				},
 			});
 			const data = await response.json();
+			console.log(data);
 			setTotp(data);
 			setIsOpen2FACheckModal(false);
 			setIsTotpModalOpen(true);
@@ -114,12 +119,7 @@ export const Settings = (props: SettingsProps) => {
 		}
 	};
 
-	const cancelCheck2FA = () => {
-		setIsOpen2FACheckModal(false);
-		setIsChecked2FA((prev) => !prev);
-	};
-
-	const submit42ProfilPicture = async (event: any) => {
+	const submit42ProfilPicture = async () => {
 		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
 			method: 'GET',
 			headers: {
@@ -183,12 +183,15 @@ export const Settings = (props: SettingsProps) => {
 	return (
 		<div className="settings-wrapper">
 			<div className="settings">
-				<Badge
-					onClick={openPictureModalHandler}
-					count={<img className="edit-icon" src="https://static.thenounproject.com/png/2758640-200.png" />}
-				>
-					<img className="profile-picture" src={props.user_me.profile_picture} />
-				</Badge>
+				<div onClick={openPictureModalHandler}>
+					<Badge
+						count={
+							<img className="edit-icon" src="https://static.thenounproject.com/png/2758640-200.png" />
+						}
+					>
+						<img className="profile-picture" src={props.user_me.profile_picture} />
+					</Badge>
+				</div>
 				<div className="user-name">
 					<p>{props.user_me.displayName}</p>
 					<p>@{props.user_me.username}</p>

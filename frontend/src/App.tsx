@@ -18,13 +18,16 @@ import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
 import useGameInfo from './hooks/useGameInfo';
+import useMatchmaking from './hooks/useMatchmaking';
 import NotFound from './pages/NotFound';
+import Ladder from './pages/Ladder';
 
 function App() {
 	const navigate = useNavigate();
 	const socket = useContext(SocketContext);
 	const { auth, setAuth } = useAuth();
 	const { gameInfo, setGameInfo } = useGameInfo();
+	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
@@ -93,6 +96,7 @@ function App() {
 		socket.on('games_start', (data: any) => {
 			console.log('games_start', data);
 			setGameInfo(data);
+			setInMatchmaking(false);
 			navigate(`/pong/${data.id}`);
 		});
 		socket.on('game_invitation', (data: any) => {
@@ -109,8 +113,8 @@ function App() {
 		});
 		return () => {
 			socket.off();
-		}
-	}, [])
+		};
+	}, []);
 
 	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
@@ -189,6 +193,7 @@ function App() {
 						<Route path="/404" element={<NoUserFound />} />
 						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
+						<Route path="/ladder" element={<Ladder />} />
 					</Route>
 					<Route path="*" element={<NotFound />} />
 				</Routes>

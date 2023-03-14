@@ -64,3 +64,22 @@ a {
 .e-settings {
 	background-color: none;
 }
+
+@media (max-width: 400px) {
+	.menu {
+		.menu-title {
+			h1 {
+				font-size: 12px;
+				span {
+					font-size: 16px;
+				}
+			}
+		}
+		ul {
+			gap: 5px;
+			img {
+				height: 25px;
+			}
+		}
+	}
+}

@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { IUser } from '../interfaces';
+import { useEffect, useContext, useState } from 'react';
+import { IUser, IGame, IStat } from '../interfaces';
 import { socket, SocketContext } from '../context/socket';
-import { IScore } from '../interfaces';
-import { useParams } from 'react-router-dom';
+import { useNavigate, Navigate, useParams } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
+import { alertTitleClasses } from '@mui/material';
 
 type StatsProps = {
 	user_me: IUser;
@@ -18,11 +18,12 @@ export const Stats = (props: StatsProps) => {
 	const [is_friend, setIs_friend] = useState(false);
 	const [is_block, setIs_block] = useState(false);
 	const [rerender, setRerender] = useState(false);
-	const rerendUseEffect = true;
-	const displayScores: IScore[] = [
-		{ me: 2, op: 1, op_name: 'NOOB' },
-		{ me: 2, op: 1, op_name: 'NOOB' },
-	];
+	const [displayScores, setDisplayScores] = useState<IGame[]>();
+	const [userStat, setUserStat] = useState<IStat>();
+	const [redirect, setRedirect] = useState(false);
+	const [redirectUrl, setRedirectUrl] = useState('');
+	let Navigate = useNavigate();
+	const rerendUseEffect = !rerender;
 
 	useEffect(() => {
 		let currentId: number;
@@ -38,28 +39,59 @@ export const Stats = (props: StatsProps) => {
 				id: currentId,
 			},
 			(data: any) => {
-				data.elo = 2001;
-				data.wins = 8;
-				data.loses = 3;
+				if (data.messages) {
+					alert(data.messages);
+					setRedirect(true);
+				}
 				setUser(data);
 			},
-		);
+			);
 		socket.emit(
 			'users_get',
 			{
 				id: props.user_me.id,
 			},
 			(data: any) => {
-				setMyUser(data);
-				if (myUser && user) {
-					initIsfriend();
-					initBlocked();
+				if (data.messages) {
+					alert(data.messages);
+					setRedirect(true);
+
 				}
+				setMyUser(data);
+				initIsfriend();
+				initBlocked();
+			},
+			);
+		socket.emit(
+			'games_history',
+			{
+				id: currentId,
+			},
+			(data: any) => {
+				if (data.messages) {
+					alert(data.messages);
+					setRedirect(true);
+				}
+				setDisplayScores(data);
 			},
 		);
-	}, [rerender, rerendUseEffect]);
-
-	const initIsfriend = () => {
+		socket.emit(
+			'games_userStats',
+			{
+				id: currentId,
+			},
+			(data: any) => {
+				if (data.messages) {
+					alert(data.messages);
+					setRedirect(true);
+				}
+				setUserStat(data);
+			},
+			);
+		}, [rerender, rerendUseEffect]);
+	
+		console.log(user, myUser,userStat,displayScores);
+		const initIsfriend = () => {
 		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
 			for (let i = 0; i < l; i++) {
@@ -77,10 +109,10 @@ export const Stats = (props: StatsProps) => {
 		}
 	};
 	const initBlocked = () => {
-		if (myUser && user && user.id !== myUser.id && myUser.blocked) {
-			const l: number = myUser.blocked.length;
+		if (myUser && user && user.id !== myUser.id && myUser.muted) {
+			const l: number = myUser.muted.length;
 			for (let i = 0; i < l; i++) {
-				if (myUser.blocked[i].id === user.id) {
+				if (myUser.muted[i].mutedId === user.id) {
 					return setIs_block(true);
 				}
 			}
@@ -88,26 +120,47 @@ export const Stats = (props: StatsProps) => {
 		}
 	};
 
-	if (!user || !myUser) {
+	if (redirect)
+	{
+		Navigate('/404');
+		setRerender(!rerender);
+	}
+	if (!user || !myUser || !userStat || !displayScores) {
 		setTimeout(() => {
 			setRerender(!rerender);
-		}, 100);
+		}, 1000);
 		return (
 			<div className="loading-wapper">
 				<div>Loading...</div>
 			</div>
 		);
 	}
+	
+	const statClickHandler= (score: IGame) => {
+		let opponent_profil: string = "/stats/";
+		if (user.id !== score.loser.id){
+
+			opponent_profil += score.loser.id;
+		}
+		else {
+			opponent_profil += score.winner.id;
+		}
+		console.log("kikoo",opponent_profil);
+		Navigate(opponent_profil);
+		setRerender(!rerender);
+	}
 	const gameHistory = () => {
-		return displayScores.map((score, index) => (
-			<span className="historic-item" key={index}>
-				{user.username} {score.me} VS {score.op} {score.op_name}
+		const lastTenScores = displayScores.slice(-10);
+ 		 return lastTenScores.map((score, index) => (
+			<span className="historic-item" key={index} onClick={() => statClickHandler(score)}>
+				{score.mode} - {score.maxDuration}min <br />
+				{score.winner.displayName} {score.winnerScore} VS {score.loser.displayName} {score.loserScore}
 			</span>
 		));
 	};
 	const defineRank = () => {
 		const current_elo: number = user.elo;
-		if (current_elo < 1000) {
+		if (current_elo < 1250) {
 			return 'Fer';
 		} else if (current_elo < 1500) {
 			return 'Argent';
@@ -123,7 +176,7 @@ export const Stats = (props: StatsProps) => {
 	};
 	const displayRank = () => {
 		const current_elo: number = user.elo;
-		if (current_elo < 1000)
+		if (current_elo < 1250)
 			return (
 				<img
 					src="https://i.pinimg.com/originals/f5/a5/9d/f5a59d542851a7dcb3d0eae1851af735.png"
@@ -167,7 +220,7 @@ export const Stats = (props: StatsProps) => {
 			);
 	};
 	const percentWinrate = () => {
-		if (user.wins + user.loses > 0) return Math.trunc(100 * (user.wins / (user.loses + user.wins)));
+		if (userStat.stats.wins + userStat.stats.losses > 0) return Math.trunc(100 * (userStat.stats.wins / (userStat.stats.losses + userStat.stats.wins)));
 		else return 0;
 	};
 	const onChangeFriend = () => {
@@ -196,7 +249,6 @@ export const Stats = (props: StatsProps) => {
 					if (data.messages) alert(data.messages);
 				},
 			);
-			//envois ajout ami au back
 		}
 	};
 
@@ -208,7 +260,7 @@ export const Stats = (props: StatsProps) => {
 				'users_mute',
 				{
 					id: user.id,
-					until: new Date().toISOString(),
+					until: '2000-01-01T01:00:00-01:00',
 				},
 				(data: any) => {
 					if (data.messages) alert(data.messages);
@@ -227,35 +279,7 @@ export const Stats = (props: StatsProps) => {
 					if (data.messages) alert(data.messages);
 				},
 			);
-			//envois ajout ami au back
 		}
-	};
-
-	const searchFriendById = (id: number): boolean => {
-		let l: number = myUser.friends.length;
-		for (let i = 0; i < l; i++) {
-			if (myUser.friends[i].id === id) {
-				return true;
-			}
-		}
-		l = myUser.invitedFriends.length;
-		for (let i = 0; i < l; i++) {
-			if (myUser.invitedFriends[i].inviteeId === id) {
-				return true;
-			}
-		}
-		return false;
-	};
-
-	const searchblockedById = (id: number): boolean => {
-		if (!myUser || !myUser.blocked) return false;
-		const l: number = myUser.blocked.length;
-		for (let i = 0; i < l; i++) {
-			if (myUser.blocked[i].id === id) {
-				return true;
-			}
-		}
-		return false;
 	};
 
 	if (myUser.id === user.id)
@@ -300,15 +324,15 @@ export const Stats = (props: StatsProps) => {
 						<h1>Stats</h1>
 						<div className="stats-item">
 							<span>Nombre de parties</span>
-							<span className="score">{user.wins + user.loses}</span>
+							<span className="score">{userStat.stats.wins + userStat.stats.losses}</span>
 						</div>
 						<div className="stats-item">
 							<span>Gagnées</span>
-							<span className="score">{user.wins}</span>
+							<span className="score">{userStat.stats.wins}</span>
 						</div>
 						<div className="stats-item">
 							<span>Perdu</span>
-							<span className="score">{user.loses}</span>
+							<span className="score">{userStat.stats.losses}</span>
 						</div>
 						<div className="stats-item">
 							<span>Winrate</span>
@@ -378,15 +402,15 @@ export const Stats = (props: StatsProps) => {
 					<h1>Stats</h1>
 					<div className="stats-item">
 						<span>Nombre de parties</span>
-						<span className="score">{user.wins + user.loses}</span>
+						<span className="score">{userStat.stats.wins + userStat.stats.losses}</span>
 					</div>
 					<div className="stats-item">
 						<span>Gagnées</span>
-						<span className="score">{user.wins}</span>
+						<span className="score">{userStat.stats.wins}</span>
 					</div>
 					<div className="stats-item">
 						<span>Perdu</span>
-						<span className="score">{user.loses}</span>
+						<span className="score">{userStat.stats.losses}</span>
 					</div>
 					<div className="stats-item">
 						<span>Winrate</span>
