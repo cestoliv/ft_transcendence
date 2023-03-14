@@ -426,7 +426,8 @@ export class UsersService {
 		const filename = `${uuidv4()}.webp`;
 		const ppPath = path.join('./', 'uploads', 'profile-pictures', filename);
 
-		const pipelinePromise = new Promise<void>((resolve, reject) => {
+		// Resize and convert image to webp
+		await new Promise<void>((resolve, reject) => {
 			pipeline(
 				file,
 				sharp()
@@ -443,14 +444,12 @@ export class UsersService {
 								'Input buffer contains unsupported image format',
 							)
 						) {
-							console.log('error test')
 							reject(
 								new BadRequestException(
 									'File type not supported',
 								),
 							);
-						}
-						else {
+						} else {
 							reject(
 								new BadRequestException(
 									'Error while uploading the file',
@@ -460,38 +459,35 @@ export class UsersService {
 					} else resolve();
 				},
 			);
+		}).catch((err) => {
+			throw err;
 		});
 
-		const deleteOldProfilePicture = new Promise<void>((resolve, reject) => {
-			console.log('HEREEEE no ? !!!')
-			if (!user.profile_picture) resolve();
+		// Delete the old profile picture
+		await new Promise<void>((resolve, reject) => {
+			if (!user.profile_picture) return resolve();
 			const filename = user.profile_picture.split('/').slice(-1)[0];
-			console.log(filename)
 			fs.unlink(
 				path.join('./', 'uploads', 'profile-pictures', filename),
 				(err) => {
 					if (err) {
 						if (err.code === 'ENOENT') {
-							resolve();
-						} else reject(new BadRequestException(err.message));
-					} else resolve();
+							return resolve();
+						} else
+							return reject(new BadRequestException(err.message));
+					} else return resolve();
 				},
 			);
+		}).catch((err) => {
+			throw err;
 		});
 
-		try {
-			await pipelinePromise;
-			await deleteOldProfilePicture;
-			// Update the user profile picture filename
-			user.profile_picture = filename;
-			user = await this.save(user);
-			// Propage the new profile picture
-			this.gateway.propagateUserUpdate(user, 'users_update');
-			return user;
-		} catch (err) {
-			console.log(err)
-			throw err;
-		}
+		// Update the user profile picture filename
+		user.profile_picture = filename;
+		user = await this.save(user);
+		// Propage the new profile picture
+		this.gateway.propagateUserUpdate(user, 'users_update');
+		return user;
 	}
 
 	async set42ProfilePicture(user: User) {

@@ -13,13 +13,10 @@ async function bootstrap() {
 	const fastifyAdapter = new FastifyAdapter();
 	// Enable Multipart
 	fastifyAdapter.register(fmp, {
+		throwFileSizeLimit: false,
 		limits: {
-			fieldNameSize: 100, // Max field name size in bytes
-			fieldSize: 1000000, // Max field value size in bytes
-			fields: 10, // Max number of non-file fields
-			fileSize: 10000000, // For multipart forms, the max file size
-			files: 1, // Max number of file fields
-			headerPairs: 2000, // Max number of header key=>value pairs
+			fileSize: 10000000, // 10 mb
+			files: 1,
 		},
 	});
 
