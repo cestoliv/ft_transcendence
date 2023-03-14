@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"@fastify/cookie": "^8.3.0",
+		"@fastify/cors": "^8.2.0",
 		"@fastify/multipart": "^7.4.1",
 		"@nestjs/common": "^9.3.9",
 		"@nestjs/config": "^2.3.1",
