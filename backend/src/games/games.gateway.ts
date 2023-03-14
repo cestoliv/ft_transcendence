@@ -175,7 +175,7 @@ export class GamesGateway extends BaseGateway {
 
 		// Start watching
 		const game = await this.gamesService
-			.findGame(payload.id || payload.user_id)
+			.findStartedGame(payload.id || payload.user_id)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 		if (isWsResponse(game)) return game;
@@ -207,7 +207,7 @@ export class GamesGateway extends BaseGateway {
 
 		// Stop watching
 		const game = await this.gamesService
-			.findGame(payload.id || payload.user_id)
+			.findStartedGame(payload.id || payload.user_id)
 			.then((game) => game)
 			.catch((err) => exceptionToObj(err));
 		if (isWsResponse(game)) return game;
@@ -335,6 +335,15 @@ export class GamesGateway extends BaseGateway {
 		return this.gamesService
 			.getUserStats(payload.id)
 			.then((history) => history)
+			.catch((err) => exceptionToObj(err));
+	}
+
+	@SubscribeMessage('games_available')
+	async available(): Promise<LocalGameInfo[] | WSResponse> {
+		// Get Available games
+		return this.gamesService
+			.getAvailableGamesInfo()
+			.then((games) => games)
 			.catch((err) => exceptionToObj(err));
 	}
 }

@@ -1,11 +1,9 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-
-// import { InfosConvProps } from '../interface';
+import { message } from 'antd';
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IChannelMutedUser, IUser } from '../interfaces';
 
 import ChanUser from './ChanUser';
 
@@ -31,17 +29,17 @@ export default function InfosConv(props: InfosConvProps) {
 				},
 				(data: any) => {
 					if (data.messages) {
-						alert(data.messages);
+						message.error(data.messages);
 						reject(new Error(data.messages));
 					} else {
-						resolve(data);
+						resolve(data as IChannelMutedUser);
 					}
 				},
 			);
 		});
 	};
 
-	const closeInfosConv = (event: any): void => {
+	const closeInfosConv = (): void => {
 		const sidenav = document.getElementById('infos-conv');
 		sidenav?.classList.remove('active-infos-conv');
 

@@ -1,20 +1,12 @@
 import React, { useEffect, useContext } from 'react';
 import { message } from 'antd';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import {
-	IChannel,
-	IUser,
-	IUserFriend,
-	IChannelMessage,
-	IUserMessage,
-	IChannelInvitedUser,
-	IChannelBannedUser,
-} from '../interfaces';
+import { IChannel, IUser, IUserFriend, ILocalGameInfo } from '../interfaces';
 
+import useMatchmaking from '../hooks/useMatchmaking';
 import FriendsList from '../components/FriendsList';
 import useGameInfo from '../hooks/useGameInfo';
 import { SocketContext } from '../context/socket';
@@ -26,21 +18,23 @@ type FriendsProps = {
 
 export const SearchGame = (props: FriendsProps) => {
 	const socket = useContext(SocketContext);
-	const navigate = useNavigate();
 
 	// for friendlist component
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	const [friends, setFriends] = useState<IUser[]>([]);
 
+	// list of available games
+	const [availableGames, setAvailableGames] = useState<ILocalGameInfo[]>([]);
+
 	// Search Filter
-	const [visibility, setVisibility] = useState('public');
+	// const [visibility, setVisibility] = useState('public');
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
 	const [points, setPoints] = useState('5');
 
 	const { gameInfo, setGameInfo } = useGameInfo();
-	const [inMatchmaking, setInMatchmaking] = useState<boolean>(false);
+	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
 
 	const [user, setUser] = useState<IUser>();
 
@@ -52,8 +46,16 @@ export const SearchGame = (props: FriendsProps) => {
 		active_elem = element;
 	};
 
+	const showOptions = () => {
+		document.getElementsByClassName('searchGame-settings')[0]?.classList.toggle('active-searchGame-settings');
+	};
+
+	const showFriends = () => {
+		document.getElementsByClassName('priv-conv-list')[0]?.classList.toggle('active-friends-list');
+	};
+
 	const createGame = () => {
-		if (gameInfo) {
+		if (gameInfo || inMatchmaking) {
 			message.error('You are already in a game');
 			return;
 		}
@@ -63,12 +65,13 @@ export const SearchGame = (props: FriendsProps) => {
 				maxDuration: parseInt(time),
 				maxScore: parseInt(points),
 				mode: mode,
-				visibility: visibility,
+				visibility: 'public',
 			},
 			(data: any) => {
-				console.log(data);
+				// console.log(data);
 				if (data?.statusCode) {
 					message.error(data.error);
+					console.error(data.messages);
 					return;
 				}
 				message.success('Game created');
@@ -77,31 +80,27 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
-	if (!gameInfo) {
-		console.log('gameInfo', gameInfo);
-	}
-	console.log('inMatchmaking', inMatchmaking);
-
 	const joinMatchmaking = () => {
 		socket.emit('games_joinMatchmaking', (data: any) => {
-			console.log(data);
-			console.log(gameInfo);
+			// console.log(data);
+			// console.log(gameInfo);
 			setInMatchmaking(data);
 		});
 	};
 
 	const quitGame = () => {
-		if (!gameInfo.id) {
+		if (!gameInfo || !gameInfo.id) {
 			setGameInfo(null);
 			return;
 		}
+		console.log('quit game');
 		socket.emit(
 			'games_quit',
 			{
 				id: gameInfo.id,
 			},
 			(data: any) => {
-				console.log(data);
+				// console.log(data);
 				if (data?.statusCode) {
 					message.error(data.error);
 					return;
@@ -113,7 +112,7 @@ export const SearchGame = (props: FriendsProps) => {
 
 	const quitMatchmaking = () => {
 		socket.emit('games_quitMatchmaking', (data: any) => {
-			console.log(data);
+			// console.log(data);
 			if (data?.statusCode) {
 				message.error(data.error);
 				return;
@@ -236,8 +235,9 @@ export const SearchGame = (props: FriendsProps) => {
 	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-			let chanJoined: IChannel[];
-			chanJoined = data.filter((channel) => channel.members.some((member) => member.id === props.user_me.id));
+			const chanJoined = data.filter((channel) =>
+				channel.members.some((member) => member.id === props.user_me.id),
+			);
 			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 			setChanList(chanJoined);
@@ -261,6 +261,20 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	}, []);
+
+	useEffect(() => {
+		console.log('Available games useEffect');
+		socket.emit('games_available', {}, (data: any) => {
+			if (data.statusCode) message.error(data.error);
+			else setAvailableGames(data);
+		});
+	}, []);
+
+	socket.off('games_available');
+	socket.on('games_available', (data: any) => {
+		if (data.statusCode) message.error(data.error);
+		else setAvailableGames(data);
+	});
 
 	return (
 		<div className="searchGame-wrapper">
@@ -290,19 +304,52 @@ export const SearchGame = (props: FriendsProps) => {
 							<span>n</span>
 							<span>g</span>
 						</p>
+						{inMatchmaking ? (
+							<>
+								{availableGames.length > 0 ? (
+									<p>
+										<span className="nes-text is-primary">{availableGames.length}</span> games
+										available
+									</p>
+								) : (
+									<p className="nes-text is-disabled">
+										no game available,
+										<br />
+										you should create one!
+									</p>
+								)}
+							</>
+						) : (
+							<></>
+						)}
 						<button className="quit nes-btn" onClick={handleQuit}>
 							Quit
 						</button>
 					</div>
 				) : (
-					<div className="button-wrapper">
-						<button className="searchButton nes-btn" onClick={createGame}>
-							Create a game
-						</button>
-						<button className="searchButton nes-btn" onClick={joinMatchmaking}>
-							Search a game
-						</button>
-					</div>
+					<>
+						<div className="available-games-wrapper">
+							{availableGames.length > 0 ? (
+								<p>
+									<span className="nes-text is-primary">{availableGames.length}</span> games available
+								</p>
+							) : (
+								<p className="nes-text is-disabled">
+									no game available,
+									<br />
+									you should create one!
+								</p>
+							)}
+						</div>
+						<div className="button-wrapper">
+							{/* <button className="searchButton nes-btn" onClick={createGame}>
+								Create a game
+							</button> */}
+							<button className="searchButton nes-btn" onClick={joinMatchmaking}>
+								Search a game
+							</button>
+						</div>
+					</>
 				)}
 				{/* <Modal
 					open={open}
@@ -316,8 +363,14 @@ export const SearchGame = (props: FriendsProps) => {
 						</button>
 					</Box>
 				</Modal> */}
+				<button onClick={showOptions} className="show-settings nes-btn">
+					Settings
+				</button>
+				<button onClick={showFriends} className="show-friends nes-btn">
+					Friends
+				</button>
 			</div>
-			<SearchSettings setVisibility={setVisibility} setMode={setMode} setTime={setTime} setPoints={setPoints} />
+			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} createGame={createGame} />
 			{/* <div className="searchGame-settings">
 				<div className="formControl formControl-mode-wrapper">
 					<Box sx={{ minWidth: 120 }}>

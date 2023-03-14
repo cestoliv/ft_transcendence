@@ -13,6 +13,7 @@ import { parse } from 'cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticator } from 'otplib';
 import { pipeline, Readable } from 'stream';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
@@ -28,6 +29,7 @@ import { User } from './entities/user.entity';
 import { UserMessage } from './entities/user.message.entity';
 import { BaseGateway } from 'src/base.gateway';
 import { Status } from './enums/status.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -44,6 +46,8 @@ export class UsersService {
 		private readonly userMessagesRepository: Repository<UserMessage>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
+
+		private readonly configService: ConfigService,
 	) {}
 
 	public gateway: BaseGateway = null;
@@ -174,12 +178,38 @@ export class UsersService {
 		const secret = authenticator.generateSecret();
 		const url = authenticator.keyuri('', 'Transcendence', secret);
 
+		// Encrypt TOTP secret
+		const iv = crypto.randomBytes(16);
+		const cipher = crypto.createCipheriv(
+			'aes-256-cbc',
+			Buffer.from(this.configService.get('TOTP_SECRET')),
+			iv,
+		);
+		const encrypted = Buffer.concat([
+			cipher.update(secret),
+			cipher.final(),
+		]);
+		const encryptedSecret =
+			iv.toString('hex') + ':' + encrypted.toString('hex');
+
 		// Update user TOTP secret
 		await this.update(user.id, user.id, {
-			otp: secret,
+			otp: encryptedSecret,
 		});
 
 		return { secret, url };
+	}
+
+	async disableTotp(user: User): Promise<{ otp: null }> {
+		// Update user TOTP secret
+		if (!user.id42)
+			throw new ForbiddenException(
+				"You can't disable TOTP if you don't have a 42 account",
+			);
+		await this.update(user.id, user.id, {
+			otp: null,
+		});
+		return { otp: null };
 	}
 
 	async getUserFromSocket(socket: any): Promise<User> {
@@ -214,12 +244,19 @@ export class UsersService {
 		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
-		// Check if already invited or already friend
-		if (newFriend.friends.includes(inviter)) {
+		// Check if friendship already exists
+		const friendship = await this.userFriendsRepository.findOne({
+			where: [
+				{ inviterId: inviter.id, inviteeId: newFriend.id },
+				{ inviterId: newFriend.id, inviteeId: inviter.id },
+			],
+		});
+		if (friendship && friendship.accepted)
+			throw new ConflictException('You are already friends');
+		else if (friendship)
 			throw new ConflictException(
-				'User already invited or already friend',
+				'There is already a pending invitation',
 			);
-		}
 
 		// Check if newFriend banned inviter
 		const banned = await this.bannedUsersRepository.findOne({
@@ -248,12 +285,15 @@ export class UsersService {
 		if (!inviter) throw new NotFoundException('User not found');
 
 		const friendship = await this.userFriendsRepository.findOne({
-			where: { inviterId, inviteeId: inviteeId },
+			where: [
+				{ inviterId: inviter.id, inviteeId: inviteeId },
+				{ inviterId: inviteeId, inviteeId: inviter.id },
+			],
 		});
 		if (!friendship)
 			throw new NotFoundException('Friendship request not found');
 		if (friendship.accepted)
-			throw new ConflictException('Friendship already accepted');
+			throw new ConflictException('You are already friends');
 
 		friendship.accepted = true;
 
@@ -402,12 +442,14 @@ export class UsersService {
 							err.message.includes(
 								'Input buffer contains unsupported image format',
 							)
-						)
+						) {
+							console.log('error test')
 							reject(
 								new BadRequestException(
 									'File type not supported',
 								),
 							);
+						}
 						else {
 							reject(
 								new BadRequestException(
@@ -421,21 +463,15 @@ export class UsersService {
 		});
 
 		const deleteOldProfilePicture = new Promise<void>((resolve, reject) => {
+			console.log('HEREEEE no ? !!!')
 			if (!user.profile_picture) resolve();
 			const filename = user.profile_picture.split('/').slice(-1)[0];
+			console.log(filename)
 			fs.unlink(
 				path.join('./', 'uploads', 'profile-pictures', filename),
 				(err) => {
 					if (err) {
 						if (err.code === 'ENOENT') {
-							console.log(
-								path.join(
-									'./',
-									'uploads',
-									'profile-pictures',
-									filename,
-								),
-							);
 							resolve();
 						} else reject(new BadRequestException(err.message));
 					} else resolve();
@@ -453,6 +489,7 @@ export class UsersService {
 			this.gateway.propagateUserUpdate(user, 'users_update');
 			return user;
 		} catch (err) {
+			console.log(err)
 			throw err;
 		}
 	}
@@ -506,7 +543,7 @@ export class UsersService {
 
 		if (user.status != status) {
 			user.status = status;
-			user = await this.usersRepository.save(user);
+			user = await this.save(user);
 
 			// Propage the new status
 			this.gateway.propagateUserUpdate(user, 'users_update');

@@ -1,10 +1,9 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+import React, { ChangeEvent, useContext, useState } from 'react';
 
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
-
+import { message } from 'antd';
 import { IChannel, IUser, IChannelMessage } from '../interfaces';
 import Modal from '@mui/material/Modal';
 import ChatMessages from './ChatMessages';
@@ -14,17 +13,21 @@ type ChatProps = {
 	activeChan: IChannel;
 	messages: IChannelMessage[];
 	addPassword: (passWord: string, chan_id: number) => void;
-	togglePrivateChan: (activeChan: IChannel) => void;
+	setChanVisibility: (
+		activeChan: IChannel,
+		oldVisibility: string,
+		newVisibility: string,
+		passWord: string | null,
+	) => void;
 };
 
 export default function Chat(props: ChatProps) {
 	const socket = useContext(SocketContext);
 
 	const [passWord, setPassWord] = useState<string>('');
-	const [message, setMessage] = useState<string>('');
+	const [messageValue, setMessage] = useState<string>('');
 
 	const [OpenSettingsChanModal, setOpenSettingsChanModal] = useState(false);
-	const handleOpenSettingsChanModal = () => setOpenSettingsChanModal(true);
 	const handleCloseSettingsChanModal = () => setOpenSettingsChanModal(false);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -32,20 +35,20 @@ export default function Chat(props: ChatProps) {
 		if (event.target.name === 'message-input') setMessage(event.target.value);
 	};
 
-	const submitMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+	const submitMessage = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLImageElement>) => {
 		event.preventDefault();
-		if (message != '') {
+		if (messageValue != '') {
 			socket.emit(
 				'channels_sendMessage',
 				{
 					id: props.activeChan?.id,
-					message: message,
+					message: messageValue,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						setMessage('');
-						props.messages.unshift(data);
+						props.messages.unshift(data as IChannelMessage);
 					}
 				},
 			);
@@ -59,10 +62,15 @@ export default function Chat(props: ChatProps) {
 	};
 
 	const isChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
-		props.togglePrivateChan(props.activeChan);
+		if (e.target.name === 'public')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'public', null);
+		if (e.target.name === 'private')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'private', null);
+		if (e.target.name === 'password-protected')
+			props.setChanVisibility(props.activeChan, props.activeChan.visibility, 'password-protected', '');
 	};
 
-	const toggleHidden = (event: any) => {
+	const toggleHidden = () => {
 		setOpenSettingsChanModal(true);
 		const active_elem = document.getElementsByClassName('wrapper-settings')[0];
 		if (active_elem) active_elem.classList.toggle('hidden');
@@ -85,30 +93,6 @@ export default function Chat(props: ChatProps) {
 				)}
 				{isOwner() && (
 					<div className="chat-nav-right">
-						{/* <div className="wrapper-settings hidden pixel-font">
-							<Checkbox
-								handleChange={isChecked}
-								isChecked={
-									props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
-										? false
-										: true
-								}
-								label="Private"
-							/>
-							<form className="mpd-form" onSubmit={addPassWord}>
-								<label htmlFor="mdp" id="mdp-label" className='pixel-font'>
-									mdp :
-								</label>
-								<input
-									className='change-password-input pixel-font'
-									name='password-input'
-									type="text"
-									id="mdp"
-									value={passWord}
-									onChange={handleChange}
-								/>
-							</form>
-						</div> */}
 						<Modal
 							open={OpenSettingsChanModal}
 							onClose={handleCloseSettingsChanModal}
@@ -118,33 +102,37 @@ export default function Chat(props: ChatProps) {
 							<div className="settings-modal modal">
 								<h2 id="modal-modal-title">Settings</h2>
 								<div className="divider"></div>
-								{/* <Checkbox
-									handleChange={isChecked}
-									isChecked={
-										props.activeChan?.visibility === 'public' || props.activeChan?.visibility === 'password-protected'
-											? false
-											: true
-									}
-									label="Private"
-								/> */}
 								<label>
 									<input
 										type="checkbox"
+										name="private"
 										className="nes-checkbox is-dark"
 										onChange={isChecked}
-										checked={
-											props.activeChan?.visibility === 'public' ||
-											props.activeChan?.visibility === 'password-protected'
-												? false
-												: true
-										}
+										checked={props.activeChan?.visibility === 'private' ? true : false}
 									/>
 									<span>Private</span>
 								</label>
+								<label>
+									<input
+										type="checkbox"
+										name="public"
+										className="nes-checkbox is-dark"
+										onChange={isChecked}
+										checked={props.activeChan?.visibility === 'public' ? true : false}
+									/>
+									<span>Public</span>
+								</label>
+								<label>
+									<input
+										type="checkbox"
+										name="password-protected"
+										className="nes-checkbox is-dark"
+										checked={props.activeChan?.visibility === 'password-protected' ? true : false}
+										disabled
+									/>
+									<span>Password-protected</span>
+								</label>
 								<form className="mpd-form" onSubmit={addPassWord}>
-									{/* <label htmlFor="mdp" id="mdp-label" className='pixel-font'>
-										mdp :
-									</label> */}
 									<input
 										className="nes-input is-dark"
 										placeholder="Password"
@@ -168,7 +156,7 @@ export default function Chat(props: ChatProps) {
 			<ChatMessages user_me={props.user_me} chan_id={props.activeChan.id} messages={props.messages} />
 			<form className="write-message" onSubmit={submitMessage}>
 				<input
-					value={message}
+					value={messageValue}
 					name="message-input"
 					id="message-input"
 					type="message"

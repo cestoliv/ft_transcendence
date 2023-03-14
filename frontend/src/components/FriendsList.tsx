@@ -25,14 +25,10 @@ type PersonListProps = {
 };
 
 export const FriendsList = (props: PersonListProps) => {
-	const socket = useContext(SocketContext);
-
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
-	// const[friendOf, setFriendOf] = useState<IUserFriend[]>([]);
-	// const[friends, setFriends] = useState<IUser[]>([]);
-
-	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
+	const [OpenLFriendRequest, setOpenListFriendRequest] =
+		React.useState(false);
 	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
 	const CloseListFriendRequest = () => setOpenListFriendRequest(false);
 
@@ -46,7 +42,7 @@ export const FriendsList = (props: PersonListProps) => {
 		setAddFriendValue('');
 	};
 
-	const closeFriendList = (event: any): void => {
+	const closeFriendList = (): void => {
 		const sidenav = document.getElementById('priv-conv-list');
 		sidenav?.classList.remove('active-friend-list');
 
@@ -58,11 +54,6 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 		button3?.classList.remove('hidden-button');
 	};
-
-	// useEffect(() => {
-	// 	console.log("hello56");
-	// 	console.log(props.friends);
-	// }, [props.friends]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
@@ -103,8 +94,12 @@ export const FriendsList = (props: PersonListProps) => {
 								<FriendRequests
 									key={friend_request.inviterId}
 									friend_request={friend_request}
-									accept_friend_request={props.accept_friend_request}
-									refuse_friend_request={props.refuse_friend_request}
+									accept_friend_request={
+										props.accept_friend_request
+									}
+									refuse_friend_request={
+										props.refuse_friend_request
+									}
 								/>
 							))}
 					</Box>

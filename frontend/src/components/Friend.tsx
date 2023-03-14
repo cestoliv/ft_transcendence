@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 
 import useGameInfo from '../hooks/useGameInfo';
@@ -34,7 +34,6 @@ export const Friend = (props: FriendProps) => {
 	const [muteTimeValue, setMuteTimeValue] = useState<string>('');
 
 	const [privateChanJoined, setPrivateChanJoined] = useState<IChannel[]>([]);
-	// const [chanListJoined, setChanListJoined] = useState<IChannel[]>([]);
 	const [openInviteGameModal, setOpenInviteGameModal] = React.useState(false);
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
 	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
@@ -83,7 +82,7 @@ export const Friend = (props: FriendProps) => {
 		if (event.target.name === 'mute-time-input') setMuteTimeValue(event.target.value);
 	};
 
-	const removeFriendClick = (event: any): void => {
+	const removeFriendClick = (): void => {
 		props.removeFriend(props.user.id);
 	};
 
@@ -91,6 +90,7 @@ export const Friend = (props: FriendProps) => {
 		event.preventDefault();
 		props.banFriend(banTimeValue, props.user.id);
 		closeBanTimeModal();
+		setBanTimeValue('');
 	};
 
 	const muteFriend = async (event: any) => {
@@ -104,37 +104,14 @@ export const Friend = (props: FriendProps) => {
 				until: now,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
-				else closeBanTimeModal();
+				if (data.messages) message.error(data.messages);
+				else {
+					closeMuteTimeModal();
+					setMuteTimeValue('');
+				}
 			},
 		);
 	};
-
-	// const muteFriend = (event: any): void => {
-	// 	socket.emit(
-	// 		'users_mute',
-	// 		{
-	// 			id: props.user.id,
-	// 			until: new Date().toISOString(),
-	// 		},
-	// 		(data: any) => {
-	// 			if (data.messages) alert(data.messages);
-	// 		},
-	// 	);
-	// };
-
-	// const banFriend = (event: any): void => {
-	// 	socket.emit(
-	// 		'users_ban',
-	// 		{
-	// 			id: props.user.id,
-	// 			until: new Date().toISOString(),
-	// 		},
-	// 		(data: any) => {
-	// 			if (data.messages) alert(data.messages);
-	// 		},
-	// 	);
-	// };
 
 	const inviteFriend = () => {
 		socket.emit(
@@ -152,7 +129,6 @@ export const Friend = (props: FriendProps) => {
 					return;
 				}
 				socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
-					console.log(data);
 					if (data?.statusCode) {
 						message.error(data.messages);
 						// TODO: delete game if needed
@@ -172,15 +148,17 @@ export const Friend = (props: FriendProps) => {
 				user_id: invited_user_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
-					setPrivateChanJoined((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+					setPrivateChanJoined((prevList) =>
+						prevList.filter((chan) => chan.id !== (data.channelId as number)),
+					);
 				}
 			},
 		);
 	};
 
-	const handleRedirect = (event: any): void => {
+	const handleRedirect = (): void => {
 		setRedirect(true);
 	};
 
@@ -280,28 +258,28 @@ export const Friend = (props: FriendProps) => {
 				>
 					<Box className="friend-action-modal background-modal">
 						{props.user.status === 'online' && (
-							<button className="discord-blue" onClick={OpenInviteGameModal}>
+							<button className="nes-btn is-primary" onClick={OpenInviteGameModal}>
 								Inviter à jouer
 							</button>
 						)}
 						{props.user.status === 'playing' && (
-							<button className="discord-blue" onClick={showGame}>
+							<button className="nes-btn is-primary" onClick={showGame}>
 								Regarder la partie
 							</button>
 						)}
-						<button className="discord-blue" onClick={handleRedirect}>
+						<button className="nes-btn is-primary" onClick={handleRedirect}>
 							Profil
 						</button>
-						<button className="discord-blue" onClick={OpenChanListModal}>
+						<button className="nes-btn is-primary" onClick={OpenChanListModal}>
 							Inviter channel
 						</button>
-						<button className="discord-blue" onClick={OpenMuteTimeModal}>
+						<button className="nes-btn is-primary" onClick={OpenMuteTimeModal}>
 							Mute
 						</button>
-						<button className="discord-blue" onClick={OpenBanTimeModal}>
+						<button className="nes-btn is-primary" onClick={OpenBanTimeModal}>
 							Ban
 						</button>
-						<button className="discord-blue" onClick={removeFriendClick}>
+						<button className="nes-btn is-primary" onClick={removeFriendClick}>
 							Suprrimer
 						</button>
 					</Box>
@@ -374,7 +352,7 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="chan-user-modal">
+				<Box className="chan-user-modal modal">
 					{privateChanJoined.map((chan) => (
 						<PrivateChanJoined
 							key={chan.id}
@@ -392,16 +370,16 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="ban-time-modal background-modal">
+				<Box className="ban-time-modal modal background-modal">
 					<form className="ban-time-form" onSubmit={banFriend}>
 						<input
 							value={banTimeValue}
 							name="ban-time-input"
 							type="message"
-							placeholder="Ban time in mintues"
+							placeholder="Ban time in minutes"
 							onChange={handleChangeBantime}
 							required
-							className="ban-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>
@@ -413,7 +391,7 @@ export const Friend = (props: FriendProps) => {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<Box className="mute-time-modal background-modal">
+				<Box className="mute-time-modal modal background-modal">
 					<form className="mute-time-form" onSubmit={muteFriend}>
 						<input
 							value={muteTimeValue}
@@ -422,7 +400,7 @@ export const Friend = (props: FriendProps) => {
 							placeholder="Mute time in minutes"
 							onChange={handleChangeMutetime}
 							required
-							className="mute-time-input"
+							className="nes-input is-dark"
 						/>
 					</form>
 				</Box>

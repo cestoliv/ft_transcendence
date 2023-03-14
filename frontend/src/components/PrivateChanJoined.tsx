@@ -16,15 +16,13 @@ type PrivateChanJoinedProps = {
 };
 
 export const PrivateChanJoined = (props: PrivateChanJoinedProps) => {
-	const socket = useContext(SocketContext);
-
-	const chanInvit = (event: any): void => {
+	const chanInvit = (): void => {
 		props.chanInvit(props.chan.id, props.userToInviteId);
 	};
 
 	return (
 		<div className="wrapper-private-chan-joined-item">
-			<div className="private-chan-joined-item discord-blue" onClick={chanInvit}>
+			<div className="private-chan-joined-item nes-btn is-primary" onClick={chanInvit}>
 				{props.chan.name}
 			</div>
 		</div>

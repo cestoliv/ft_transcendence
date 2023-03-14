@@ -1755,6 +1755,7 @@ Send game information 3 seconds before the start of the game.
 		user: User,
 		score: number,
 	}>,
+	paddleHeight: number,
 }
 ```
 

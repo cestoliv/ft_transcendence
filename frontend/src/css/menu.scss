@@ -42,14 +42,13 @@
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	width: 30%;
 	margin-bottom: 0;
+	gap: 15px;
 }
 
 .menu ul li {
 	align-self: center;
 	background-color: none;
-	// font-family: 'VT323', monospace;
 }
 
 a {
@@ -64,4 +63,23 @@ a {
 
 .e-settings {
 	background-color: none;
+}
+
+@media (max-width: 400px) {
+	.menu {
+		.menu-title {
+			h1 {
+				font-size: 12px;
+				span {
+					font-size: 16px;
+				}
+			}
+		}
+		ul {
+			gap: 5px;
+			img {
+				height: 25px;
+			}
+		}
+	}
 }

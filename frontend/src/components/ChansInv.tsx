@@ -19,8 +19,6 @@ type ChansInvProps = {
 };
 
 export const ChansInv = (props: ChansInvProps) => {
-	const socket = useContext(SocketContext);
-
 	const handleJoinClick = () => {
 		props.chanListJoin(props.chan?.code);
 	};
@@ -28,7 +26,7 @@ export const ChansInv = (props: ChansInvProps) => {
 	return (
 		<div className="ChansInv-wrapper">
 			<div className="">
-				<div className="chan-list-item modal-item pixel-font">
+				<div className="chan-list-item pixel-font">
 					<span className="pixel-font">{props.chan?.name}</span>
 					<span className="e-icons e-medium e-plus modal-e-plus" onClick={handleJoinClick}></span>
 				</div>

@@ -6,7 +6,6 @@ import FriendsList from '../components/FriendsList';
 import ChanList from '../components/ChanList';
 import AllChan from '../components/AllChan';
 import { useState } from 'react';
-import { IConvList } from '../interface';
 import { message } from 'antd';
 
 import {
@@ -34,6 +33,7 @@ export default function Friends(props: FriendsProps) {
 
 	const [user, setUser] = useState<IUser>();
 	const [chanList, setChanList] = useState<IChannel[]>([]);
+	const [allChan, setAllChan] = useState<IChannel[]>([]);
 	const [chanMessages, setChanMessages] = useState<IChannelMessage[] | null>([]);
 	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 	const [allPrivateConvMessages, setAllPrivateConvMessages] = useState<IUserMessage[]>([]);
@@ -76,9 +76,8 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	useEffect(() => {
-		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-			console.log(data);
-			setUser(data);
+		socket.emit('users_get', { id: props.user_me.id }, (data: IUser) => {
+			setUser(data as IUser);
 		});
 	}, []);
 
@@ -93,8 +92,11 @@ export default function Friends(props: FriendsProps) {
 					visibility: chanMdp === '' ? 'public' : 'password-protected',
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
-					else setChanList((prevChanList) => [...prevChanList, data]);
+					if (data.messages) message.error(data.messages);
+					else {
+						setChanList((prevChanList) => [...prevChanList, data as IChannel]);
+						setAllChan((prevChanList) => [...prevChanList, data as IChannel]);
+					} 
 				},
 			);
 			setChanName('');
@@ -109,8 +111,8 @@ export default function Friends(props: FriendsProps) {
 					password: joinChanMdp,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
-					else setChanList((prevChanList) => [...prevChanList, data]);
+					if (data.messages) message.error(data.messages);
+					else setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 				},
 			);
 			setJoinChanName('');
@@ -127,7 +129,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 				} else {
 					// Remove the channel with the given chan_id from the chanList array
 					setChanList((prevList) => prevList.filter((chan) => chan.id !== chan_id));
@@ -147,8 +149,8 @@ export default function Friends(props: FriendsProps) {
 				code: chan_code,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
-				else setChanList((prevChanList) => [...prevChanList, data]);
+				if (data.messages) message.error(data.messages);
+				else setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 			},
 		);
 	};
@@ -163,66 +165,15 @@ export default function Friends(props: FriendsProps) {
 				},
 				(data: any) => {
 					if (data.messages) {
-						alert(data.messages);
+						message.error(data.messages);
 						reject(new Error(data.messages));
 					} else {
-						setChanList((prevChanList) => [...prevChanList, data]);
+						setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 						resolve(data);
 					}
 				},
 			);
 		});
-	};
-
-	const addPassword = (passWord: string, chan_id: number): void => {
-		if (passWord === '') {
-			socket.emit(
-				'channels_update',
-				{
-					id: chan_id,
-					visibility: 'public',
-				},
-				(data: any) => {
-					if (data.message) alert(data.errors);
-					else {
-						const index = chanList.findIndex((channel) => channel.id === chan_id);
-
-						if (index !== -1) {
-							let updatedChanList: IChannel[];
-							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
-							updatedChanList = [...chanList];
-							updatedChanList[index] = data;
-							setChanList(updatedChanList);
-							setActiveChan(data);
-						}
-					}
-				},
-			);
-		} else {
-			socket.emit(
-				'channels_update',
-				{
-					id: chan_id,
-					visibility: 'password-protected',
-					password: passWord,
-				},
-				(data: any) => {
-					if (data.message) alert(data.errors);
-					else {
-						const index = chanList.findIndex((channel) => channel.id === chan_id);
-
-						if (index !== -1) {
-							let updatedChanList: IChannel[];
-							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
-							updatedChanList = [...chanList];
-							updatedChanList[index] = data;
-							setChanList(updatedChanList);
-							setActiveChan(data);
-						}
-					}
-				},
-			);
-		}
 	};
 
 	const banUser = (banTime: string, chan_id: number, member_id: number): void => {
@@ -237,7 +188,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 				} else {
 					if (activeChan) {
 						const newMembers = activeChan.members.filter((member) => member.id !== member_id);
@@ -252,31 +203,13 @@ export default function Friends(props: FriendsProps) {
 		);
 	};
 
-	const togglePrivateChan = (activeChan: IChannel): void => {
-		if ((activeChan && activeChan.visibility === 'public') || activeChan?.visibility === 'password-protected') {
-			socket.emit(
-				'channels_update',
-				{
-					id: activeChan.id,
-					visibility: 'private',
-				},
-				(data: any) => {
-					if (data.message) alert(data.errors);
-					else {
-						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
-
-						if (index !== -1) {
-							let updatedChanList: IChannel[];
-							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
-							updatedChanList = [...chanList];
-							updatedChanList[index] = data;
-							setChanList(updatedChanList);
-							setActiveChan(data);
-						}
-					}
-				},
-			);
-		} else {
+	const setChanVisibility = (
+		activeChan: IChannel,
+		oldVisibility: string,
+		newVisibility: string,
+		passWord: string | null,
+	): void => {
+		if ((activeChan && newVisibility === 'public') || oldVisibility === newVisibility) {
 			socket.emit(
 				'channels_update',
 				{
@@ -284,7 +217,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'public',
 				},
 				(data: any) => {
-					if (data.message) alert(data.errors);
+					if (data.message) message.error(data.messages);
 					else {
 						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
 
@@ -294,7 +227,60 @@ export default function Friends(props: FriendsProps) {
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
 							setChanList(updatedChanList);
-							setActiveChan(data);
+							setActiveChan(data as IChannel);
+						}
+					}
+				},
+			);
+		} else if (activeChan && newVisibility === 'private') {
+			socket.emit(
+				'channels_update',
+				{
+					id: activeChan.id,
+					visibility: 'private',
+				},
+				(data: any) => {
+					if (data.message) message.error(data.messages);
+					else {
+						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
+
+						if (index !== -1) {
+							let updatedChanList: IChannel[];
+							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+							updatedChanList = [...chanList];
+							updatedChanList[index] = data;
+							setChanList(updatedChanList);
+							setActiveChan(data as IChannel);
+						}
+					}
+				},
+			);
+		}
+	};
+
+	const addPassword = (passWord: string, chan_id: number): void => {
+		if (passWord === '') {
+			message.error('Password cant be empty');
+		} else {
+			socket.emit(
+				'channels_update',
+				{
+					id: chan_id,
+					visibility: 'password-protected',
+					password: passWord,
+				},
+				(data: any) => {
+					if (data.message) message.error(data.messages);
+					else {
+						const index = chanList.findIndex((channel) => channel.id === chan_id);
+
+						if (index !== -1) {
+							let updatedChanList: IChannel[];
+							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+							updatedChanList = [...chanList];
+							updatedChanList[index] = data;
+							setChanList(updatedChanList);
+							setActiveChan(data as IChannel);
 						}
 					}
 				},
@@ -309,7 +295,7 @@ export default function Friends(props: FriendsProps) {
 				username: username,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 			},
 		);
 	};
@@ -321,10 +307,10 @@ export default function Friends(props: FriendsProps) {
 				id: inviter_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
-					setFriends((prevFriends) => [...prevFriends, data.inviter]);
-					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== data.inviteeId));
+					setFriends((prevFriends) => [...prevFriends, data.inviter as IUser]);
+					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
 				}
 			},
 		);
@@ -337,9 +323,9 @@ export default function Friends(props: FriendsProps) {
 				id: inviter_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
-					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== data.inviteeId));
+					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
 				}
 			},
 		);
@@ -352,7 +338,7 @@ export default function Friends(props: FriendsProps) {
 				id: user_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
 			},
 		);
@@ -368,7 +354,7 @@ export default function Friends(props: FriendsProps) {
 				until: now,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
 			},
 		);
@@ -377,7 +363,6 @@ export default function Friends(props: FriendsProps) {
 	const activeConv = (event: any) => {
 		let newId;
 		let element;
-
 		if (
 			event.target.classList != 'wrapper-active-conv list-item' &&
 			event.target.classList != 'wrapper-active-conv-span pixel-font' &&
@@ -396,18 +381,19 @@ export default function Friends(props: FriendsProps) {
 		active_elem = element;
 		const newActivConv = document.getElementById('active-conv-bg');
 		if (newActivConv) newId = newActivConv.getAttribute('data-id');
-		if (newId) {
+		if (newId && newActivConv?.getAttribute('data-conv-type') == 'chan-conv') {
 			socket.emit(
 				'channels_get',
 				{
 					id: parseInt(newId),
 				},
 				(data: any) => {
-					setActiveChan(data);
+					setActiveChan(data as IChannel);
 				},
 			);
 			setActivConvId(parseInt(newId));
-		}
+		} else if (newId && newActivConv?.getAttribute('data-conv-type') != 'chan-conv')
+			setActivConvId(parseInt(newId));
 		if (newActivConv?.getAttribute('data-conv-type') == 'chan-conv') setChanConv(1);
 		else setChanConv(2);
 	};
@@ -449,13 +435,13 @@ export default function Friends(props: FriendsProps) {
 	socket.off('channels_join'); // Unbind previous event
 	socket.on('channels_join', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
@@ -463,25 +449,45 @@ export default function Friends(props: FriendsProps) {
 	socket.off('channels_leave'); // Unbind previous event
 	socket.on('channels_leave', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
 
 	socket.off('channels_addAdmin'); // Unbind previous event
 	socket.on('channels_addAdmin', (data: any) => {
-		if (data.id === activeChan?.id) setActiveChan(data);
+		if (data.id === activeChan?.id) setActiveChan(data as IChannel);
+
+		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
+
+		if (index !== -1) {
+			let updatedChanList: IChannel[];
+			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+			updatedChanList = [...chanList];
+			updatedChanList[index] = data as IChannel;
+			setChanList(updatedChanList);
+		}
 	});
 
 	socket.off('channels_removeAdmin'); // Unbind previous event
 	socket.on('channels_removeAdmin', (data: any) => {
 		if (data.id === activeChan?.id) setActiveChan(data);
+
+		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
+
+		if (index !== -1) {
+			let updatedChanList: IChannel[];
+			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
+			updatedChanList = [...chanList];
+			updatedChanList[index] = data as IChannel;
+			setChanList(updatedChanList);
+		}
 	});
 
 	socket.off('channels_banUser'); // Unbind previous event
@@ -491,10 +497,10 @@ export default function Friends(props: FriendsProps) {
 			const newActiveChan = { ...activeChan, members: newMembers };
 			setActiveChan(newActiveChan);
 		}
-		const index = chanList.findIndex((channel) => channel.id === data.channelId);
+		const index = chanList.findIndex((channel) => channel.id === (data.channelId as number));
 
 		if (data.userId === user?.id) {
-			setChanList((prevList) => prevList.filter((chan) => chan.id !== data.channelId));
+			setChanList((prevList) => prevList.filter((chan) => chan.id !== (data.channelId as number)));
 			if (activeChan?.id === data.channelId) {
 				setActivConvId(-1);
 				setActiveChan(null);
@@ -504,7 +510,7 @@ export default function Friends(props: FriendsProps) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			const newMembers = updatedChanList[index].members.filter((member) => member.id !== data.userId);
+			const newMembers = updatedChanList[index].members.filter((member) => member.id !== (data.userId as number));
 			updatedChanList[index].members = newMembers;
 			setChanList(updatedChanList);
 		}
@@ -512,21 +518,24 @@ export default function Friends(props: FriendsProps) {
 
 	socket.off('channels_update'); // Unbind previous event
 	socket.on('channels_update', (data: any) => {
-		if (data.id === activeChan?.id) setActiveChan(data);
-		const index = chanList.findIndex((channel) => channel.id === data.id);
+		console.log('channels update');
+		// if (data.id === activeChan?.id) setActiveChan(data);
+		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
 			let updatedChanList: IChannel[];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
-			updatedChanList[index] = data;
+			updatedChanList[index] = data as IChannel;
 			setChanList(updatedChanList);
 		}
 	});
 
 	socket.off('channels_message'); // Unbind previous event
 	socket.on('channels_message', (data: any) => {
-		setAllChanMessages((prevMessages) => [data, ...prevMessages]);
+		setAllChanMessages((prevMessages) => [data as IChannelMessage, ...prevMessages]);
+		if (chanConv === 2 || (chanConv === 1 && (data.channelId as number) !== activeConvId))
+			message.info(`Message receive in ${data.channel.name as string}`);
 	});
 
 	// end socket.on channel
@@ -535,36 +544,37 @@ export default function Friends(props: FriendsProps) {
 
 	socket.off('users_update'); // Unbind previous event
 	socket.on('users_update', (data: any) => {
-		const index = friends.findIndex((friend) => friend.id === data.id);
+		console.log('users_update', data);
+		const index = friends.findIndex((friend) => friend.id === (data.id as number));
 
 		if (index !== -1) {
 			let updatedFriendList: IUser[];
 
 			updatedFriendList = [...friends];
-			updatedFriendList[index] = data;
+			updatedFriendList[index] = data as IUser;
 			setFriends(updatedFriendList);
 		}
 	});
 
 	socket.off('users_friendshipInvitation'); // Unbind previous event
 	socket.on('users_friendshipInvitation', (data: any) => {
-		setFriendOf((prevList) => [...prevList, data]);
+		setFriendOf((prevList) => [...prevList, data as IUserFriend]);
 	});
 
 	socket.off('users_friendshipAccepted'); // Unbind previous event
 	socket.on('users_friendshipAccepted', (data: any) => {
-		setFriends((prevList) => [...prevList, data.invitee]);
+		setFriends((prevList) => [...prevList, data.invitee as IUser]);
 	});
 
 	socket.off('users_friendshipRemoved'); // Unbind previous event
 	socket.on('users_friendshipRemoved', (data: any) => {
-		setFriends((prevList) => prevList.filter((friend) => friend.id !== data.invitee.id));
-		setFriends((prevList) => prevList.filter((friend) => friend.id !== data.inviter.id));
+		setFriends((prevList) => prevList.filter((friend) => friend.id !== (data.invitee.id as number)));
+		setFriends((prevList) => prevList.filter((friend) => friend.id !== (data.inviter.id as number)));
 	});
 
 	socket.off('users_banned'); // Unbind previous event
 	socket.on('users_banned', (data: any) => {
-		setFriends((prevList) => prevList.filter((user) => user.id !== data.userId));
+		setFriends((prevList) => prevList.filter((user) => user.id !== (data.userId as number)));
 	});
 
 	// end socket.on user
@@ -574,7 +584,7 @@ export default function Friends(props: FriendsProps) {
 		console.log('setAllChanMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			const messagesFromAllChannels: any[] = []; // variable temporaire pour stocker les messages
+			const messagesFromAllChannels: IChannelMessage[] = []; // variable temporaire pour stocker les messages
 			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "messagesFromAllChannels"
 			data.forEach((channel: any) => {
 				socket.emit(
@@ -585,7 +595,7 @@ export default function Friends(props: FriendsProps) {
 							alert(messages.errors);
 						} else {
 							// Ajouter les messages du channel à "messagesFromAllChannels"
-							messages.forEach((message: any) => {
+							messages.forEach((message: IChannelMessage) => {
 								messagesFromAllChannels.push(message);
 							});
 						}
@@ -600,15 +610,16 @@ export default function Friends(props: FriendsProps) {
 	socket.off('users_message'); // Unbind previous event
 	socket.on('users_message', (data: any) => {
 		console.log('Socket users_message:');
-		setAllPrivateConvMessages((prevMessages) => [data.message, ...prevMessages]);
-		message.info(`Message receive from ${data.message.sender.username}`);
+		setAllPrivateConvMessages((prevMessages) => [data.message as IUserMessage, ...prevMessages]);
+		if (chanConv != 2 || (chanConv === 2 && (data.message.senderId as number) !== activeConvId))
+			message.info(`Message receive from ${data.message.sender.username as string}`);
 	});
 
 	useEffect(() => {
 		console.log('AllPrivateConvMessages UseEffect');
 		// Récupérer la liste des channels joints
 		socket.emit('users_get', { id: props.user_me.id }, (data: any) => {
-			const messagesFromAllConversations: any[] = []; // variable temporaire pour stocker les messages
+			const messagesFromAllConversations: IUserMessage[] = []; // variable temporaire pour stocker les messages
 			// Pour chaque conversation privée, récupérer les messages et les ajouter à "messagesFromAllConversations"
 			data.friends?.forEach((friend: any) => {
 				// console.log(channel);
@@ -621,7 +632,7 @@ export default function Friends(props: FriendsProps) {
 						} else {
 							// Ajouter les messages de la conversation à "messagesFromAllConversations"
 							if (messages) {
-								messages.forEach((message: any) => {
+								messages.forEach((message: IUserMessage) => {
 									messagesFromAllConversations.push(message);
 								});
 							}
@@ -642,15 +653,20 @@ export default function Friends(props: FriendsProps) {
 	// }, []);
 
 	useEffect(() => {
+		console.log('AllChan UseEffect');
+		socket.emit('channels_list', {}, (data: IChannel[]) => {
+			setAllChan(data);
+		});
+	}, []);
+
+	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
 			let chanJoined: IChannel[];
 			chanJoined = data.filter((channel) => channel.members.some((member) => member.id === props.user_me.id));
-			// props.chanList.map(chan => (console.log(chan)));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 			setChanList(chanJoined);
 		});
-		// Filtrez tous les canaux privés auxquels l'utilisateur n'a pas encore rejoint.
 	}, []);
 
 	useEffect(() => {
@@ -661,10 +677,10 @@ export default function Friends(props: FriendsProps) {
 				id: props.user_me.id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
-					setFriendOf(data.friendOf);
-					setFriends(data.friends);
+					setFriendOf(data.friendOf as IUserFriend[]);
+					setFriends(data.friends as IUser[]);
 				}
 			},
 		);
@@ -849,7 +865,7 @@ export default function Friends(props: FriendsProps) {
 						activeChan={activeChan}
 						messages={allChanMessages}
 						addPassword={addPassword}
-						togglePrivateChan={togglePrivateChan}
+						setChanVisibility={setChanVisibility}
 					/>
 				) : null}
 				{activeConvId != -1 && user && chanConv == 2 ? (

@@ -4,12 +4,12 @@ import {
 	forwardRef,
 	Inject,
 	Injectable,
-	InternalServerErrorException,
 	NotFoundException,
 	Req,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { authenticator } from 'otplib';
 import { User } from 'src/users/entities/user.entity';
@@ -166,7 +166,20 @@ export class AuthService {
 			withTotp: true,
 		});
 
-		const isTotpValid = authenticator.check(otp, user.otp);
+		// Decrypt TOTP secret
+		const iv = Buffer.from(user.otp.split(':')[0], 'hex');
+		const encryptedSecret = Buffer.from(user.otp.split(':')[1], 'hex');
+		const decipher = crypto.createDecipheriv(
+			'aes-256-cbc',
+			Buffer.from(this.configService.get('TOTP_SECRET')),
+			iv,
+		);
+		const decrypted = Buffer.concat([
+			decipher.update(encryptedSecret),
+			decipher.final(),
+		]).toString();
+
+		const isTotpValid = authenticator.check(otp, decrypted);
 
 		if (!isTotpValid) {
 			throw new UnauthorizedException('Invalid TOTP');
@@ -200,7 +213,7 @@ export class AuthService {
 			if (error.code === '23505')
 				throw new ConflictException('Username already taken');
 			else
-				throw new InternalServerErrorException(
+				throw new BadRequestException(
 					'An error occured while creating user',
 				);
 		}

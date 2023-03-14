@@ -93,11 +93,21 @@ export interface IChannel {
 	admins: IUser[];
 	members: IUser[];
 	banned: IChannelBannedUser[];
-	muted: IUser[];
+	muted: IChannelMutedUser[];
 	invited: IChannelInvitedUser[];
 }
 
 export interface IChannelBannedUser {
+	userId: number;
+	user: IUser;
+
+	channelId: number;
+	channel: IChannel;
+
+	until: Date;
+}
+
+export interface IChannelMutedUser {
 	userId: number;
 	user: IUser;
 
@@ -154,4 +164,6 @@ export interface ILocalGameInfo {
 		user: IUser;
 		score: number;
 	}>;
+	paddleHeight: number;
+	isWatching: boolean;
 }

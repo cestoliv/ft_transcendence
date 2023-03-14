@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+	ConflictException,
+	Inject,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { v4 as uuidv4 } from 'uuid';
 import { GameOptions, LocalGame } from './game.class';
@@ -29,6 +34,19 @@ export class GamesService {
 		connectedClientsService: ConnectedClientsService,
 		server: Server,
 	) {
+		// Check if user is already in a game
+		const ingame = await this.findGame(creatorId)
+			.then(() => {
+				return true;
+			})
+			.catch(() => {
+				return false;
+			});
+		if (ingame) throw new ConflictException('User is already in a game');
+
+		// Check if user is already in the queue and leave queue if so
+		if (this.queue.includes(creatorId)) this.leaveMatchmaking(creatorId);
+
 		const options = new GameOptions(
 			payload.maxDuration,
 			payload.maxScore,
@@ -53,7 +71,6 @@ export class GamesService {
 	async findGame(id: number | string) {
 		if (typeof id === 'number') {
 			for (const game of this.games.values()) {
-				if (game.state != 'started') continue;
 				if (game.players.length >= 1 && game.players[0].user.id == id)
 					return game;
 				if (game.players.length >= 2 && game.players[1].user.id == id)
@@ -61,6 +78,13 @@ export class GamesService {
 			}
 		} else return this.games.get(id);
 		throw new NotFoundException('Game not found');
+	}
+
+	async findStartedGame(id: number | string) {
+		const game = await this.findGame(id);
+		if (game.state != 'started')
+			throw new NotFoundException('Game not found');
+		return game;
 	}
 
 	async getHistory(userId: number) {
@@ -109,6 +133,19 @@ export class GamesService {
 	}
 
 	async join(id: string, joinerId: number) {
+		// Check if user is already in a game
+		const ingame = await this.findGame(joinerId)
+			.then(() => {
+				return true;
+			})
+			.catch(() => {
+				return false;
+			});
+		if (ingame) throw new ConflictException('User is already in a game');
+
+		// Check if user is already in the queue and leave queue if so
+		if (this.queue.includes(joinerId)) this.leaveMatchmaking(joinerId);
+
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
 		await game.addPlayer(joinerId);
@@ -121,9 +158,9 @@ export class GamesService {
 
 		if (game.players.length == 1) game.end();
 		else if (game.players[0].user.id == quitterId)
-			game.giveUp(game.players[1].user.id);
+			await game.giveUp(game.players[1].user.id);
 		else if (game.players[1].user.id == quitterId)
-			game.giveUp(game.players[0].user.id);
+			await game.giveUp(game.players[0].user.id);
 		else throw new NotFoundException('Player not found');
 
 		return game.getInfo();
@@ -161,6 +198,19 @@ export class GamesService {
 	}
 
 	async joinMatchmaking(userId: number) {
+		// Check if user is already in a game
+		// Check if user is already in a game
+		const ingame = await this.findGame(userId)
+			.then(() => {
+				return true;
+			})
+			.catch(() => {
+				return false;
+			});
+		if (ingame) throw new ConflictException('User is already in a game');
+
+		// Check if user is already in the queue
+		if (this.queue.includes(userId)) return true;
 		this.queue.push(userId);
 		return true;
 	}
@@ -184,20 +234,33 @@ export class GamesService {
 		});
 	}
 
-	async matchmake(userId: number) {
-		// Find public games, in waiting state and with space
-		const publicGames = Array.from(this.games.values()).filter(
+	async getAvailableGames() {
+		return Array.from(this.games.values()).filter(
 			(game) =>
 				game.options.visibility === 'public' &&
 				game.state === 'waiting' &&
 				game.players.length < 2,
 		);
+	}
+
+	async getAvailableGamesInfo() {
+		return (await this.getAvailableGames()).map((game) => game.getInfo());
+	}
+
+	async matchmake(userId: number) {
+		// Find public games, in waiting state and with space
+		const publicGames = await this.getAvailableGames();
 
 		// If there are public games, join the first one
 		if (publicGames.length > 0) {
-			await this.join(publicGames[0].id, userId);
-			// Remove the user from the queue
-			this.queue = this.queue.filter((id) => id != userId);
+			await this.join(publicGames[0].id, userId)
+				.then(() => {
+					// Remove the user from the queue
+					this.queue = this.queue.filter((id) => id != userId);
+				})
+				.catch(() => {
+					// Do nothing
+				});
 		}
 	}
 

@@ -1,17 +1,18 @@
 import React from 'react';
 
 type SearchSettingsProps = {
-	setVisibility: React.Dispatch<React.SetStateAction<string>>;
+	// setVisibility: React.Dispatch<React.SetStateAction<string>>;
 	setMode: React.Dispatch<React.SetStateAction<string>>;
 	setTime: React.Dispatch<React.SetStateAction<string>>;
 	setPoints: React.Dispatch<React.SetStateAction<string>>;
+	createGame: () => void;
 };
 
-export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: SearchSettingsProps) => {
-	const visibilityOptions = [
-		{ value: 'public', label: 'Public' },
-		{ value: 'private', label: 'Private' },
-	];
+export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: SearchSettingsProps) => {
+	// const visibilityOptions = [
+	// 	{ value: 'public', label: 'Public' },
+	// 	{ value: 'private', label: 'Private' },
+	// ];
 	const modeOptions = [
 		{ value: 'classic', label: 'Classic' },
 		{ value: 'hardcore', label: 'Hardcore' },
@@ -28,8 +29,9 @@ export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: S
 		{ value: 'null', label: 'No limit' },
 	];
 	return (
-		<div className="searchGame-settings">
-			<label htmlFor="visibility_select">Visibility</label>
+		<div className="searchGame-settings slide-left">
+			<p className="create-title">Create a game</p>
+			{/* <label htmlFor="visibility_select">Visibility</label>
 			<div className="nes-select is-dark">
 				<select
 					onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setVisibility(e.target.value)}
@@ -44,7 +46,7 @@ export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: S
 						);
 					})}
 				</select>
-			</div>
+			</div> */}
 			<label htmlFor="mode_select">Mode</label>
 			<div className="nes-select is-dark">
 				<select
@@ -96,6 +98,9 @@ export const SearchSettings = ({ setVisibility, setMode, setTime, setPoints }: S
 				</select>
 			</div>
 			{/* <Select defaultValue="5 points" onChange={(value: string) => setPoints(value)} options={pointsOptions} /> */}
+			<button className="searchButton nes-btn" onClick={createGame}>
+				GO
+			</button>
 		</div>
 	);
 };

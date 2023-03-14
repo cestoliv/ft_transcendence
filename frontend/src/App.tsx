@@ -18,6 +18,7 @@ import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
 import useGameInfo from './hooks/useGameInfo';
+import useMatchmaking from './hooks/useMatchmaking';
 import NotFound from './pages/NotFound';
 import Ladder from './pages/Ladder';
 
@@ -26,9 +27,12 @@ function App() {
 	const socket = useContext(SocketContext);
 	const { auth, setAuth } = useAuth();
 	const { gameInfo, setGameInfo } = useGameInfo();
+	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
+	const maxRetry = 5;
+	let retry = 0;
 
 	const fetchUser = async () => {
 		const response = await fetch(process.env.REACT_APP_API_URL + '/users/me', {
@@ -36,13 +40,16 @@ function App() {
 			headers: {
 				Authorization: `Bearer ${cookies.bearer}`,
 			},
+		}).catch((error) => {
+			console.log(error);
+			setAuth({ bearer: null, otp_ok: false, user: null });
 		});
+		if (!response) return;
+
 		const data = await response.json();
-		console.log(data);
 		setUserLoading(false);
 		if (response.ok) {
 			setUser(data);
-			console.log('user', data);
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== true)
 				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
 			// Connect to socket
@@ -54,26 +61,60 @@ function App() {
 		} else if (response.status === 401) {
 			// User is not connected
 			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
-		} else console.error(data);
+		} else console.log(data);
 	};
 
-	socket.off(); // Unbind all previous events
-	socket.on('connect', () => {
-		console.log('Socket connected');
-	});
-	socket.on('disconnect', () => {
-		console.log('Socket disconnected');
-	});
-	socket.on('connect_error', (error: any) => {
-		console.log('Socket connect_error:', error);
-	});
-	socket.on('error', (error: any) => {
-		console.log('Socket error:', error);
-		if (error.code === 401) {
-			// User is not connected
-			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
-		}
-	});
+	useEffect(() => {
+		socket.on('connect', () => {
+			console.log('Socket connected');
+		});
+		socket.on('disconnect', () => {
+			console.log('Socket disconnected');
+		});
+		// if the user can't connect to the server after 3 tries, he will be disconnected
+		socket.on('connect_error', (error: any) => {
+			console.log('Socket connect_failed:', error);
+			if (retry < maxRetry) {
+				retry++;
+				socket.connect();
+			} else {
+				socket.disconnect();
+				setAuth({ bearer: null, otp_ok: false, user: null });
+				message.error('Connection failed');
+			}
+		});
+		// socket.on('connect_error', (error: any) => {
+		// 	console.log('Socket connect_error:', error);
+		// });
+		socket.on('error', (error: any) => {
+			console.log('Socket error:', error);
+			if (error.code === 401) {
+				// User is not connected
+				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+			}
+		});
+		socket.on('games_start', (data: any) => {
+			console.log('games_start', data);
+			setGameInfo(data);
+			setInMatchmaking(false);
+			navigate(`/pong/${data.id}`);
+		});
+		socket.on('game_invitation', (data: any) => {
+			console.log('game_invitation', data);
+			message.info(
+				<div className="invite-notification">
+					<p>You receive an invitation from {data.players[0].user.username}</p>
+					<button className="nes-btn" onClick={() => joinGame(data)}>
+						Join
+					</button>
+				</div>,
+				10,
+			);
+		});
+		return () => {
+			socket.off();
+		};
+	}, []);
 
 	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
@@ -86,24 +127,24 @@ function App() {
 		});
 	};
 
-	socket.off();
-	socket.on('games_start', (data: any) => {
-		console.log('games_start', data);
-		setGameInfo(data);
-		navigate(`/pong/${data.id}`);
-	});
-	socket.on('game_invitation', (data: any) => {
-		console.log('game_invitation', data);
-		message.info(
-			<div className="invite-notification">
-				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button className="nes-btn" onClick={() => joinGame(data)}>
-					Join
-				</button>
-			</div>,
-			10,
-		);
-	});
+	// socket.off();
+	// socket.on('games_start', (data: any) => {
+	// 	console.log('games_start', data);
+	// 	setGameInfo(data);
+	// 	navigate(`/pong/${data.id}`);
+	// });
+	// socket.on('game_invitation', (data: any) => {
+	// 	console.log('game_invitation', data);
+	// 	message.info(
+	// 		<div className="invite-notification">
+	// 			<p>You receive an invitation from {data.players[0].user.username}</p>
+	// 			<button className="nes-btn" onClick={() => joinGame(data)}>
+	// 				Join
+	// 			</button>
+	// 		</div>,
+	// 		10,
+	// 	);
+	// });
 
 	useEffect(() => {
 		console.log(gameInfo);
