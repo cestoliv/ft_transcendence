@@ -8,6 +8,7 @@ import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { AuthProvider } from './context/AuthProvider';
 import { GameInfoProvider } from './context/GameInfoProvider';
+import { MatchmakingProvider } from './context/MatchmakingProvider';
 
 declare global {
 	interface Window {
@@ -19,9 +20,11 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
 	<BrowserRouter>
 		<AuthProvider>
-			<GameInfoProvider>
-				<App />
-			</GameInfoProvider>
+			<MatchmakingProvider>
+				<GameInfoProvider>
+					<App />
+				</GameInfoProvider>
+			</MatchmakingProvider>
 		</AuthProvider>
 	</BrowserRouter>,
 );

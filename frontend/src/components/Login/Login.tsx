@@ -1,25 +1,22 @@
 import '../../css/app.scss';
-import { Button, Input, ConfigProvider, theme, Divider, message } from 'antd';
+import { ConfigProvider, theme, Divider, message } from 'antd';
 import Modal from '@mui/material/Modal';
 import { ILogin } from '../../interfaces';
-import { UserOutlined } from '@ant-design/icons';
 import { QRCodeCanvas } from 'qrcode.react';
 import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
-import Otp from '../Otp/Otp';
 
 const Login = (props: ILogin) => {
 	const { auth, setAuth } = useAuth();
 	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 	const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
 	const [isTotpModalOpen, setIsTotpModalOpen] = useState(false);
 	const [username, setUsername] = useState('');
 	const [newUsername, setNewUsername] = useState('');
 	const [otpCode, setOtpCode] = useState('');
 	const [totpCode, setTotpCode] = useState();
-	const [totpUrl, setTotpUrl] = useState();
+	const [totpUrl, setTotpUrl] = useState<string>('');
 	console.log(auth);
 
 	const handle42Login = () => {
@@ -29,8 +26,8 @@ const Login = (props: ILogin) => {
 	const showLoginModal = () => setIsLoginModalOpen(true);
 	const showRegisterModal = () => setIsRegisterModalOpen(true);
 
-	const handleRegister = async (e) => {
-		e.preventDefault()
+	const handleRegister = async (e: React.SyntheticEvent) => {
+		e.preventDefault();
 		if (!newUsername) {
 			message.error('Please enter a username');
 			return;
@@ -53,7 +50,7 @@ const Login = (props: ILogin) => {
 		}
 	};
 
-	const handleOtp = async (e) => {
+	const handleOtp = async (e: React.SyntheticEvent) => {
 		e.preventDefault();
 		const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/${otpCode}`, {
 			method: 'POST',
@@ -77,9 +74,8 @@ const Login = (props: ILogin) => {
 		}
 	};
 
-	const handleLogin = async (e) => {
+	const handleLogin = async (e: React.SyntheticEvent) => {
 		e.preventDefault();
-		setConfirmLoading(true);
 		if (!username) {
 			message.error('Please enter a username');
 			return;
@@ -105,7 +101,6 @@ const Login = (props: ILogin) => {
 		} else {
 			message.error(data.error);
 		}
-		setConfirmLoading(false);
 		console.log(data);
 		// window.location.assign(`http://api.transcendence.local/api/v1/auth/login?username=${username}`);
 	};
@@ -121,7 +116,7 @@ const Login = (props: ILogin) => {
 		});
 		setAuth({ bearer: null, otp_ok: false, user: null });
 		message.error('You need to enable 2FA to log in');
-	}
+	};
 	const handleCloseTotp = () => setIsTotpModalOpen(false);
 
 	useEffect(() => {
@@ -164,15 +159,18 @@ const Login = (props: ILogin) => {
 						Create account
 					</button>
 				</div>
-				<Modal
-					open={isLoginModalOpen}
-					onClose={handleCloseLogin}
-				>
+				<Modal open={isLoginModalOpen} onClose={handleCloseLogin}>
 					<div className="modal">
 						<h3>Login</h3>
 						<form onSubmit={handleLogin}>
-							<input placeholder="Enter your username" className="nes-input is-dark" onChange={(e) => setUsername(e.target.value)} />
-							<button className="nes-btn is-success" type="submit">Confirm</button>
+							<input
+								placeholder="Enter your username"
+								className="nes-input is-dark"
+								onChange={(e) => setUsername(e.target.value)}
+							/>
+							<button className="nes-btn is-success" type="submit">
+								Confirm
+							</button>
 						</form>
 						{/* <Input
 							placeholder="Enter your OTP code"
@@ -182,22 +180,21 @@ const Login = (props: ILogin) => {
 						{/* <Button onClick={handleOtp}>Valid OTP</Button> */}
 					</div>
 				</Modal>
-				<Modal
-					open={isRegisterModalOpen}
-					onClose={handleCloseRegister}
-				>
+				<Modal open={isRegisterModalOpen} onClose={handleCloseRegister}>
 					<div className="modal">
 						<h3>Register</h3>
 						<form onSubmit={handleRegister}>
-							<input className="nes-input is-dark" placeholder="Enter your username" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
+							<input
+								className="nes-input is-dark"
+								placeholder="Enter your username"
+								value={newUsername}
+								onChange={(e) => setNewUsername(e.target.value)}
+							/>
 							<button className="nes-btn is-success">Confirm</button>
 						</form>
 					</div>
 				</Modal>
-				<Modal
-					open={isTotpModalOpen}
-					onClose={handleCloseTotp}
-				>
+				<Modal open={isTotpModalOpen} onClose={handleCloseTotp}>
 					<div className="info-2fa modal">
 						<p className="title">Scan this QR Code : </p>
 						<QRCodeCanvas value={totpUrl} />
@@ -209,7 +206,11 @@ const Login = (props: ILogin) => {
 					<div className="modal">
 						<h3>Enter your OTP </h3>
 						<form onSubmit={handleOtp}>
-							<input placeholder="Enter your OTP code" className="nes-input is-dark" onChange={(e) => setOtpCode(e.target.value)} />
+							<input
+								placeholder="Enter your OTP code"
+								className="nes-input is-dark"
+								onChange={(e) => setOtpCode(e.target.value)}
+							/>
 							<button className="nes-btn is-success">Confirm</button>
 						</form>
 					</div>
