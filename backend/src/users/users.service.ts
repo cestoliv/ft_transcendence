@@ -244,6 +244,10 @@ export class UsersService {
 		const newFriend = await this.findOneByUsername(newFriendName);
 		if (!newFriend) throw new NotFoundException('User not found');
 
+		// Check if inviter is not inviting himself
+		if (inviter.id === newFriend.id)
+			throw new ConflictException("You can't invite yourself");
+
 		// Check if friendship already exists
 		const friendship = await this.userFriendsRepository.findOne({
 			where: [

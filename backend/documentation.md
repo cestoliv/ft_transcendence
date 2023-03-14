@@ -845,7 +845,9 @@ payload: {
 		{
 			statusCode: 409,
 			error: 'Conflict',
-			messages: ['User already invited or already friend'],
+			messages: ['There is already a pending invitation']
+						| ["You can't invite yourself"],
+						| ["You are already friends"]
 		}
 		```
 
