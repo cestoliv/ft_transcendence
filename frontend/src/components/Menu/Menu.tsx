@@ -62,6 +62,14 @@ export default function Menu(props: { setCookie: SetCookie }) {
 				</li>
 				<li>
 					<NavLink
+						to="/ladder"
+						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
+					>
+						<img src="https://fanaplay.fr/6277-medium_default/playmobil-30046843-echelle-pour-creneau-09.jpg" />
+					</NavLink>
+				</li>
+				<li>
+					<NavLink
 						to="/settings"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>

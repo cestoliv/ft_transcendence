@@ -32,7 +32,6 @@ export const Stats = (props: StatsProps) => {
 		} else {
 			currentId = props.user_me.id;
 		}
-		console.log('Stat');
 		socket.emit(
 			'users_get',
 			{
@@ -89,8 +88,6 @@ export const Stats = (props: StatsProps) => {
 			},
 			);
 		}, [rerender, rerendUseEffect]);
-	
-		console.log(user, myUser,userStat,displayScores);
 		const initIsfriend = () => {
 		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
@@ -113,7 +110,8 @@ export const Stats = (props: StatsProps) => {
 			const l: number = myUser.muted.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.muted[i].mutedId === user.id) {
-					return setIs_block(true);
+					if (myUser.muted[i].until <= Date.now() )
+						return setIs_block(true);
 				}
 			}
 			return setIs_block(false);
@@ -145,7 +143,6 @@ export const Stats = (props: StatsProps) => {
 		else {
 			opponent_profil += score.winner.id;
 		}
-		console.log("kikoo",opponent_profil);
 		Navigate(opponent_profil);
 		setRerender(!rerender);
 	}

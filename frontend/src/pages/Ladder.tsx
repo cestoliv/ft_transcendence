@@ -59,7 +59,6 @@ export const Ladder = () => {
 	const displayLadderPodium = () => {
 		if (selectedLadder) {
 			let podium: IUser[] = leaderboards.elo.slice(0, 3);
-			console.log(podium, leaderboards.elo);
 			return podium.map((score, index) => (
 				<span className="ladder-item" key={index} id={"rank"+index} onClick={() => ladderEloClickHandler(score)}>
 					<div><img src={score.profile_picture} alt="picture error" /></div>
@@ -82,7 +81,6 @@ export const Ladder = () => {
 		
 		if (selectedLadder && leaderboards.elo.length > 3) {
 			let podium: IUser[] = leaderboards.elo.slice(3 - leaderboards.elo.length);
-			console.log("dispalyladder",podium, leaderboards.elo);
 			return podium.map((score, index) => (
 				<span className="ladder-item" key={index} onClick={() => ladderEloClickHandler(score)}>
 					<div><img src={score.profile_picture} alt="picture error" /></div>
