@@ -310,10 +310,13 @@ const Pong = () => {
 	window.socket = socket;
 
 	// If no game info
-	if (!gameInfo) {
-		message.error('No game info');
-		return <NotFound />;
-	}
+
+	useEffect(() => {
+		if (!gameInfo) {
+			message.error('No game info');
+			navigate('/notFound');
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!gameInfo || !gameInfo.players || gameInfo.players.length !== 2) return;
@@ -333,6 +336,12 @@ const Pong = () => {
 	});
 	socket.off('games_end'); // Unbind previous event
 	socket.on('games_end', (data: any) => {
+		console.log('game end !');
+		console.log(data);
+		if (!data.winner) {
+			navigate('/searchGame', { replace: true });
+			return;
+		}
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 	});
@@ -344,6 +353,7 @@ const Pong = () => {
 	});
 	socket.off('games_watch_end'); // Unbind previous event
 	socket.on('games_watch_end', (data: any) => {
+		console.log(data);
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 	});
@@ -371,6 +381,7 @@ const Pong = () => {
 				if (gameInfo.isWatching) {
 					socket.emit('games_watch_stop', { id: gameId });
 				} else {
+					console.log(gameInfo);
 					socket.emit('games_quit', { id: gameId });
 				}
 			}

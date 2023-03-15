@@ -7,10 +7,10 @@ import { IUser } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import Modal from '@mui/material/Modal';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 
 type SettingsProps = {
 	user_me: IUser;
-	auth: Record<string, unknown>;
 };
 
 type Totp = {
@@ -21,6 +21,8 @@ type Totp = {
 export const Settings = (props: SettingsProps) => {
 	const navigate = useNavigate();
 	const socket = useContext(SocketContext);
+
+	const { auth, setAuth } = useAuth();
 
 	const [isOpenPictureModal, setIsOpenPictureModal] = useState(false);
 	const openPictureModalHandler = () => setIsOpenPictureModal(true);
@@ -63,7 +65,7 @@ export const Settings = (props: SettingsProps) => {
 		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
 			method: 'POST',
 			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+				Authorization: `Bearer ${auth.bearer}`,
 			},
 			body: formData,
 		});
@@ -83,7 +85,7 @@ export const Settings = (props: SettingsProps) => {
 			const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/enable`, {
 				method: 'POST',
 				headers: {
-					Authorization: `Bearer ${props.auth.bearer}`,
+					Authorization: `Bearer ${auth.bearer}`,
 				},
 			});
 			const data = await response.json();
@@ -95,7 +97,7 @@ export const Settings = (props: SettingsProps) => {
 			const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/totp/disable`, {
 				method: 'POST',
 				headers: {
-					Authorization: `Bearer ${props.auth.bearer}`,
+					Authorization: `Bearer ${auth.bearer}`,
 				},
 			});
 			if (response.ok) {
@@ -112,7 +114,7 @@ export const Settings = (props: SettingsProps) => {
 		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+				Authorization: `Bearer ${auth.bearer}`,
 			},
 		});
 		if (response.ok) {
@@ -125,7 +127,7 @@ export const Settings = (props: SettingsProps) => {
 		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/generate', {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+				Authorization: `Bearer ${auth.bearer}`,
 			},
 		});
 		if (response.ok) {
@@ -156,7 +158,7 @@ export const Settings = (props: SettingsProps) => {
 		const response = await fetch(`${process.env.REACT_APP_API_URL}/users/2fa`, {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${props.auth.bearer}`,
+				Authorization: `Bearer ${auth.bearer}`,
 			},
 		});
 		if (response.ok) {
