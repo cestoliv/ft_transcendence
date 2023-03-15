@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"scripts": {
 		"start": "react-scripts --openssl-legacy-provider start",
-		"build": "react-scripts --openssl-legacy-provider build",
+		"build": "DISABLE_ESLINT_PLUGIN=true react-scripts --openssl-legacy-provider build",
 		"eject": "react-scripts eject",
 		"format": "prettier --write \"src/**/*.{ts,tsx}\"",
 		"lint": "eslint \"src/**/*.{ts,tsx}\" --fix"

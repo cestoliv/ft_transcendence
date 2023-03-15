@@ -3,14 +3,14 @@ import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import { message, Badge } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
-import { IUser } from '../interfaces';
+import { IAuth, IUser } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import Modal from '@mui/material/Modal';
 import { useNavigate } from 'react-router-dom';
 
 type SettingsProps = {
 	user_me: IUser;
-	auth: Record<string, unknown>;
+	auth: IAuth;
 };
 
 type Totp = {

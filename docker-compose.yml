@@ -42,42 +42,26 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${API_URL}
+        REACT_APP_SOCKET_URL: ${SOCKET_URL}
+        REACT_APP_COOKIE_DOMAIN: ${COOKIE_DOMAIN}
     restart: always
-    volumes:
-     # Lots of lines, but we don't want node_modules to be mounted
-      - ./frontend/public:/transcendence/public
-      - ./frontend/src:/transcendence/src
-      - ./frontend/.eslintrc.js:/transcendence/.eslintrc.js
-      - ./frontend/package-lock.json:/transcendence/package-lock.json
-      - ./frontend/package.json:/transcendence/package.json
-      - ./frontend/prettier.config.js:/transcendence/prettier.config.js
-      - ./frontend/tsconfig.json:/transcendence/tsconfig.json
     ports:
-      - "3000:3000"
-    environment:
-      REACT_APP_API_URL: ${API_URL}
-      REACT_APP_SOCKET_URL: ${SOCKET_URL}
-      REACT_APP_COOKIE_DOMAIN: ${COOKIE_DOMAIN}
-      ESLINT_NO_DEV_ERRORS: 1
+      - "3014:80"
     networks:
       - nginx
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     restart: always
+    ports:
+      - "3013:80"
     volumes:
-      # Lots of lines, but we don't want node_modules to be mounted
-      - ./backend/src:/transcendence/src
       - ./backend/uploads:/transcendence/uploads
-      - ./backend/.eslintrc.js:/transcendence/.eslintrc.js
-      - ./backend/nest-cli.json:/transcendence/nest-cli.json
-      - ./backend/package-lock.json:/transcendence/package-lock.json
-      - ./backend/package.json:/transcendence/package.json
-      - ./backend/prettier.config.js:/transcendence/prettier.config.js
-      - ./backend/tsconfig.json:/transcendence/tsconfig.json
     environment:
       DB_HOST: db
       DB_PORT: 5432

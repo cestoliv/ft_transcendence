@@ -290,6 +290,9 @@ export const SearchGame = (props: FriendsProps) => {
 					removeFriend={removeFriend}
 					banFriend={banFriend}
 					gameInfo={gameInfo}
+					refuse_friend_request={() => {
+						/* TODO: */
+					}}
 				/>
 			)}
 			<div className="searchRandomPlayer">
