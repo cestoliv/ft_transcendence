@@ -1,4 +1,5 @@
 import {
+	IsBoolean,
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
@@ -23,6 +24,10 @@ export class CreateUserDto {
 	@IsString()
 	@IsOptional()
 	otp: string;
+
+	@IsBoolean()
+	@IsNotEmpty()
+	firstConnection: boolean;
 
 	@IsString()
 	@IsOptional()

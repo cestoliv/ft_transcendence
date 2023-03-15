@@ -37,6 +37,9 @@ export class User {
 	@Column({ nullable: true, select: false })
 	otp: string;
 
+	@Column()
+	firstConnection: boolean;
+
 	@OneToMany(() => UserFriend, (userFriend) => userFriend.inviter)
 	invitedFriends: UserFriend[];
 
