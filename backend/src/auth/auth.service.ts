@@ -100,6 +100,7 @@ export class AuthService {
 				username: newUsername,
 				displayName: userData.displayname,
 				otp: null,
+				firstConnection: true,
 				profile_picture_42: userData.image.link,
 			});
 			await this.usersService.set42ProfilePicture(user).catch(() => {
@@ -206,6 +207,7 @@ export class AuthService {
 				username: username,
 				displayName: null,
 				otp: null,
+				firstConnection: true,
 				profile_picture_42: null,
 			});
 		} catch (error) {

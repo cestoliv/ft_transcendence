@@ -1619,6 +1619,7 @@ Send game information 3 seconds before the start of the game.
 	displayName: string,
 	status: 'online' | 'offline' | 'playing',
 	elo: number,
+	firstConnection: boolean,
 	invitedFriends: UserFriends[],
 	friendOf: UserFriend[],
 	friends: User[],
