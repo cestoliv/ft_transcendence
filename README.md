@@ -21,6 +21,9 @@ COOKIE_DOMAIN=.transcendence.local
 FRONTEND_URL=http://transcendence.local
 API_URL=http://api.transcendence.local/api/v1
 SOCKET_URL=http://api.transcendence.local
+
+NGINX_SERVER_NAME_BACK=api.transcendence.local
+NGINX_SERVER_NAME_FRONT=transcendence.local
 ```
 
 Edit the `/etc/hosts` file on your system to include:
