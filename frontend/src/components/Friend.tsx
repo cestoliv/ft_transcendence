@@ -8,11 +8,12 @@ import PrivateChanJoined from './PrivateChanJoined';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IChannel, IUser, ILocalGameInfo } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { message, Badge } from 'antd';
+import useMatchmaking from '../hooks/useMatchmaking';
 
 type FriendProps = {
 	user: IUser;
@@ -37,6 +38,8 @@ export const Friend = (props: FriendProps) => {
 	const [openInviteGameModal, setOpenInviteGameModal] = React.useState(false);
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
 	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
+
+	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
 
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
@@ -114,6 +117,10 @@ export const Friend = (props: FriendProps) => {
 	};
 
 	const inviteFriend = () => {
+		if (gameInfo || inMatchmaking) {
+			message.error('You are already in a game');
+			return;
+		}
 		socket.emit(
 			'games_create',
 			{
@@ -122,19 +129,28 @@ export const Friend = (props: FriendProps) => {
 				mode: mode,
 				visibility: 'private',
 			},
-			(data: any) => {
-				console.log(data);
-				if (data?.statusCode) {
-					message.error(data.messages);
+			(dataGame: any) => {
+				console.log(dataGame);
+				if (dataGame?.statusCode) {
+					message.error(dataGame.messages);
 					return;
 				}
-				socket.emit('games_invite', { id: data.id, user_id: props.user.id }, (data: any) => {
+				setGameInfo(dataGame as ILocalGameInfo);
+				socket.emit('games_invite', { id: dataGame.id, user_id: props.user.id }, (data: any) => {
 					if (data?.statusCode) {
+						console.log(dataGame);
 						message.error(data.messages);
 						// TODO: delete game if needed
+						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
+							if (data?.statusCode) {
+								message.error(data.messages);
+							}
+							return;
+						});
 						return;
 					}
 					message.success('Invitation sent');
+					// if invitation is not accepted in 15s, delete game
 				});
 			},
 		);
@@ -184,23 +200,10 @@ export const Friend = (props: FriendProps) => {
 	}, [props.chanList]);
 
 	const showGame = () => {
-		console.log(props.user.id);
-		// socket.emit('games_userGame', { id: props.user.id }, (data: any) => {
-		// 	console.log(data);
-		// 	if (data?.statusCode) {
-		// 		message.error(data.messages);
-		// 		return;
-		// 	}
-		// 	socket.emit('games_startWatching', { id: data.id }, (data: any) => {
-		// 		console.log(data);
-		// 		if (data?.statusCode) {
-		// 			message.error(data.messages);
-		// 			return;
-		// 		}
-		// 		setGameInfo({...data, isWatching: true});
-		// 		navigate(`/pong/${data.id}`)
-		// 	});
-		// });
+		if (gameInfo || inMatchmaking) {
+			message.error('You are already in a game');
+			return;
+		}
 		socket.emit('games_startWatching', { id: props.user.id }, (data: any) => {
 			console.log(data);
 			if (data?.statusCode) {
@@ -212,6 +215,10 @@ export const Friend = (props: FriendProps) => {
 		});
 		console.log(gameInfo);
 	};
+
+	useEffect(() => {
+		console.log('user', props.user);
+	}, [props.user]);
 
 	function getBadgeStyle() {
 		if (props.user.status === 'online') {

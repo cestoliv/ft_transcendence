@@ -65,13 +65,16 @@ function App() {
 	};
 
 	useEffect(() => {
+		socket.off('connect');
 		socket.on('connect', () => {
 			console.log('Socket connected');
 		});
+		socket.off('disconnect');
 		socket.on('disconnect', () => {
 			console.log('Socket disconnected');
 		});
 		// if the user can't connect to the server after 3 tries, he will be disconnected
+		socket.off('connect_error');
 		socket.on('connect_error', (error: any) => {
 			console.log('Socket connect_failed:', error);
 			if (retry < maxRetry) {
@@ -86,6 +89,7 @@ function App() {
 		// socket.on('connect_error', (error: any) => {
 		// 	console.log('Socket connect_error:', error);
 		// });
+		socket.off('error');
 		socket.on('error', (error: any) => {
 			console.log('Socket error:', error);
 			if (error.code === 401) {
@@ -93,28 +97,59 @@ function App() {
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			}
 		});
-		socket.on('games_start', (data: any) => {
-			console.log('games_start', data);
-			setGameInfo(data);
-			setInMatchmaking(false);
-			navigate(`/pong/${data.id}`);
-		});
-		socket.on('game_invitation', (data: any) => {
-			console.log('game_invitation', data);
-			message.info(
-				<div className="invite-notification">
-					<p>You receive an invitation from {data.players[0].user.username}</p>
-					<button className="nes-btn" onClick={() => joinGame(data)}>
-						Join
-					</button>
-				</div>,
-				10,
-			);
-		});
+		// socket.off('games_start');
+		// socket.on('games_start', (data: any) => {
+		// 	console.log('games_start', data);
+		// 	setGameInfo(data);
+		// 	setInMatchmaking(false);
+		// 	navigate(`/pong/${data.id}`);
+		// });
+		// socket.off('games_invitation');
+		// socket.on('game_invitation', (data: any) => {
+		// 	console.log('game_invitation', data);
+		// 	message.info(
+		// 		<div className="invite-notification">
+		// 			<p>You receive an invitation from {data.players[0].user.username}</p>
+		// 			<button className="nes-btn is-error" onClick={() => declineGame(data)}>
+		// 				Decline
+		// 			</button>
+		// 			<button className="nes-btn" onClick={() => joinGame(data)}>
+		// 				Join
+		// 			</button>
+		// 		</div>,
+		// 		10,
+		// 	);
+		// });
 		return () => {
+			if (gameInfo) socket.emit('games_leave', { id: gameInfo.id });
+			if (inMatchmaking) socket.emit('games_quit_matchmaking');
 			socket.off();
 		};
 	}, []);
+
+	socket.off('games_start');
+	socket.on('games_start', (data: any) => {
+		console.log('games_start', data);
+		setGameInfo(data);
+		setInMatchmaking(false);
+		navigate(`/pong/${data.id}`);
+	});
+	socket.off('games_invitation');
+	socket.on('game_invitation', (data: any) => {
+		console.log('game_invitation', data);
+		message.info(
+			<div className="invite-notification">
+				<p>You receive an invitation from {data.players[0].user.username}</p>
+				<button className="nes-btn is-error" onClick={() => declineGame(data)}>
+					Decline
+				</button>
+				<button className="nes-btn" onClick={() => joinGame(data)}>
+					Join
+				</button>
+			</div>,
+			10,
+		);
+	});
 
 	const joinGame = (gameInfo: any) => {
 		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
@@ -127,24 +162,16 @@ function App() {
 		});
 	};
 
-	// socket.off();
-	// socket.on('games_start', (data: any) => {
-	// 	console.log('games_start', data);
-	// 	setGameInfo(data);
-	// 	navigate(`/pong/${data.id}`);
-	// });
-	// socket.on('game_invitation', (data: any) => {
-	// 	console.log('game_invitation', data);
-	// 	message.info(
-	// 		<div className="invite-notification">
-	// 			<p>You receive an invitation from {data.players[0].user.username}</p>
-	// 			<button className="nes-btn" onClick={() => joinGame(data)}>
-	// 				Join
-	// 			</button>
-	// 		</div>,
-	// 		10,
-	// 	);
-	// });
+	const declineGame = (gameInfo: any) => {
+		socket.emit('games_decline', { id: gameInfo.id, user_id: gameInfo.players[0].user.id }, (data: any) => {
+			console.log('games_decline', data);
+			if (data?.statusCode) {
+				message.error(data.error);
+			} else {
+				message.success('Game declined');
+			}
+		});
+	};
 
 	useEffect(() => {
 		console.log(gameInfo);
@@ -184,14 +211,14 @@ function App() {
 						element={<Login fetchUser={fetchUser} setCookie={setCookie} removeCookie={removeCookie} />}
 					/>
 					<Route element={<RequireAuth />}>
-						<Route path="/" element={<Home user={user} auth={auth} />} />
+						<Route path="/" element={<Home user={user} />} />
 						<Route path="/friends" element={<Friends user_me={user} />} />
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats" element={<Stats user_me={user} />} />
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
-						<Route path="/settings" element={<Settings user_me={user} auth={auth} />} />
+						<Route path="/settings" element={<Settings user_me={user} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 						<Route path="/ladder" element={<Ladder />} />
 					</Route>

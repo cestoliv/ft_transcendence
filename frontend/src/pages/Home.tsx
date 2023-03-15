@@ -3,7 +3,7 @@ import { SocketContext } from '../context/socket';
 import { IAuth, IUser } from '../interfaces';
 import { NavLink } from 'react-router-dom';
 
-const Home = (props: { user: IUser; auth: IAuth }) => {
+const Home = (props: { user: IUser }) => {
 	const socket = useContext(SocketContext);
 	window.socket = socket;
 

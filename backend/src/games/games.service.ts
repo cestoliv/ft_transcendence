@@ -157,6 +157,8 @@ export class GamesService {
 		if (!game) throw new NotFoundException('Game not found');
 
 		if (game.players.length == 1) game.end();
+		else if (game.players.length == 2 && game.state == 'waiting')
+			game.end();
 		else if (game.players[0].user.id == quitterId)
 			await game.giveUp(game.players[1].user.id);
 		else if (game.players[1].user.id == quitterId)
