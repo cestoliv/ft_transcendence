@@ -5,6 +5,7 @@ import {
 	Injectable,
 	NotFoundException,
 	ForbiddenException,
+	ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
@@ -152,10 +153,8 @@ export class ChannelsService {
 		if (!channel.banned) channel.banned = [];
 
 		// Check if user is already a member
-		if (channel.members.find((member) => member.id === user.id)) {
-			delete channel.password_hash;
-			return channel;
-		}
+		if (channel.members.find((member) => member.id === user.id))
+			throw new ConflictException('You are already a member');
 
 		// Check if user is banned
 		const bannedUser = channel.banned.find(
@@ -370,11 +369,25 @@ export class ChannelsService {
 		const userToInvite = await this.usersService.findOne(userToInviteId);
 		if (!userToInvite) throw new NotFoundException('User not found');
 
+		// Check that user is not invitting himself
+		if (userToInvite.id === userId)
+			throw new ConflictException("You can't invite yourself");
+
 		// Check that user is channel admin
 		if (!channel.admins) channel.admins = [];
 		if (!channel.admins.find((admin) => admin.id === userId))
 			throw new ForbiddenException(
 				'Only channel admins can invite users',
+			);
+
+		// Check if there is already an invitation pending
+		if (
+			channel.invited.find(
+				(invited) => invited.user.id === userToInvite.id,
+			)
+		)
+			throw new ConflictException(
+				'There is already a pending invitation',
 			);
 
 		// Create new invited user
