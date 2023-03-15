@@ -199,7 +199,6 @@ export class GamesService {
 
 	async joinMatchmaking(userId: number) {
 		// Check if user is already in a game
-		// Check if user is already in a game
 		const ingame = await this.findGame(userId)
 			.then(() => {
 				return true;

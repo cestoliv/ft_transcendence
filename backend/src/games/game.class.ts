@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ConflictException,
 	ForbiddenException,
 	NotFoundException,
 } from '@nestjs/common';
@@ -210,22 +211,27 @@ export class LocalGame {
 
 		// Check that creator doesn't invite himself
 		if (this.players[0].user.id === invitee.id)
-			throw new ForbiddenException('You cannot invite yourself');
+			throw new ConflictException('You cannot invite yourself');
 		// Check that inviter is the creator
 		if (this.players[0].user.id !== inviterId)
 			throw new ForbiddenException('Only the creator can invite');
+		// Check if the invitee is not already in the game
+		if (this.players.find((player) => player.user.id === invitee.id))
+			throw new ConflictException('User is already in the game');
+		// Check if user is already invited
+		if (this.invited.includes(invitee.id))
+			throw new ConflictException('User is already invited');
 		// Check if game is waiting for players and is not full
 		if (this.state !== 'waiting' || this.players.length >= 2)
 			throw new ForbiddenException('Game is already full');
 		// Check if user is online
 		if (!this.connectedClientsService.has(invitee.id))
 			throw new ForbiddenException('User is offline');
-		// Check if game is private and user is not invited
-		if (
-			this.options.visibility === 'private' &&
-			!this.invited.find((id) => id === invitee.id)
-		)
-			this.invited.push(invitee.id);
+		// Check that the game is private
+		if (this.options.visibility !== 'private')
+			throw new ForbiddenException('Game is not private');
+
+		this.invited.push(invitee.id);
 
 		// Send notification to invitee
 		this.connectedClientsService
@@ -245,6 +251,9 @@ export class LocalGame {
 			this.players.length !== 0 // Creator can join
 		)
 			throw new ForbiddenException('User not invited');
+		// Check if user is already in the game
+		if (this.players.find((player) => player.user.id === user.id))
+			throw new ConflictException('User is already in the game');
 
 		this.players.push({
 			user,

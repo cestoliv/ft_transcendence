@@ -427,6 +427,13 @@ payload: {
 			messages: ['Channel not found']
 		}
 		```
+	+ ```typescript
+		{
+			statusCode: 409,
+			error: 'Conflict',
+			messages: ['You are already a member']
+		}
+		```
 
 ### **List joined channel**
 
@@ -657,6 +664,14 @@ payload: {
 			error: 'Not found',
 			messages: ['Channel not found']
 					| ['User not found']
+		}
+		```
+	+ ```typescript
+		{
+			statusCode: 409,
+			error: 'Conflict',
+			messages: ["You can't invite yourself"]
+					| ['There is already a pending invitation']
 		}
 		```
 
@@ -1110,6 +1125,13 @@ payload: {
 		messages: ['User not invited'],
 	}
 	```
+- ```typescript
+	{
+		statusCode: 409,
+		error: 'Conflict',
+		messages: ['User is already in the game'],
+	}
+	```
 
 ### **Quit a game**
 
@@ -1184,7 +1206,17 @@ payload: {
 		error: 'Forbidden',
 		messages: ['Only the creator can invite'] |
 					['Game is already full'] |
-					['User is offline'],
+					['User is offline'], |
+					['Game is not private']
+	}
+	```
+- ```typescript
+	{
+		statusCode: 409,
+		error: 'Conflict',
+		messages: ['User is already in the game']
+				| ['You cannot invite yourself']
+				| ['User is already invited']
 	}
 	```
 
