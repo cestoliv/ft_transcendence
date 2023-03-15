@@ -99,6 +99,11 @@ export const Ladder = () => {
 		));
 		}
 	};
+	if ((selectedLadder && leaderboards.elo.length < 1) || (!selectedLadder && leaderboards.mostPlayed.length < 1)){
+		<div className="ladder-wrapper-no-data">
+			No current data
+		</div>
+	}
 	return(
 		<div className='ladder-wrapper'>
 			<div>

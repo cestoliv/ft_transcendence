@@ -3,6 +3,12 @@
 	max-height: 100%;
   }
 
+.ladder-wrapper-no-data {
+	display: block;
+	align-items: center;
+	justify-content: space-around;
+}
+
 .selectLadder {
 	display: none;
 }
