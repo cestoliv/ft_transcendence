@@ -58,6 +58,7 @@ export class UsersService {
 		user.username = createUserDto.username;
 		user.displayName = createUserDto.displayName || 'Unnamed';
 		user.elo = 1000;
+		user.firstConnection = createUserDto.firstConnection;
 		user.status = Status.Offline;
 		user.otp = createUserDto.otp;
 		user.profile_picture_42 = createUserDto.profile_picture_42;
@@ -81,6 +82,7 @@ export class UsersService {
 			'username',
 			'displayName',
 			'elo',
+			'firstConnection',
 			'status',
 			'profile_picture',
 		];
@@ -104,6 +106,7 @@ export class UsersService {
 			'username',
 			'displayName',
 			'elo',
+			'firstConnection',
 			'status',
 			'profile_picture',
 		];
@@ -127,6 +130,7 @@ export class UsersService {
 			'username',
 			'displayName',
 			'elo',
+			'firstConnection',
 			'status',
 			'profile_picture',
 		];
@@ -149,6 +153,9 @@ export class UsersService {
 		user.username = updateUserDto.username;
 		user.displayName = updateUserDto.displayName;
 		user.otp = updateUserDto.otp;
+
+		// Set first connection to false
+		user.firstConnection = false;
 
 		return this.save(user)
 			.then((user) => user)
