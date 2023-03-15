@@ -1,12 +1,7 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
-import { SocketContext } from '../context/socket';
-
-import { IChannel, IUser, IUserFriend } from '../interfaces';
-
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
+import { IUserFriend } from '../interfaces';
 
 type FriendRequestsProps = {
 	friend_request: IUserFriend;
@@ -15,13 +10,11 @@ type FriendRequestsProps = {
 };
 
 export const FriendRequests = (props: FriendRequestsProps) => {
-	const socket = useContext(SocketContext);
-
-	const accept_friend_requestClick = (event: any): void => {
+	const accept_friend_requestClick = (): void => {
 		props.accept_friend_request(props.friend_request.inviter.id);
 	};
 
-	const refuse_friend_request = (event: any): void => {
+	const refuse_friend_request = (): void => {
 		props.refuse_friend_request(props.friend_request.inviter.id);
 	};
 

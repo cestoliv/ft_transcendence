@@ -13,7 +13,7 @@ import Pong from './pages/P5Pong';
 import SearchGame from './pages/SearchGame';
 import Settings from './pages/Settings';
 import Stats from './pages/Stats';
-import { IAuth, IUser } from './interfaces';
+import { IUser } from './interfaces';
 import NoUserFound from './pages/404';
 import RequireAuth from './components/RequireAuth';
 import useAuth from './hooks/useAuth';
@@ -21,6 +21,7 @@ import useGameInfo from './hooks/useGameInfo';
 import useMatchmaking from './hooks/useMatchmaking';
 import NotFound from './pages/NotFound';
 import Ladder from './pages/Ladder';
+import { ILocalGameInfo } from './interfaces';
 
 function App() {
 	const navigate = useNavigate();
@@ -128,13 +129,13 @@ function App() {
 	}, []);
 
 	socket.off('games_start');
-	socket.on('games_start', (data: any) => {
+	socket.on('games_start', (data: ILocalGameInfo) => {
 		console.log('games_start', data);
 		setGameInfo(data);
 		setInMatchmaking(false);
 		navigate(`/pong/${data.id}`);
 	});
-	socket.off('games_invitation');
+	socket.off('game_invitation');
 	socket.on('game_invitation', (data: any) => {
 		console.log('game_invitation', data);
 		message.info(
@@ -151,13 +152,17 @@ function App() {
 		);
 	});
 
-	const joinGame = (gameInfo: any) => {
-		socket.emit('games_join', { id: gameInfo.id }, (data: any) => {
+	const joinGame = (joinGameInfo: any) => {
+		if (gameInfo) {
+			message.error('You are already in a game');
+			return;
+		}
+		socket.emit('games_join', { id: joinGameInfo.id }, (data: any) => {
 			console.log('games_join', data);
 			if (data?.statusCode) {
 				message.error(data.error);
 			} else {
-				navigate(`/pong/${gameInfo.id}`);
+				navigate(`/pong/${joinGameInfo.id}`);
 			}
 		});
 	};
@@ -196,6 +201,7 @@ function App() {
 				<span>g</span>
 			</p>
 		);
+	if (auth.bearer != null && !userLoading && auth.user?.firstConnection) return <Settings user_me={user} />;
 
 	return (
 		<ConfigProvider
@@ -211,7 +217,7 @@ function App() {
 						element={<Login fetchUser={fetchUser} setCookie={setCookie} removeCookie={removeCookie} />}
 					/>
 					<Route element={<RequireAuth />}>
-						<Route path="/" element={<Home user={user} />} />
+						<Route path="/" element={<Home />} />
 						<Route path="/friends" element={<Friends user_me={user} />} />
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats" element={<Stats user_me={user} />} />

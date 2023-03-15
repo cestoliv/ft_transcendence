@@ -1,14 +1,13 @@
 import * as React from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import { useEffect, useContext, useState } from 'react';
-import { IUser, IGame, IStat, ILeaderboards } from '../interfaces';
-import { useNavigate, Navigate, useParams } from 'react-router-dom';
-import { socket, SocketContext } from '../context/socket';
+import { useEffect, useState } from 'react';
+import { IUser, IStat, ILeaderboards } from '../interfaces';
+import { useNavigate } from 'react-router-dom';
+import { socket } from '../context/socket';
 
 export const Ladder = () => {
 	const Navigate = useNavigate();
-	const [redirect, setRedirect] = useState(false);
 	const [leaderboards, setLeaderboards] = useState<ILeaderboards>();
 	const [rerender, setRerender] = useState(false);
 	const [selectedLadder, setSelectedLadder] = useState(true);
@@ -18,7 +17,6 @@ export const Ladder = () => {
 		socket.emit('games_leaderboards', {}, (data: any) => {
 			if (data.messages) {
 				alert(data.messages);
-				setRedirect(true);
 			} else {
 				setLeaderboards(data);
 				if (leaderboards && leaderboards.elo && leaderboards.mostPlayed) {
@@ -57,7 +55,7 @@ export const Ladder = () => {
 
 	const displayLadderPodium = () => {
 		if (selectedLadder) {
-			let podium: IUser[] = leaderboards.elo.slice(0, 3);
+			const podium: IUser[] = leaderboards.elo.slice(0, 3);
 			return podium.map((score, index) => (
 				<span
 					className="ladder-item"
@@ -93,7 +91,7 @@ export const Ladder = () => {
 
 	const displayLadder = () => {
 		if (selectedLadder && leaderboards.elo.length > 3) {
-			let podium: IUser[] = leaderboards.elo.slice(3 - leaderboards.elo.length);
+			const podium: IUser[] = leaderboards.elo.slice(3 - leaderboards.elo.length);
 			return podium.map((score, index) => (
 				<span className="ladder-item" key={index} onClick={() => ladderEloClickHandler(score)}>
 					<div>
@@ -121,9 +119,26 @@ export const Ladder = () => {
 	return (
 		<div className="ladder-wrapper">
 			<div>
-			<input className="selectLadder" type="Checkbox" onChange={() => setSelectedLadder(!selectedLadder)} id="myCheckbox" checked={selectedLadder} >
-			</input>
-			<label htmlFor="myCheckbox">Ladder: {selectedLadder? <><span className="label-item"> elo</span> Played</>: <> elo<span className="label-item"> Played</span></> } </label>
+				<input
+					className="selectLadder"
+					type="Checkbox"
+					onChange={() => setSelectedLadder(!selectedLadder)}
+					id="myCheckbox"
+					checked={selectedLadder}
+				></input>
+				<label htmlFor="myCheckbox">
+					Ladder:{' '}
+					{selectedLadder ? (
+						<>
+							<span className="label-item"> elo</span> Played
+						</>
+					) : (
+						<>
+							{' '}
+							elo<span className="label-item"> Played</span>
+						</>
+					)}{' '}
+				</label>
 			</div>
 			<div className="ladder-items-wrapper">
 				<div className="podium">{displayLadderPodium()}</div>

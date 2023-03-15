@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
 import Modal from '@mui/material/Modal';
@@ -7,9 +6,7 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser, IChannelMessage } from '../interfaces';
-
-import ChanBanItem from './ChanBanItem';
+import { IChannel, IUser } from '../interfaces';
 
 type ChansOtherProps = {
 	chan: IChannel | null;

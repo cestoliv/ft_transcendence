@@ -305,9 +305,9 @@ export class LocalGame {
 	async end(winner: User | null = null) {
 		if (this.state === 'ended') return;
 
-		console.log('hereeee')
+		console.log('hereeee');
 		if (this.state === 'waiting') {
-			console.log('is waiting')
+			console.log('is waiting');
 			this.state = 'ended';
 			this.winner = null;
 			this.players.forEach((player) => {
@@ -371,7 +371,7 @@ export class LocalGame {
 		};
 
 		// Send score to players
-		console.log('sending games_end')
+		console.log('sending games_end');
 		this.connectedClientsService
 			.get(this.players[0].user.id)
 			.emit('games_end', {
@@ -537,10 +537,10 @@ export class LocalGame {
 			!(
 				this.ball.x + this.ball.radius < pX ||
 				this.ball.x - this.ball.radius >
-				pX + this.players[0].paddle.width ||
+					pX + this.players[0].paddle.width ||
 				this.ball.y + this.ball.radius < pY ||
 				this.ball.y - this.ball.radius >
-				pY + this.players[0].paddle.height
+					pY + this.players[0].paddle.height
 			)
 		)
 			this.ball.speed = this._paddleBounce(
@@ -556,10 +556,10 @@ export class LocalGame {
 			!(
 				this.ball.x + this.ball.radius < pX ||
 				this.ball.x - this.ball.radius >
-				pX + this.players[1].paddle.width ||
+					pX + this.players[1].paddle.width ||
 				this.ball.y + this.ball.radius < pY ||
 				this.ball.y - this.ball.radius >
-				pY + this.players[1].paddle.height
+					pY + this.players[1].paddle.height
 			)
 		)
 			this.ball.speed = this._paddleBounce(

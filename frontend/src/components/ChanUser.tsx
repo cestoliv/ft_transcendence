@@ -1,6 +1,5 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+import React, { ChangeEvent, useContext, useState } from 'react';
 import { message } from 'antd';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
 import Modal from '@mui/material/Modal';
@@ -8,7 +7,7 @@ import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser } from '../interfaces';
+import { IUser } from '../interfaces';
 
 type ChanUserProps = {
 	user_me_id: number;
@@ -72,13 +71,9 @@ export const ChanUser = (props: ChanUserProps) => {
 				(data: any) => {
 					if (data.messages) message.error(data.messages);
 					else {
-						socket.emit(
-							'users_get',
-							{ id: props.member_id },
-							(data: any) => {
-								props.chan_admins.push(data as IUser);
-							},
-						);
+						socket.emit('users_get', { id: props.member_id }, (data: any) => {
+							props.chan_admins.push(data as IUser);
+						});
 						CloseChanUserModal();
 					}
 				},
@@ -141,19 +136,13 @@ export const ChanUser = (props: ChanUserProps) => {
 
 	return (
 		<div className="ChanUser-wrapper list-item discord-background-three">
-			{amIAdmin() &&
-				props.user_me_id != props.member_id &&
-				props.member_id != props.chan_owner.id && (
-					<h3 onClick={OpenChanUserModal}>{props.username}</h3>
-				)}
-			{amIAdmin() &&
-				props.member_id === props.chan_owner.id &&
-				props.user_me_id != props.chan_owner.id && (
-					<h3>{props.username}</h3>
-				)}
-			{amIAdmin() && props.user_me_id === props.member_id && (
+			{amIAdmin() && props.user_me_id != props.member_id && props.member_id != props.chan_owner.id && (
+				<h3 onClick={OpenChanUserModal}>{props.username}</h3>
+			)}
+			{amIAdmin() && props.member_id === props.chan_owner.id && props.user_me_id != props.chan_owner.id && (
 				<h3>{props.username}</h3>
 			)}
+			{amIAdmin() && props.user_me_id === props.member_id && <h3>{props.username}</h3>}
 			{!amIAdmin() && <h3>{props.username}</h3>}
 			<Modal
 				open={openChanUserModal}

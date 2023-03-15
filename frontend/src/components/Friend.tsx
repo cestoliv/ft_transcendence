@@ -39,7 +39,7 @@ export const Friend = (props: FriendProps) => {
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
 	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
 
-	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
+	const { inMatchmaking } = useMatchmaking();
 
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
@@ -136,21 +136,33 @@ export const Friend = (props: FriendProps) => {
 					return;
 				}
 				setGameInfo(dataGame as ILocalGameInfo);
-				socket.emit('games_invite', { id: dataGame.id, user_id: props.user.id }, (data: any) => {
+				console.log(props.user.id);
+				socket.emit('games_invite', { id: dataGame.id, user_id: props.user?.id }, (data: any) => {
 					if (data?.statusCode) {
 						console.log(dataGame);
+						console.log(data);
 						message.error(data.messages);
 						// TODO: delete game if needed
 						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
 							if (data?.statusCode) {
 								message.error(data.messages);
 							}
+							setGameInfo(null);
 							return;
 						});
 						return;
 					}
 					message.success('Invitation sent');
 					// if invitation is not accepted in 15s, delete game
+					setTimeout(() => {
+						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
+							if (data?.statusCode) {
+								message.error(data.messages);
+							}
+							setGameInfo(null);
+							return;
+						});
+					}, 15000);
 				});
 			},
 		);

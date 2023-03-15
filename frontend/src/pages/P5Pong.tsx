@@ -9,7 +9,6 @@ import useAuth from '../hooks/useAuth';
 import { throttle } from '../utils';
 import { useNavigate } from 'react-router-dom';
 import useGameInfo from '../hooks/useGameInfo';
-import NotFound from './NotFound';
 
 const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;

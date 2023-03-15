@@ -3,7 +3,7 @@ import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import { message, Badge } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
-import { IAuth, IUser } from '../interfaces';
+import { IUser } from '../interfaces';
 import { SocketContext } from '../context/socket';
 import Modal from '@mui/material/Modal';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,7 @@ export const Settings = (props: SettingsProps) => {
 	const navigate = useNavigate();
 	const socket = useContext(SocketContext);
 
-	const { auth, setAuth } = useAuth();
+	const { auth } = useAuth();
 
 	const [isOpenPictureModal, setIsOpenPictureModal] = useState(false);
 	const openPictureModalHandler = () => setIsOpenPictureModal(true);
@@ -82,7 +82,7 @@ export const Settings = (props: SettingsProps) => {
 				if (r.response.ok) message.success('Profil Picture uploaded');
 				else message.error(r.data.message || r.data.messages[0] || 'Error');
 			})
-			.catch((error) => {
+			.catch(() => {
 				// We need to handle this better, but now there is a CORS error that I can't manage to fix
 				message.error('File too large');
 				//message.error(error.message || 'Network Error');
@@ -180,6 +180,25 @@ export const Settings = (props: SettingsProps) => {
 		}
 	};
 
+	const handleFirstConnection = async (event: any) => {
+		event?.preventDefault();
+		socket.emit(
+			'users_update',
+			{
+				id: props.user_me.id,
+				displayName: displayname ? displayname : auth?.user?.displayName,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+				else {
+					message.success('Username uploaded');
+					setDisplayName('');
+					navigate(0);
+				}
+			},
+		);
+	};
+
 	useEffect(() => {
 		fetch2FA();
 	}, []);
@@ -243,6 +262,13 @@ export const Settings = (props: SettingsProps) => {
 					/>
 					<span>2FA</span>
 				</label>
+				{auth.user?.firstConnection ? (
+					<button onClick={handleFirstConnection} className="confirm-button nes-btn is-success">
+						Confirm
+					</button>
+				) : (
+					<></>
+				)}
 				<Modal open={isOpen2FACheckModal} onClose={close2FACheckModal}>
 					<div className="modal-2fa-check modal">
 						{isChecked2FA ? (

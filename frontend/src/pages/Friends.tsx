@@ -8,15 +8,7 @@ import AllChan from '../components/AllChan';
 import { useState } from 'react';
 import { message } from 'antd';
 
-import {
-	IChannel,
-	IUser,
-	IUserFriend,
-	IChannelMessage,
-	IUserMessage,
-	IChannelInvitedUser,
-	IChannelBannedUser,
-} from '../interfaces';
+import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage } from '../interfaces';
 
 // modal
 import Modal from '@mui/material/Modal';
@@ -34,7 +26,6 @@ export default function Friends(props: FriendsProps) {
 	const [user, setUser] = useState<IUser>();
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [allChan, setAllChan] = useState<IChannel[]>([]);
-	const [chanMessages, setChanMessages] = useState<IChannelMessage[] | null>([]);
 	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 	const [allPrivateConvMessages, setAllPrivateConvMessages] = useState<IUserMessage[]>([]);
 
@@ -96,7 +87,7 @@ export default function Friends(props: FriendsProps) {
 					else {
 						setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 						setAllChan((prevChanList) => [...prevChanList, data as IChannel]);
-					} 
+					}
 				},
 			);
 			setChanName('');
@@ -400,15 +391,15 @@ export default function Friends(props: FriendsProps) {
 
 	const OpenConvs = (event: any): void => {
 		if (event.target.name === 'open-chan-joined-button') {
-			var sidenav = document.getElementById('chan-list');
+			const sidenav = document.getElementById('chan-list');
 			sidenav?.classList.add('active-chan-list');
 		}
 		if (event.target.name === 'open-friend-list-button') {
-			var sidenav = document.getElementById('priv-conv-list');
+			const sidenav = document.getElementById('priv-conv-list');
 			sidenav?.classList.add('active-friend-list');
 		}
 		if (event.target.name === 'open-infos-conv-button') {
-			var sidenav = document.getElementById('infos-conv');
+			const sidenav = document.getElementById('infos-conv');
 			sidenav?.classList.add('active-infos-conv');
 		}
 		const button1 = document.getElementById('open-chan-joined-button');
