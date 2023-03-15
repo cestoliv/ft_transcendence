@@ -714,7 +714,7 @@ payload: {
 
 ### **Get channel messages**
 
-Retrieve 50 message before the date passed.
+Retrieve 200 message before the date passed.
 
 #### Input
 ```typescript
@@ -726,7 +726,7 @@ payload: {
 ```
 
 ### Example
-To retrieve the last 50 messages.
+To retrieve the last 200 messages.
 ```typescript
 socket.emit('channels_messages', {
 	id: 1,

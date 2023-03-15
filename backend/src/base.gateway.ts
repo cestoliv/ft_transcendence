@@ -97,6 +97,7 @@ export abstract class BaseGateway implements OnGatewayConnection {
 
 			// Make the join his own channel
 			socket.join(`user_${user.id}`);
+			socket.join(`me_${user.id}`);
 
 			// Propagate new user status
 			this.gamesService.usersService

@@ -238,6 +238,19 @@ export class UsersService {
 		}
 	}
 
+	/*
+	 * Get a list of users how have muted the given user
+	 */
+	async getMuters(userId: number) {
+		const mute = await this.mutedUsersRepository.find({
+			where: { mutedId: userId },
+		});
+		// Filter expired mutes
+		const now = new Date();
+		const filteredMute = mute.filter((m) => m.until > now);
+		return filteredMute.map((m) => m.user);
+	}
+
 	async inviteFriend(inviterId: number, newFriendName: string) {
 		const inviter = await this.findOne(inviterId);
 		if (!inviter) throw new NotFoundException('User not found');
@@ -419,7 +432,7 @@ export class UsersService {
 				},
 			],
 			order: { sentAt: 'DESC' },
-			take: 50,
+			take: 200,
 		});
 	}
 

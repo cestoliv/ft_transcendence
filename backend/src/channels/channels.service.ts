@@ -8,7 +8,7 @@ import {
 	ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, LessThan, Repository } from 'typeorm';
+import { FindOptionsSelect, In, LessThan, Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { genId } from 'src/utils';
@@ -453,6 +453,8 @@ export class ChannelsService {
 		channelId: number,
 		before: Date,
 	): Promise<ChannelMessage[]> {
+		const user = await this.usersService.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
 		const channel = await this.findOne(channelId);
 		if (!channel) throw new NotFoundException('Channel not found');
 
@@ -463,13 +465,19 @@ export class ChannelsService {
 				'Only channel members can read messages',
 			);
 
+		// Filter muted
+		const now = new Date();
+		user.muted = user.muted.filter((m) => m.until > now);
+
+		// Get messages of the channel, exept the ones sent by muted users
 		return await this.channelMessagesRepository.find({
 			where: {
 				channel: { id: channel.id },
 				sentAt: LessThan(before),
+				sender: Not(In(user.muted.map((m) => m.mutedId))),
 			},
 			order: { sentAt: 'DESC' },
-			take: 50,
+			take: 200,
 		});
 	}
 }

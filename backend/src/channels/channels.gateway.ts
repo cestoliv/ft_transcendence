@@ -494,10 +494,17 @@ export class ChannelsGateway extends BaseGateway {
 		// Try to send message
 		return await this.channelsService
 			.sendMessage(socket.userId, payload.id, payload.message)
-			.then((message) => {
+			.then(async (message) => {
+				// Get a list of all members how have muted the sender
+				const muters = await this.usersService.getMuters(
+					message.senderId,
+				);
+
 				// Send message to all members of the channel (except the sender)
 				socket
 					.to(`channel_${message.channelId}`)
+					// Except every user how muted the sender
+					.except(muters.map((m) => `me_${m.id}`))
 					.emit('channels_message', message);
 				return message;
 			})
