@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { useEffect, useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IUser, IGame, IStat } from '../interfaces';
-import { socket, SocketContext } from '../context/socket';
-import { useNavigate, Navigate, useParams } from 'react-router-dom';
+import { socket } from '../context/socket';
+import { useNavigate, useParams } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import { alertTitleClasses } from '@mui/material';
 
 type StatsProps = {
 	user_me: IUser;
@@ -21,8 +20,7 @@ export const Stats = (props: StatsProps) => {
 	const [displayScores, setDisplayScores] = useState<IGame[]>();
 	const [userStat, setUserStat] = useState<IStat>();
 	const [redirect, setRedirect] = useState(false);
-	const [redirectUrl, setRedirectUrl] = useState('');
-	let Navigate = useNavigate();
+	const Navigate = useNavigate();
 	const rerendUseEffect = !rerender;
 
 	useEffect(() => {
@@ -44,7 +42,7 @@ export const Stats = (props: StatsProps) => {
 				}
 				setUser(data);
 			},
-			);
+		);
 		socket.emit(
 			'users_get',
 			{
@@ -54,13 +52,12 @@ export const Stats = (props: StatsProps) => {
 				if (data.messages) {
 					alert(data.messages);
 					setRedirect(true);
-
 				}
 				setMyUser(data);
 				initIsfriend();
 				initBlocked();
 			},
-			);
+		);
 		socket.emit(
 			'games_history',
 			{
@@ -86,9 +83,9 @@ export const Stats = (props: StatsProps) => {
 				}
 				setUserStat(data);
 			},
-			);
-		}, [rerender, rerendUseEffect]);
-		const initIsfriend = () => {
+		);
+	}, [rerender, rerendUseEffect]);
+	const initIsfriend = () => {
 		if (myUser && user && user.id !== myUser.id && (myUser.friends || myUser.invitedFriends)) {
 			let l: number = myUser.friends.length;
 			for (let i = 0; i < l; i++) {
@@ -110,16 +107,14 @@ export const Stats = (props: StatsProps) => {
 			const l: number = myUser.muted.length;
 			for (let i = 0; i < l; i++) {
 				if (myUser.muted[i].mutedId === user.id) {
-					if (myUser.muted[i].until <= Date.now() )
-						return setIs_block(true);
+					if (myUser.muted[i].until <= Date.now()) return setIs_block(true);
 				}
 			}
 			return setIs_block(false);
 		}
 	};
 
-	if (redirect)
-	{
+	if (redirect) {
 		Navigate('/404');
 		setRerender(!rerender);
 	}
@@ -133,22 +128,20 @@ export const Stats = (props: StatsProps) => {
 			</div>
 		);
 	}
-	
-	const statClickHandler= (score: IGame) => {
-		let opponent_profil: string = "/stats/";
-		if (user.id !== score.loser.id){
 
+	const statClickHandler = (score: IGame) => {
+		let opponent_profil = '/stats/';
+		if (user.id !== score.loser.id) {
 			opponent_profil += score.loser.id;
-		}
-		else {
+		} else {
 			opponent_profil += score.winner.id;
 		}
 		Navigate(opponent_profil);
 		setRerender(!rerender);
-	}
+	};
 	const gameHistory = () => {
 		const lastTenScores = displayScores.slice(-10);
- 		 return lastTenScores.map((score, index) => (
+		return lastTenScores.map((score, index) => (
 			<span className="historic-item" key={index} onClick={() => statClickHandler(score)}>
 				{score.mode} - {score.maxDuration}min <br />
 				{score.winner.displayName} {score.winnerScore} VS {score.loser.displayName} {score.loserScore}
@@ -217,7 +210,8 @@ export const Stats = (props: StatsProps) => {
 			);
 	};
 	const percentWinrate = () => {
-		if (userStat.stats.wins + userStat.stats.losses > 0) return Math.trunc(100 * (userStat.stats.wins / (userStat.stats.losses + userStat.stats.wins)));
+		if (userStat.stats.wins + userStat.stats.losses > 0)
+			return Math.trunc(100 * (userStat.stats.wins / (userStat.stats.losses + userStat.stats.wins)));
 		else return 0;
 	};
 	const onChangeFriend = () => {

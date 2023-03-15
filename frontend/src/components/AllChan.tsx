@@ -1,20 +1,10 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
+import React, { useEffect, useContext, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import { message } from 'antd';
 
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-
 import { SocketContext } from '../context/socket';
 
-import {
-	IChannel,
-	IUser,
-	IChannelBannedUser,
-	IChannelInvitedUser,
-	IChannelMessage,
-} from '../interfaces';
+import { IChannel, IUser, IChannelInvitedUser } from '../interfaces';
 
 import ChansBan from './ChansBan';
 import ChansInv from './ChansInv';
@@ -24,10 +14,7 @@ type AllChanProps = {
 	user_me: IUser;
 	chanList: IChannel[];
 	chanListJoin: (chan_code: string | undefined) => void;
-	chanListJoinPassWord: (
-		chan_code: string | undefined,
-		psswrd: string,
-	) => Promise<any>;
+	chanListJoinPassWord: (chan_code: string | undefined, psswrd: string) => Promise<any>;
 };
 
 export const AllChan = (props: AllChanProps) => {
@@ -57,10 +44,7 @@ export const AllChan = (props: AllChanProps) => {
 			setChans(data);
 			setChansInv(
 				data.filter((channel) =>
-					channel.invited.some(
-						(invitedUser) =>
-							invitedUser.userId === props.user_me.id,
-					),
+					channel.invited.some((invitedUser) => invitedUser.userId === props.user_me.id),
 				),
 			);
 			setLoading(false);
@@ -75,10 +59,7 @@ export const AllChan = (props: AllChanProps) => {
 				setChans(data);
 				setChansInv(
 					data.filter((channel) =>
-						channel.invited.some(
-							(invitedUser) =>
-								invitedUser.userId === props.user_me.id,
-						),
+						channel.invited.some((invitedUser) => invitedUser.userId === props.user_me.id),
 					),
 				);
 				setLoading(false);
@@ -95,17 +76,11 @@ export const AllChan = (props: AllChanProps) => {
 					<div className="loading-spinner"></div>
 				</div>
 			)}
-			{!loading && (
-				<h3 className="display-chan-title pixel-font">All Chan</h3>
-			)}
+			{!loading && <h3 className="display-chan-title pixel-font">All Chan</h3>}
 			<div className="ChansOther-wrapper">
 				{chans
 					?.filter((chan) => {
-						if (
-							chan.visibility === 'public' ||
-							chan.visibility == 'password-protected'
-						)
-							return true;
+						if (chan.visibility === 'public' || chan.visibility == 'password-protected') return true;
 						return false;
 					})
 					.map((chan) => (
@@ -119,15 +94,11 @@ export const AllChan = (props: AllChanProps) => {
 						/>
 					))}
 			</div>
-			{!loading && (
-				<h3 className="display-chan-title pixel-font">ban Chan</h3>
-			)}
+			{!loading && <h3 className="display-chan-title pixel-font">ban Chan</h3>}
 			{chans?.map((chan) => (
 				<ChansBan key={chan.id} chan={chan} user_me={props.user_me} />
 			))}
-			{!loading && (
-				<h3 className="display-chan-title pixel-font">invit chan</h3>
-			)}
+			{!loading && <h3 className="display-chan-title pixel-font">invit chan</h3>}
 			{chansInv?.map((chan) => (
 				<ChansInv
 					key={chan.id}

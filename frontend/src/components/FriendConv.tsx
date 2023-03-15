@@ -1,11 +1,10 @@
 import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
 import { message } from 'antd';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import Checkbox from './Checkbox';
 
 import { SocketContext } from '../context/socket';
 
-import { IChannel, IUser, IUserMessage } from '../interfaces';
+import { IUser, IUserMessage } from '../interfaces';
 
 import FriendConvMessages from './FriendConvMessages';
 
@@ -27,11 +26,7 @@ export default function FriendConv(props: FriendConvProps) {
 		if (event.target.name === 'message-input') setMessage(event.target.value);
 	};
 
-	const submitMessage = async (
-		event:
-			| React.FormEvent<HTMLFormElement>
-			| React.MouseEvent<HTMLImageElement>,
-	) => {
+	const submitMessage = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLImageElement>) => {
 		event.preventDefault();
 		if (messageValue != '') {
 			socket.emit(

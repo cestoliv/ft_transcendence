@@ -1,9 +1,5 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
+import React, { useEffect, useContext, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
-
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
 
 import { SocketContext } from '../context/socket';
 
@@ -20,9 +16,6 @@ export const ChanBanItem = (props: ChanBanItemProps) => {
 	const [chans, setChans] = useState<IChannel[] | null>(null);
 	const [chansBan, setChansBan] = useState<IUser | null>(null);
 	const [chansInvited, setChansInvited] = useState<IUser | null>(null);
-	const [openCModal, setOpenCModal] = React.useState(false);
-	const OpenCreateChanModal = () => setOpenCModal(true);
-	const CloseCreateChanModal = () => setOpenCModal(false);
 
 	const isBan = (): boolean => {
 		if (props.chan) {

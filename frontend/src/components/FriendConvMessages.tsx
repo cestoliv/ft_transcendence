@@ -1,13 +1,7 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-
-import { SocketContext } from '../context/socket';
-
-import { IChannel, IUser, IChannelMessage, IUserMessage } from '../interfaces';
+import { IUser, IUserMessage } from '../interfaces';
 
 type FriendConvMessagesProps = {
 	user_me: IUser;

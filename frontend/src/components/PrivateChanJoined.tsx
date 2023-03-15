@@ -1,13 +1,7 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
-import { SocketContext } from '../context/socket';
-
-import { IChannel, IUser } from '../interfaces';
-
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
+import { IChannel } from '../interfaces';
 
 type PrivateChanJoinedProps = {
 	chan: IChannel;
