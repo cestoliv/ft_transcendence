@@ -90,10 +90,10 @@ function App() {
 		socket.off('error');
 		socket.on('error', (error: any) => {
 			console.log('Socket error:', error);
-			if (error.code === 401) {
+			if (error.statusCode === 401) {
 				// User is not connected
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
-			} else if (error.code === 409) {
+			} else if (error.statusCode === 409) {
 				message.error(error.errors[0]);
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			}
