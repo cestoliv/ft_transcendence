@@ -24,6 +24,8 @@ SOCKET_URL=http://api.transcendence.local
 
 NGINX_SERVER_NAME_BACK=api.transcendence.local
 NGINX_SERVER_NAME_FRONT=transcendence.local
+
+CORS_ORIGIN=http://transcendence.local
 ```
 
 Edit the `/etc/hosts` file on your system to include:
