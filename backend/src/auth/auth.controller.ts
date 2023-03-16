@@ -105,7 +105,7 @@ export class AuthController {
 	@Post('/totp/enable')
 	@UseGuards(JwtAuthGuard)
 	async totpEnable(@Res() response, @Req() request) {
-		const data = await this.usersService.enableTotp(request.user);
+		const data = await this.usersService.enableTotp(request.user.id);
 		return response.send(data);
 	}
 
@@ -115,7 +115,7 @@ export class AuthController {
 	@Post('/totp/disable')
 	@UseGuards(JwtAuthGuard)
 	async totpDisable(@Res() response, @Req() request) {
-		const data = await this.usersService.disableTotp(request.user);
+		const data = await this.usersService.disableTotp(request.user.id);
 		return response.send(data);
 	}
 
