@@ -4,8 +4,6 @@ import useAuth from '../hooks/useAuth';
 const RequireAuth = () => {
 	const { auth } = useAuth();
 
-	console.log(auth);
-
 	return auth?.bearer && auth?.otp_ok ? <Outlet /> : <Navigate to="/login" replace />;
 };
 

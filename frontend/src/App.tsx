@@ -64,11 +64,11 @@ function App() {
 			if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 		} else console.log(data);
 	};
-
 	useEffect(() => {
 		socket.off('connect');
 		socket.on('connect', () => {
 			console.log('Socket connected');
+			if (retry > 0) message.success('Reconnected');
 		});
 		socket.off('disconnect');
 		socket.on('disconnect', () => {
@@ -76,8 +76,8 @@ function App() {
 		});
 		// if the user can't connect to the server after 3 tries, he will be disconnected
 		socket.off('connect_error');
-		socket.on('connect_error', (error: any) => {
-			console.log('Socket connect_failed:', error);
+		socket.on('connect_error', () => {
+			message.error('Trying to reconnect...');
 			if (retry < maxRetry) {
 				retry++;
 				socket.connect();
@@ -87,9 +87,6 @@ function App() {
 				message.error('Connection failed');
 			}
 		});
-		// socket.on('connect_error', (error: any) => {
-		// 	console.log('Socket connect_error:', error);
-		// });
 		socket.off('error');
 		socket.on('error', (error: any) => {
 			console.log('Socket error:', error);
@@ -98,29 +95,6 @@ function App() {
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			}
 		});
-		// socket.off('games_start');
-		// socket.on('games_start', (data: any) => {
-		// 	console.log('games_start', data);
-		// 	setGameInfo(data);
-		// 	setInMatchmaking(false);
-		// 	navigate(`/pong/${data.id}`);
-		// });
-		// socket.off('games_invitation');
-		// socket.on('game_invitation', (data: any) => {
-		// 	console.log('game_invitation', data);
-		// 	message.info(
-		// 		<div className="invite-notification">
-		// 			<p>You receive an invitation from {data.players[0].user.username}</p>
-		// 			<button className="nes-btn is-error" onClick={() => declineGame(data)}>
-		// 				Decline
-		// 			</button>
-		// 			<button className="nes-btn" onClick={() => joinGame(data)}>
-		// 				Join
-		// 			</button>
-		// 		</div>,
-		// 		10,
-		// 	);
-		// });
 		return () => {
 			if (gameInfo) socket.emit('games_leave', { id: gameInfo.id });
 			if (inMatchmaking) socket.emit('games_quit_matchmaking');
@@ -179,11 +153,6 @@ function App() {
 	};
 
 	useEffect(() => {
-		console.log(gameInfo);
-	}, [gameInfo]);
-
-	useEffect(() => {
-		console.log(auth);
 		if (auth.bearer != null) {
 			fetchUser();
 		}
