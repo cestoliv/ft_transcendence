@@ -84,8 +84,7 @@ export abstract class BaseGateway implements OnGatewayConnection {
 				this.connectedClientsService.get(user.id).disconnect()
 				this.connectedClientsService.delete(
 					this.connectedClientsService.get(user.id).userId
-				);
-				return;
+				)
 			}
 
 			console.log(
