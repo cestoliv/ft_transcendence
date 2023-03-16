@@ -31,6 +31,9 @@ type FriendsProps = {
 export default function Friends(props: FriendsProps) {
 	const socket = useContext(SocketContext);
 
+	// const [isEnabled, setIsEnabled] = useState(false);
+	// const [delai, setDelai] = useState<number>(0);
+
 	const [user, setUser] = useState<IUser>();
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [allChan, setAllChan] = useState<IChannel[]>([]);
@@ -96,7 +99,7 @@ export default function Friends(props: FriendsProps) {
 					else {
 						setChanList((prevChanList) => [...prevChanList, data as IChannel]);
 						setAllChan((prevChanList) => [...prevChanList, data as IChannel]);
-					} 
+					}
 				},
 			);
 			setChanName('');
@@ -104,6 +107,8 @@ export default function Friends(props: FriendsProps) {
 			CloseCreateChanModal();
 		}
 		if (event.target.name === 'button-join-chan') {
+			// let chan : IChannel | undefined;
+			// chan = allChan.find(element => element.name == joinChanName);
 			socket.emit(
 				'channels_join',
 				{
@@ -360,6 +365,56 @@ export default function Friends(props: FriendsProps) {
 		);
 	};
 
+	// const calcDelai = (): void => {
+	// 	const now = new Date();
+	// 	let timeDiffInSeconds : number;
+	// 	let x = 0;
+	// 	while (user?.muted[x])
+	// 		x++;
+	// 	if (x = 0)
+	// 	{
+	// 		setDelai(0);
+	// 		setIsEnabled(false);
+	// 		return ;
+	// 	}
+	// 	else
+	// 	{
+	// 		console.log("buzz");
+	// 		user?.muted.forEach(element => {
+	// 			const isoDate = new Date(element.until);
+	// 			console.log("until : " + isoDate);
+	// 			console.log('now : ' + now);
+	// 			console.log(isoDate.getTime() > now.getTime());
+	// 			if (isoDate.getTime() > now.getTime())
+	// 			{
+	// 				timeDiffInSeconds = (isoDate.getTime() - now.getTime()) / 1000;
+	// 			}
+	// 			if (delai == 0 || delai > timeDiffInSeconds)
+	// 				setDelai(timeDiffInSeconds)
+	// 		});
+	// 	}
+	// 	console.log(delai);
+	// 	setIsEnabled(true);
+	// };
+
+	const muteFriend = (muteTime: string, friend_id: number) => {
+		const now = new Date();
+		now.setMinutes(now.getMinutes() + parseInt(muteTime));
+		socket.emit(
+			'users_mute',
+			{
+				id: friend_id,
+				until: now,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+				else {
+					setAllChanMessages((prevList) => prevList.filter((message) => message.senderId != friend_id));
+				}
+			},
+		);
+	};
+
 	const activeConv = (event: any) => {
 		let newId;
 		let element;
@@ -578,6 +633,47 @@ export default function Friends(props: FriendsProps) {
 	});
 
 	// end socket.on user
+
+	// useEffect(() => {
+	// 	let intervalId: NodeJS.Timeout | null = null;
+
+	// 	if (isEnabled) {
+	// 		intervalId = setInterval(() => {
+	// 			setAllChanMessages([]);
+	// 			console.log('setAllChanMessages delai UseEffect');
+	// 			// Récupérer la liste des channels joints
+	// 			socket.emit('channels_listJoined', {}, (data: any) => {
+	// 				const messagesFromAllChannels: IChannelMessage[] = []; // variable temporaire pour stocker les messages
+	// 				// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "messagesFromAllChannels"
+	// 				data.forEach((channel: any) => {
+	// 					socket.emit(
+	// 						'channels_messages',
+	// 						{ id: channel.id, before: new Date().toISOString() },
+	// 						(messages: any) => {
+	// 							if (messages.message) {
+	// 								alert(messages.errors);
+	// 							} else {
+	// 								// Ajouter les messages du channel à "messagesFromAllChannels"
+	// 								messages.forEach((message: IChannelMessage) => {
+	// 									messagesFromAllChannels.push(message);
+	// 								});
+	// 							}
+	// 						},
+	// 					);
+	// 				});
+	// 				// Ajouter tous les messages récupérés à "allChanMessages"
+	// 				setAllChanMessages(messagesFromAllChannels);
+	// 			});
+	// 			calcDelai();
+	// 	  }, delai);
+	// 	}
+
+	// 	return () => {
+	// 	  if (intervalId) {
+	// 		clearInterval(intervalId);
+	// 	  }
+	// 	};
+	//   }, [isEnabled]);
 
 	useEffect(() => {
 		setAllChanMessages([]);
@@ -855,6 +951,7 @@ export default function Friends(props: FriendsProps) {
 					refuse_friend_request={refuse_friend_request}
 					removeFriend={removeFriend}
 					banFriend={banFriend}
+					muteFriend={muteFriend}
 					gameInfo={undefined}
 				/>
 			)}

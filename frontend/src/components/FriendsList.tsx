@@ -20,6 +20,7 @@ type PersonListProps = {
 	accept_friend_request: (inviter_id: number) => void;
 	refuse_friend_request: (inviter_id: number) => void;
 	banFriend: (banTime: string, friend_id: number) => void;
+	muteFriend: (muteTime: string, friend_id: number) => void;
 	removeFriend: (user_id: number) => void;
 	gameInfo: any;
 };
@@ -70,6 +71,7 @@ export const FriendsList = (props: PersonListProps) => {
 							activeConv={props.activeConv}
 							removeFriend={props.removeFriend}
 							banFriend={props.banFriend}
+							muteFriend={props.muteFriend}
 							gameInfo={props.gameInfo}
 						/>
 					))}
