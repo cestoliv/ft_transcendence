@@ -193,6 +193,21 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
+	const muteFriend = (muteTime: string, friend_id: number) => {
+		const now = new Date();
+		now.setMinutes(now.getMinutes() + parseInt(muteTime));
+		socket.emit(
+			'users_mute',
+			{
+				id: friend_id,
+				until: now,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+			},
+		);
+	};
+
 	const banFriend = (banTime: string, friend_id: number): void => {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(banTime));
@@ -289,6 +304,7 @@ export const SearchGame = (props: FriendsProps) => {
 					accept_friend_request={accept_friend_request}
 					removeFriend={removeFriend}
 					banFriend={banFriend}
+					muteFriend={muteFriend}
 					gameInfo={gameInfo}
 					refuse_friend_request={() => {
 						/* TODO: */
