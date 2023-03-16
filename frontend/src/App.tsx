@@ -93,6 +93,9 @@ function App() {
 			if (error.code === 401) {
 				// User is not connected
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+			} else if (error.code === 409) {
+				message.error(error.errors[0]);
+				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			}
 		});
 		return () => {
