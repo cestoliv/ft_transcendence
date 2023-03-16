@@ -8,9 +8,12 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 COPY tsconfig.json tsconfig.json
 COPY nest-cli.json nest-cli.json
-COPY src src
-# Install npm dependencies and build
+
+# Install npm dependencies
 RUN npm i
+
+COPY src src
+
 RUN npm run build
 
 FROM node:alpine as main
@@ -23,9 +26,11 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 COPY tsconfig.json tsconfig.json
 COPY nest-cli.json nest-cli.json
-COPY --from=build /transcendence/dist ./dist
+
 # Install only production
 RUN npm install --omit=dev
+
+COPY --from=build /transcendence/dist ./dist
 
 EXPOSE 3000
 ENV PORT=3000
