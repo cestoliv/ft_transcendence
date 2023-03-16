@@ -122,50 +122,71 @@ export const Friend = (props: FriendProps) => {
 			return;
 		}
 		socket.emit(
-			'games_create',
+			'games_invite',
 			{
+				user_id: props.user.id,
 				maxDuration: parseInt(time),
 				maxScore: parseInt(points),
 				mode: mode,
 				visibility: 'private',
 			},
-			(dataGame: any) => {
-				console.log(dataGame);
-				if (dataGame?.statusCode) {
-					message.error(dataGame.messages);
+			(data: any) => {
+				if (data?.statusCode) {
+					message.error(data.messages);
+					setGameInfo(null);
 					return;
 				}
-				setGameInfo(dataGame as ILocalGameInfo);
-				console.log(props.user.id);
-				socket.emit('games_invite', { id: dataGame.id, user_id: props.user?.id }, (data: any) => {
-					if (data?.statusCode) {
-						console.log(dataGame);
-						console.log(data);
-						message.error(data.messages);
-						// TODO: delete game if needed
-						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
-							if (data?.statusCode) {
-								message.error(data.messages);
-							}
-							setGameInfo(null);
-							return;
-						});
-						return;
-					}
-					message.success('Invitation sent');
-					// if invitation is not accepted in 15s, delete game
-					setTimeout(() => {
-						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
-							if (data?.statusCode) {
-								message.error(data.messages);
-							}
-							setGameInfo(null);
-							return;
-						});
-					}, 15000);
-				});
+				setGameInfo(data as ILocalGameInfo);
+				console.log('data', data);
 			},
 		);
+		// socket.emit(
+		// 	'games_create',
+		// 	{
+		// 		maxDuration: parseInt(time),
+		// 		maxScore: parseInt(points),
+		// 		mode: mode,
+		// 		visibility: 'private',
+		// 	},
+		// 	(dataGame: any) => {
+		// 		console.log(dataGame);
+		// 		if (dataGame?.statusCode) {
+		// 			message.error(dataGame.messages);
+		// 			return;
+		// 		}
+		// 		setGameInfo(dataGame as ILocalGameInfo);
+		// 		console.log(props.user.id);
+		// 		socket.emit('games_invite', { id: dataGame.id, user_id: props.user?.id }, (data: any) => {
+		// 			if (data?.statusCode) {
+		// 				console.log(dataGame);
+		// 				console.log(data);
+		// 				if (data.statusCode === 500) {
+		// 					message.error('Server error');
+		// 				} else message.error(data.messages);
+		// 				// TODO: delete game if needed
+		// 				socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
+		// 					if (data?.statusCode) {
+		// 						message.error(data.messages);
+		// 					}
+		// 					setGameInfo(null);
+		// 					return;
+		// 				});
+		// 				return;
+		// 			}
+		// 			message.success('Invitation sent');
+		// 			// if invitation is not accepted in 15s, delete game
+		// 			setTimeout(() => {
+		// 				socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
+		// 					if (data?.statusCode) {
+		// 						message.error(data.messages);
+		// 					}
+		// 					setGameInfo(null);
+		// 					return;
+		// 				});
+		// 			}, 15000);
+		// 		});
+		// 	},
+		// );
 	};
 
 	const chanInvit = (chan_id: number, invited_user_id: number): void => {

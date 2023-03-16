@@ -73,7 +73,7 @@ export const FriendsList = (props: PersonListProps) => {
 			</div>
 			<div className="add-accept-friend">
 				<button className="en-attente-button nes-btn is-primary" onClick={OpenListFriendRequest}>
-					En attente
+					Pending
 				</button>
 				<Modal
 					open={OpenLFriendRequest}
