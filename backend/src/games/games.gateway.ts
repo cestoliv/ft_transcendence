@@ -246,8 +246,6 @@ export class GamesGateway extends BaseGateway {
 				error: 'Bad request',
 				messages: errors,
 			};
-
-		console.log('test game');
 		return await this.gamesService
 			.create(
 				socket.userId,
@@ -264,7 +262,6 @@ export class GamesGateway extends BaseGateway {
 					await game.end();
 					return init;
 				}
-				console.log(game.getInfo());
 				return await this.gamesService
 					.invite(game.id, socket.userId, payload.user_id)
 					.then(async (invitee) => {

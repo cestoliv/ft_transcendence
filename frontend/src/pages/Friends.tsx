@@ -218,7 +218,7 @@ export default function Friends(props: FriendsProps) {
 						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
 
 						if (index !== -1) {
-							let updatedChanList: IChannel[];
+							let updatedChanList: IChannel[] = [];
 							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
@@ -241,7 +241,7 @@ export default function Friends(props: FriendsProps) {
 						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
 
 						if (index !== -1) {
-							let updatedChanList: IChannel[];
+							let updatedChanList: IChannel[] = [];
 							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
@@ -271,7 +271,7 @@ export default function Friends(props: FriendsProps) {
 						const index = chanList.findIndex((channel) => channel.id === chan_id);
 
 						if (index !== -1) {
-							let updatedChanList: IChannel[];
+							let updatedChanList: IChannel[] = [];
 							// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 							updatedChanList = [...chanList];
 							updatedChanList[index] = data;
@@ -484,7 +484,7 @@ export default function Friends(props: FriendsProps) {
 		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			updatedChanList[index] = data as IChannel;
@@ -498,7 +498,7 @@ export default function Friends(props: FriendsProps) {
 		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			updatedChanList[index] = data as IChannel;
@@ -513,7 +513,7 @@ export default function Friends(props: FriendsProps) {
 		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			updatedChanList[index] = data as IChannel;
@@ -528,7 +528,7 @@ export default function Friends(props: FriendsProps) {
 		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			updatedChanList[index] = data as IChannel;
@@ -553,7 +553,7 @@ export default function Friends(props: FriendsProps) {
 			}
 		}
 		if (index !== -1 && data.userId !== user?.id) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			const newMembers = updatedChanList[index].members.filter((member) => member.id !== (data.userId as number));
@@ -569,7 +569,7 @@ export default function Friends(props: FriendsProps) {
 		const index = chanList.findIndex((channel) => channel.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedChanList: IChannel[];
+			let updatedChanList: IChannel[] = [];
 			// Si l'objet IChannel existe dans le tableau, remplacer l'objet à l'index par le nouvel objet
 			updatedChanList = [...chanList];
 			updatedChanList[index] = data as IChannel;
@@ -594,7 +594,7 @@ export default function Friends(props: FriendsProps) {
 		const index = friends.findIndex((friend) => friend.id === (data.id as number));
 
 		if (index !== -1) {
-			let updatedFriendList: IUser[];
+			let updatedFriendList: IUser[] = [];
 
 			updatedFriendList = [...friends];
 			updatedFriendList[index] = data as IUser;
@@ -749,7 +749,7 @@ export default function Friends(props: FriendsProps) {
 	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-			let chanJoined: IChannel[];
+			let chanJoined: IChannel[] = [];
 			chanJoined = data.filter((channel) => channel.members.some((member) => member.id === props.user_me.id));
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 			setChanList(chanJoined);

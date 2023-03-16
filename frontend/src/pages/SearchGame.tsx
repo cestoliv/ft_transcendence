@@ -4,7 +4,7 @@ import { useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 
-import { IChannel, IUser, IUserFriend, ILocalGameInfo } from '../interfaces';
+import { IChannel, IUser, IUserFriend, ILocalGameInfo, IChannelMessage } from '../interfaces';
 
 import useMatchmaking from '../hooks/useMatchmaking';
 import FriendsList from '../components/FriendsList';
@@ -23,6 +23,7 @@ export const SearchGame = (props: FriendsProps) => {
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	const [friends, setFriends] = useState<IUser[]>([]);
+	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	// list of available games
 	const [availableGames, setAvailableGames] = useState<ILocalGameInfo[]>([]);
@@ -44,6 +45,24 @@ export const SearchGame = (props: FriendsProps) => {
 		const element = event.target;
 		element.classList.toggle('active-conv-bg');
 		active_elem = element;
+	};
+
+	const muteFriend = (muteTime: string, friend_id: number) => {
+		const now = new Date();
+		now.setMinutes(now.getMinutes() + parseInt(muteTime));
+		socket.emit(
+			'users_mute',
+			{
+				id: friend_id,
+				until: now,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+				else {
+					setAllChanMessages((prevList) => prevList.filter((message) => message.senderId != friend_id));
+				}
+			},
+		);
 	};
 
 	const showOptions = () => {
@@ -180,6 +199,21 @@ export const SearchGame = (props: FriendsProps) => {
 		}
 	};
 
+	const refuse_friend_request = (inviter_id: number): void => {
+		socket.emit(
+			'users_removeFriend',
+			{
+				id: inviter_id,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+				else {
+					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
+				}
+			},
+		);
+	};
+
 	const removeFriend = (user_id: number): void => {
 		socket.emit(
 			'users_removeFriend',
@@ -287,15 +321,11 @@ export const SearchGame = (props: FriendsProps) => {
 					activeConv={activeConv}
 					AddFriend={AddFriend}
 					accept_friend_request={accept_friend_request}
+					refuse_friend_request={refuse_friend_request}
 					removeFriend={removeFriend}
 					banFriend={banFriend}
 					gameInfo={gameInfo}
-					refuse_friend_request={() => {
-						/* TODO: */
-					}}
-					muteFriend={() => {
-						/* TODO: */
-					}}
+					muteFriend={muteFriend}
 				/>
 			)}
 			<div className="searchRandomPlayer">
