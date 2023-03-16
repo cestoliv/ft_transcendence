@@ -293,6 +293,9 @@ export const SearchGame = (props: FriendsProps) => {
 					refuse_friend_request={() => {
 						/* TODO: */
 					}}
+					muteFriend={() => {
+						/* TODO: */
+					}}
 				/>
 			)}
 			<div className="searchRandomPlayer">

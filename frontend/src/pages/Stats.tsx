@@ -105,9 +105,10 @@ export const Stats = (props: StatsProps) => {
 	const initBlocked = () => {
 		if (myUser && user && user.id !== myUser.id && myUser.muted) {
 			const l: number = myUser.muted.length;
+			const now = new Date();
 			for (let i = 0; i < l; i++) {
 				if (myUser.muted[i].mutedId === user.id) {
-					if (myUser.muted[i].until <= Date.now()) return setIs_block(true);
+					if (myUser.muted[i].until <= now) return setIs_block(true);
 				}
 			}
 			return setIs_block(false);
