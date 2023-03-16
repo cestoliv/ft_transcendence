@@ -49,7 +49,17 @@ export class GamesGateway extends BaseGateway {
 				this.connectedClientsService,
 				this.server,
 			)
-			.then((game) => game)
+			.then(async (game) => {
+				const init = await game
+					.initGame()
+					.then(() => true)
+					.catch((err) => exceptionToObj(err));
+				if (isWsResponse(init)) {
+					await game.end();
+					return init;
+				}
+				return game.getInfo();
+			})
 			.catch((err) => exceptionToObj(err));
 	}
 
@@ -225,8 +235,8 @@ export class GamesGateway extends BaseGateway {
 		const errors: Array<string> = [];
 		if (payload === undefined || typeof payload != 'object')
 			errors.push('Empty payload');
-		if (payload.id === undefined)
-			errors.push('Game id pos is not specified');
+		// if (payload.id === undefined)
+		// 	errors.push('Game id pos is not specified');
 		if (payload.user_id === undefined)
 			errors.push('Id of user to invite is not specified');
 
@@ -237,21 +247,60 @@ export class GamesGateway extends BaseGateway {
 				messages: errors,
 			};
 
-		// Invite player
-		return this.gamesService
-			.invite(payload.id, socket.userId, payload.user_id)
-			.then(async (invitee) => {
-				// Send notification to invitee
-				this.connectedClientsService
-					.get(invitee.id)
-					.emit('games_invitation', {
-						game: await this.gamesService.info(payload.id),
-						inviter: await this.usersService.findOne(socket.userId),
+		console.log('test game');
+		return await this.gamesService
+			.create(
+				socket.userId,
+				payload,
+				this.connectedClientsService,
+				this.server,
+			)
+			.then(async (game) => {
+				const init = await game
+					.initGame()
+					.then(() => true)
+					.catch((err) => exceptionToObj(err));
+				if (isWsResponse(init)) {
+					await game.end();
+					return init;
+				}
+				console.log(game.getInfo());
+				return await this.gamesService
+					.invite(game.id, socket.userId, payload.user_id)
+					.then(async (invitee) => {
+						// Send notification to invitee
+						this.connectedClientsService
+							.get(invitee.id)
+							.emit('games_invitation', {
+								game: await this.gamesService.info(game.id),
+								inviter: await this.usersService.findOne(
+									socket.userId,
+								),
+							});
+						return game.getInfo();
+					})
+					.catch(async (err) => {
+						await game.end();
+						return exceptionToObj(err);
 					});
-
-				return invitee;
 			})
 			.catch((err) => exceptionToObj(err));
+
+		// Invite player
+		// return this.gamesService
+		// 	.invite(game.id, socket.userId, payload.user_id)
+		// 	.then(async (invitee) => {
+		// 		// Send notification to invitee
+		// 		this.connectedClientsService
+		// 			.get(invitee.id)
+		// 			.emit('games_invitation', {
+		// 				game: await this.gamesService.info(payload.id),
+		// 				inviter: await this.usersService.findOne(socket.userId),
+		// 			});
+
+		// 		return invitee;
+		// 	})
+		// 	.catch((err) => exceptionToObj(err));
 	}
 
 	@SubscribeMessage('games_info')

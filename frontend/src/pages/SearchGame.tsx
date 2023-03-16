@@ -70,7 +70,7 @@ export const SearchGame = (props: FriendsProps) => {
 			(data: any) => {
 				// console.log(data);
 				if (data?.statusCode) {
-					message.error(data.error);
+					message.error(data.messages);
 					console.error(data.messages);
 					return;
 				}

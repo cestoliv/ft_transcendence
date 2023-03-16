@@ -375,6 +375,13 @@ const Pong = () => {
 	};
 
 	useEffect(() => {
+		if (gameInfo?.isWatching) {
+			setGameScore({
+				creator: gameInfo.players[0].score,
+				opponent: gameInfo.players[1].score,
+				you: 0,
+			});
+		}
 		return () => {
 			if (gameInfo) {
 				if (gameInfo.isWatching) {

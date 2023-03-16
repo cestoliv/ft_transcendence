@@ -43,6 +43,7 @@ export class GamesService {
 			.catch(() => {
 				return false;
 			});
+		console.log(ingame);
 		if (ingame) throw new ConflictException('User is already in a game');
 
 		// Check if user is already in the queue and leave queue if so
@@ -56,6 +57,7 @@ export class GamesService {
 		);
 
 		const id = uuidv4();
+		console.log('creatorId', creatorId);
 		const game = new LocalGame(
 			id,
 			creatorId,
@@ -65,7 +67,7 @@ export class GamesService {
 			server,
 		);
 		this.games.set(id, game);
-		return game.getInfo();
+		return game;
 	}
 
 	// Find game from it's id or from a user id
@@ -156,6 +158,7 @@ export class GamesService {
 	async quit(id: string, quitterId: number) {
 		const game = this.games.get(id);
 		if (!game) throw new NotFoundException('Game not found');
+		console.log('game_quit', game);
 
 		if (game.players.length == 1) game.end();
 		else if (game.players.length == 2 && game.state == 'waiting')

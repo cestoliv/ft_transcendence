@@ -120,6 +120,7 @@ export class LocalGame {
 		user: User;
 		score: number;
 	};
+	creatorId: number;
 
 	constructor(
 		id: string,
@@ -145,21 +146,33 @@ export class LocalGame {
 		};
 		this.winner = null;
 		this.loser = null;
+		this.creatorId = creatorId;
 
 		// Ball
 		this.resetBall();
 
-		new Promise(async () => {
-			// Add creator to game
-			await this.addPlayer(creatorId);
-			// Send updated games available to all users
-			this.server.emit(
-				'games_available',
-				await this.gamesService.getAvailableGamesInfo(),
-			);
-		}).then(() => {
-			/* Do nothing */
-		});
+		// new Promise(async () => {
+		// 	// Add creator to game
+		// 	await this.addPlayer(creatorId);
+		// 	// Send updated games available to all users
+		// 	this.server.emit(
+		// 		'games_available',
+		// 		await this.gamesService.getAvailableGamesInfo(),
+		// 	);
+		// })
+		// 	.then(() => {
+		// 		/* Do nothing */
+		// 	})
+		// 	.catch((err) => console.log('error_create', err));
+	}
+
+	async initGame() {
+		await this.addPlayer(this.creatorId);
+		// Send updated games available to all users
+		this.server.emit(
+			'games_available',
+			await this.gamesService.getAvailableGamesInfo(),
+		);
 	}
 
 	getInfo(): LocalGameInfo {

@@ -150,6 +150,7 @@ export const Settings = (props: SettingsProps) => {
 
 	const changeSettings = (event: any): void => {
 		event?.preventDefault();
+		if (auth.user?.firstConnection) return;
 		socket.emit(
 			'users_update',
 			{
@@ -252,16 +253,23 @@ export const Settings = (props: SettingsProps) => {
 						onChange={handleChange}
 					/>
 				</form>
-				<div className="divider"></div>
-				<label>
-					<input
-						checked={isChecked2FA}
-						onChange={open2FACheckModal}
-						type="checkbox"
-						className="nes-checkbox is-dark"
-					/>
-					<span>2FA</span>
-				</label>
+				{auth.user?.id42 ? (
+					<>
+						<div className="divider"></div>
+						<label>
+							<input
+								checked={isChecked2FA}
+								onChange={open2FACheckModal}
+								type="checkbox"
+								className="nes-checkbox is-dark"
+							/>
+							<span>2FA</span>
+						</label>
+					</>
+				) : (
+					<></>
+				)}
+
 				{auth.user?.firstConnection ? (
 					<button onClick={handleFirstConnection} className="confirm-button nes-btn is-success">
 						Confirm
