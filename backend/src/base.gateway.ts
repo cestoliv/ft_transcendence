@@ -83,7 +83,7 @@ export abstract class BaseGateway implements OnGatewayConnection {
 					errors: ['You are connected somewhere else'],
 				});
 				this.connectedClientsService.delete(
-					this.connectedClientsService.get(user.id)
+					this.connectedClientsService.get(user.id).userId
 				);
 				return;
 			}
