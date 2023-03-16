@@ -32,6 +32,7 @@ function App() {
 	const [cookies, setCookie, removeCookie] = useCookies(['bearer']);
 	const [userLoading, setUserLoading] = useState(true);
 	const [user, setUser] = useState({} as IUser);
+	const [alreadyConnected, setAlreadyConnected] = useState(false);
 	const maxRetry = 5;
 	let retry = 0;
 
@@ -55,6 +56,8 @@ function App() {
 				setAuth({ bearer: cookies.bearer, otp_ok: true, user: data });
 			// Connect to socket
 			socket.connect();
+			setAlreadyConnected(false);
+			navigate('/');
 		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
 			// User need to enter a TOTP
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== false)
@@ -95,7 +98,11 @@ function App() {
 				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
 			} else if (error.statusCode === 409) {
 				message.error(error.errors[0]);
-				if (auth.bearer !== null || auth.otp_ok !== false) setAuth({ bearer: null, otp_ok: false, user: null });
+				// navigate('/notFound', { replace: true });
+				if (auth.bearer !== null || auth.otp_ok !== false) {
+					setAlreadyConnected(true);
+					setAuth({ bearer: null, otp_ok: false, user: null });
+				}
 			}
 		});
 		return () => {
@@ -156,7 +163,7 @@ function App() {
 	};
 
 	useEffect(() => {
-		if (auth.bearer != null) {
+		if (auth.bearer != null && !alreadyConnected) {
 			fetchUser();
 		}
 	}, [auth]);
