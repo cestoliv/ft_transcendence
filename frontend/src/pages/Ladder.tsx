@@ -116,8 +116,13 @@ export const Ladder = () => {
 			));
 		}
 	};
-	return (
-		<div className="ladder-wrapper">
+	if ((selectedLadder && leaderboards.elo.length < 1) || (!selectedLadder && leaderboards.mostPlayed.length < 1)){
+		return (<div className="ladder-wrapper-no-data">
+			No current data
+		</div>);
+	}
+	return(
+		<div className='ladder-wrapper'>
 			<div>
 				<input
 					className="selectLadder"

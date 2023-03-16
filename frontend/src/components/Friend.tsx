@@ -21,6 +21,7 @@ type FriendProps = {
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	removeFriend: (user_id: number) => void;
 	banFriend: (banTime: string, friend_id: number) => void;
+	muteFriend: (muteTime: string, friend_id: number) => void;
 	gameInfo: any;
 };
 
@@ -98,22 +99,9 @@ export const Friend = (props: FriendProps) => {
 
 	const muteFriend = async (event: any) => {
 		event.preventDefault();
-		const now = new Date();
-		now.setMinutes(now.getMinutes() + parseInt(muteTimeValue));
-		socket.emit(
-			'users_mute',
-			{
-				id: props.user.id,
-				until: now,
-			},
-			(data: any) => {
-				if (data.messages) message.error(data.messages);
-				else {
-					closeMuteTimeModal();
-					setMuteTimeValue('');
-				}
-			},
-		);
+		props.muteFriend(muteTimeValue, props.user.id);
+		closeMuteTimeModal();
+		setMuteTimeValue('');
 	};
 
 	const inviteFriend = () => {
