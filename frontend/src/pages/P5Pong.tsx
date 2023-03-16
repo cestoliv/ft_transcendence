@@ -352,7 +352,6 @@ const Pong = () => {
 	});
 	socket.off('games_watch_end'); // Unbind previous event
 	socket.on('games_watch_end', (data: any) => {
-		console.log(data);
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 	});

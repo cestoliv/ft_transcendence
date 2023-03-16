@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { SocketContext } from '../context/socket';
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
 	const socket = useContext(SocketContext);
@@ -14,9 +14,9 @@ const Home = () => {
 					<span>42</span>Pong
 				</h2>
 			</div>
-			<button className="nes-btn">
-				<NavLink to="/searchGame">Play !</NavLink>
-			</button>
+			<Link className="nes-btn" to="/searchGame">
+				Play !
+			</Link>
 		</div>
 	);
 };
