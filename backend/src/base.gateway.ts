@@ -76,12 +76,12 @@ export abstract class BaseGateway implements OnGatewayConnection {
 				console.log(
 					`Client already connected (disconnecting): ${user.username} (${socket.id})`,
 				);
-				this.connectedClientsService.get(user.id).disconnect()
 				this.connectedClientsService.get(user.id).emit('error', {
 					statusCode: 409,
 					message: 'Conflict',
 					errors: ['You are connected somewhere else'],
 				});
+				this.connectedClientsService.get(user.id).disconnect()
 				this.connectedClientsService.delete(
 					this.connectedClientsService.get(user.id).userId
 				);
