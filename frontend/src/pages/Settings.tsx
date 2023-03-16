@@ -102,7 +102,6 @@ export const Settings = (props: SettingsProps) => {
 				},
 			});
 			const data = await response.json();
-			console.log(data);
 			setTotp(data);
 			setIsOpen2FACheckModal(false);
 			setIsTotpModalOpen(true);

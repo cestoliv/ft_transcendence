@@ -335,8 +335,6 @@ const Pong = () => {
 	});
 	socket.off('games_end'); // Unbind previous event
 	socket.on('games_end', (data: any) => {
-		console.log('game end !');
-		console.log(data);
 		if (!data.winner) {
 			navigate('/searchGame', { replace: true });
 			return;
@@ -386,7 +384,6 @@ const Pong = () => {
 				if (gameInfo.isWatching) {
 					socket.emit('games_watch_stop', { id: gameId });
 				} else {
-					console.log(gameInfo);
 					socket.emit('games_quit', { id: gameId });
 				}
 			}

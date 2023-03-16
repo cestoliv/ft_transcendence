@@ -52,8 +52,6 @@ export const ChansOther = (props: ChansOtherProps) => {
 	const display = (): boolean => {
 		let i = 0;
 		if (props.chan) {
-			// console.log("hello42");
-			// console.log(props.chan);
 			let x = 0;
 			while (x < props.chan.invited.length) {
 				if (props.chan.invited[x].userId === props.user_me.id) i += 1;

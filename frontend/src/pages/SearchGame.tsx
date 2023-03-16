@@ -112,7 +112,6 @@ export const SearchGame = (props: FriendsProps) => {
 			setGameInfo(null);
 			return;
 		}
-		console.log('quit game');
 		socket.emit(
 			'games_quit',
 			{
@@ -254,17 +253,6 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	}, []);
-
-	useEffect(() => {
-		console.log(mode);
-	}, [mode]);
-
-	// useEffect(() => {
-	// 	console.log('ChansList UseEffect');
-	// 	socket.emit('channels_listJoined', {}, (data: any) => {
-	// 		setChanList(data);
-	// 	});
-	// }, []);
 
 	useEffect(() => {
 		console.log('ChansList UseEffect');

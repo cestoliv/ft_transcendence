@@ -17,7 +17,6 @@ const Login = (props: ILogin) => {
 	const [otpCode, setOtpCode] = useState('');
 	const [totpCode, setTotpCode] = useState();
 	const [totpUrl, setTotpUrl] = useState<string>('');
-	console.log(auth);
 
 	const handle42Login = () => {
 		window.location.assign(`${process.env.REACT_APP_API_URL}/auth/login`);
@@ -101,8 +100,6 @@ const Login = (props: ILogin) => {
 		} else {
 			message.error(data.error);
 		}
-		console.log(data);
-		// window.location.assign(`http://api.transcendence.local/api/v1/auth/login?username=${username}`);
 	};
 
 	const handleCloseLogin = () => setIsLoginModalOpen(false);
