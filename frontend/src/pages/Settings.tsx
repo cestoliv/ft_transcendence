@@ -62,7 +62,7 @@ export const Settings = (props: SettingsProps) => {
 		const formData = new FormData();
 		console.log(file);
 		if (file) formData.append('profil_picture', file);
-		await fetch('http://api.transcendence.local/api/v1/users/profile-picture', {
+		await fetch(`${process.env.REACT_APP_API_URL}/users/profile-picture`, {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${auth.bearer}`,
@@ -123,7 +123,7 @@ export const Settings = (props: SettingsProps) => {
 	};
 
 	const submit42ProfilPicture = async () => {
-		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/fetch42', {
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/users/profile-picture/fetch42`, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${auth.bearer}`,
@@ -136,7 +136,7 @@ export const Settings = (props: SettingsProps) => {
 
 	const submitRandomProfilPicture = async (event: any) => {
 		event.preventDefault();
-		const response = await fetch('http://api.transcendence.local/api/v1/users/profile-picture/generate', {
+		const response = await fetch(`${process.env.REACT_APP_API_URL}/users/profile-picture/generate`, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${auth.bearer}`,
