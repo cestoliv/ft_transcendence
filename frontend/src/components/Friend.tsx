@@ -215,7 +215,7 @@ export const Friend = (props: FriendProps) => {
 					onClick={props.activeConv}
 				/>
 			</Badge>
-			<span className="wrapper-active-conv-span pixel-font" onClick={props.activeConv}>
+			<span className="wrapper-active-conv-span">
 				{props.user.displayName}
 			</span>
 			<div className="friendsList-settings">
