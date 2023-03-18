@@ -1,4 +1,5 @@
 import { SetCookie, RemoveCookie } from './types';
+import qala from "./assets/boop.mp3";
 
 export interface IUser {
 	id: number;
@@ -165,4 +166,10 @@ export interface ILocalGameInfo {
 	}>;
 	paddleHeight: number;
 	isWatching: boolean;
+}
+
+export interface IMusic {
+	id : number;
+	title : string;
+	url : string;
 }

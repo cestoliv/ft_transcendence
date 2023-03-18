@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import 'reactjs-popup/dist/index.css';
 import Friend from './Friend';
 import FriendRequests from './FriendRequests';
@@ -7,6 +7,7 @@ import { IChannel, IUser, IUserFriend } from '../interfaces';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { message } from 'antd';
 
 type PersonListProps = {
 	user_me: IUser;
@@ -27,7 +28,10 @@ export const FriendsList = (props: PersonListProps) => {
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
 	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
-	const OpenListFriendRequest = () => setOpenListFriendRequest(true);
+	const OpenListFriendRequest = () => {
+		if (props.friendOf.some((friend) => friend.accepted === false)) setOpenListFriendRequest(true);
+		else message.error('No invitation pending');
+	};
 	const CloseListFriendRequest = () => setOpenListFriendRequest(false);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +56,11 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 		button3?.classList.remove('hidden-button');
 	};
+
+	useEffect(() => {
+		const hasFriendRequestPending = props.friendOf.some((friend) => !friend.accepted);
+		if (!hasFriendRequestPending) CloseListFriendRequest();
+	}, [props.friendOf]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list">
@@ -85,10 +94,7 @@ export const FriendsList = (props: PersonListProps) => {
 				>
 					<Box className="friend-request-modal modal background-modal">
 						{props.friendOf
-							?.filter((friend) => {
-								if (friend.accepted === false) return true;
-								return false;
-							})
+							?.filter((friend) => friend.accepted === false)
 							.map((friend_request) => (
 								<FriendRequests
 									key={friend_request.inviterId}

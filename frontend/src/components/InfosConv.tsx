@@ -11,6 +11,7 @@ type InfosConvProps = {
 	user_me: IUser;
 	activeChan: IChannel;
 	banUser: (banTime: string, chan_id: number, member_id: number) => void;
+	setAdmin: (chan_id: number, member_id: number, x: number) => void;
 };
 
 export default function InfosConv(props: InfosConvProps) {
@@ -70,6 +71,7 @@ export default function InfosConv(props: InfosConvProps) {
 							user_me_id={props.user_me.id}
 							banUser={props.banUser}
 							muteUser={muteUser}
+							setAdmin={props.setAdmin}
 						/>
 					))}
 				</div>

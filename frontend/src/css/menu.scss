@@ -83,3 +83,39 @@ a {
 		}
 	}
 }
+
+.music-modal-hidden {
+	z-index: -1000 !important;
+	visibility: hidden !important;
+}
+
+.music-modal {
+	display: flex;
+}
+
+.music-player {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.music-player > * {
+	margin-bottom: 8px;
+}
+
+.music-player button{
+	height: 50px;
+}
+
+.music-player .sound {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.music-player-settings {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

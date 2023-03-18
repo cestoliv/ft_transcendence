@@ -67,7 +67,10 @@ export const Friend = (props: FriendProps) => {
 	const CloseFriendActionModal = () => setOpenFriendActionModal(false);
 
 	const [openChanListModal, setOpenChanListModal] = React.useState(false);
-	const OpenChanListModal = () => setOpenChanListModal(true);
+	const OpenChanListModal = () => {
+		if (privateChanJoined.length === 0) message.error('No chan to invit in');
+		else setOpenChanListModal(true);
+	};
 	const CloseChanListModal = () => setOpenChanListModal(false);
 
 	const [openBanTimeModal, setOpenBanTimeModal] = React.useState(false);
@@ -139,9 +142,14 @@ export const Friend = (props: FriendProps) => {
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
-					setPrivateChanJoined((prevList) =>
-						prevList.filter((chan) => chan.id !== (data.channelId as number)),
-					);
+					setPrivateChanJoined((prevList) => {
+						const filteredList = prevList.filter((chan) => chan.id !== (data.channelId as number));
+						// Vérifier ici si la liste des channels privés est vide
+						if (filteredList.length === 0) {
+							CloseChanListModal();
+						}
+						return filteredList;
+					});
 				}
 			},
 		);

@@ -47,24 +47,6 @@ export const SearchGame = (props: FriendsProps) => {
 		active_elem = element;
 	};
 
-	const muteFriend = (muteTime: string, friend_id: number) => {
-		const now = new Date();
-		now.setMinutes(now.getMinutes() + parseInt(muteTime));
-		socket.emit(
-			'users_mute',
-			{
-				id: friend_id,
-				until: now,
-			},
-			(data: any) => {
-				if (data.messages) message.error(data.messages);
-				else {
-					setAllChanMessages((prevList) => prevList.filter((message) => message.senderId != friend_id));
-				}
-			},
-		);
-	};
-
 	const showOptions = () => {
 		document.getElementsByClassName('searchGame-settings')[0]?.classList.toggle('active-searchGame-settings');
 	};
@@ -226,6 +208,21 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
+	const muteFriend = (muteTime: string, friend_id: number) => {
+		const now = new Date();
+		now.setMinutes(now.getMinutes() + parseInt(muteTime));
+		socket.emit(
+			'users_mute',
+			{
+				id: friend_id,
+				until: now,
+			},
+			(data: any) => {
+				if (data.messages) message.error(data.messages);
+			},
+		);
+	};
+
 	const banFriend = (banTime: string, friend_id: number): void => {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(banTime));
@@ -312,8 +309,8 @@ export const SearchGame = (props: FriendsProps) => {
 					refuse_friend_request={refuse_friend_request}
 					removeFriend={removeFriend}
 					banFriend={banFriend}
-					gameInfo={gameInfo}
 					muteFriend={muteFriend}
+					gameInfo={gameInfo}
 				/>
 			)}
 			<div className="searchRandomPlayer">

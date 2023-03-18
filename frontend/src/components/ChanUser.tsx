@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useContext, useState } from 'react';
 import { message } from 'antd';
 import 'reactjs-popup/dist/index.css';
+import { GiImperialCrown, GiCrownedHeart } from 'react-icons/gi';
 
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -18,6 +19,7 @@ type ChanUserProps = {
 	chan_owner: IUser;
 	banUser: (banTime: string, chan_id: number, member_id: number) => void;
 	muteUser: (banTime: string, chan_id: number, member_id: number) => Promise<any>;
+	setAdmin: (chan_id: number, member_id: number, x: number) => void;
 };
 
 export const ChanUser = (props: ChanUserProps) => {
@@ -61,45 +63,10 @@ export const ChanUser = (props: ChanUserProps) => {
 	// add amin or remove admin
 	const setAdmin = (event: any): void => {
 		// add amin
-		if (event.target.name === 'button-add-admin') {
-			socket.emit(
-				'channels_addAdmin',
-				{
-					id: props.chan_id,
-					user_id: props.member_id,
-				},
-				(data: any) => {
-					if (data.messages) message.error(data.messages);
-					else {
-						socket.emit('users_get', { id: props.member_id }, (data: any) => {
-							props.chan_admins.push(data as IUser);
-						});
-						CloseChanUserModal();
-					}
-				},
-			);
-		}
+		if (event.target.name === 'button-add-admin') props.setAdmin(props.chan_id, props.member_id, 1);
 
 		// remove admin
-		if (event.target.name === 'button-remove-admin') {
-			socket.emit(
-				'channels_removeAdmin',
-				{
-					id: props.chan_id,
-					user_id: props.member_id,
-				},
-				(data: any) => {
-					if (data.messages) message.error(data.messages);
-					else {
-						const index = props.chan_admins.findIndex((admin) => admin.id === props.member_id);
-						if (index !== -1) {
-							props.chan_admins.splice(index, 1);
-						}
-						CloseChanUserModal();
-					}
-				},
-			);
-		}
+		if (event.target.name === 'button-remove-admin') props.setAdmin(props.chan_id, props.member_id, 2);
 	};
 
 	const banUser = async (event: any) => {
@@ -115,7 +82,6 @@ export const ChanUser = (props: ChanUserProps) => {
 			const data = await props.muteUser(muteTimeValue, props.chan_id, props.member_id);
 			if (data) {
 				closeMuteTimeModal();
-				CloseChanUserModal();
 			}
 		} catch (error) {
 			console.error('muteUser error:');
@@ -134,16 +100,68 @@ export const ChanUser = (props: ChanUserProps) => {
 		return false;
 	};
 
+	const displayItem = () => {
+		if (props.user_me_id === props.chan_owner.id) {
+			if (props.user_me_id == props.member_id) {
+				return (
+					<h3>
+						{props.username} <GiImperialCrown />
+					</h3>
+				);
+			} else if (isAdmin()) {
+				return (
+					<h3 onClick={OpenChanUserModal}>
+						{props.username} <GiCrownedHeart />
+					</h3>
+				);
+			} else {
+				return <h3 onClick={OpenChanUserModal}>{props.username}</h3>;
+			}
+		} else if (amIAdmin()) {
+			if (props.user_me_id == props.member_id) {
+				return (
+					<h3>
+						{props.username} <GiCrownedHeart />
+					</h3>
+				);
+			} else if (props.member_id == props.chan_owner.id) {
+				return (
+					<h3>
+						{props.username} <GiImperialCrown />
+					</h3>
+				);
+			} else if (isAdmin()) {
+				return (
+					<h3>
+						{props.username} <GiCrownedHeart />
+					</h3>
+				);
+			} else {
+				return <h3 onClick={OpenChanUserModal}>{props.username}</h3>;
+			}
+		} else {
+			if (props.member_id == props.chan_owner.id) {
+				return (
+					<h3>
+						{props.username} <GiImperialCrown />
+					</h3>
+				);
+			} else if (isAdmin()) {
+				return (
+					<h3>
+						{props.username} <GiCrownedHeart />
+					</h3>
+				);
+			} else {
+				return <h3>{props.username}</h3>;
+			}
+		}
+		return null;
+	};
+
 	return (
 		<div className="ChanUser-wrapper list-item discord-background-three">
-			{amIAdmin() && props.user_me_id != props.member_id && props.member_id != props.chan_owner.id && (
-				<h3 onClick={OpenChanUserModal}>{props.username}</h3>
-			)}
-			{amIAdmin() && props.member_id === props.chan_owner.id && props.user_me_id != props.chan_owner.id && (
-				<h3>{props.username}</h3>
-			)}
-			{amIAdmin() && props.user_me_id === props.member_id && <h3>{props.username}</h3>}
-			{!amIAdmin() && <h3>{props.username}</h3>}
+			{displayItem()}
 			<Modal
 				open={openChanUserModal}
 				onClose={CloseChanUserModal}
