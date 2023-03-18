@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useEffect } from 'react';
+import React, { ChangeEvent, useState, useEffect, useRef } from 'react';
 import 'reactjs-popup/dist/index.css';
 import Friend from './Friend';
 import FriendRequests from './FriendRequests';
@@ -25,6 +25,7 @@ type PersonListProps = {
 };
 
 export const FriendsList = (props: PersonListProps) => {
+	const friendsListRef = useRef<HTMLDivElement>(null);
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
 	const [OpenLFriendRequest, setOpenListFriendRequest] = React.useState(false);
@@ -62,8 +63,29 @@ export const FriendsList = (props: PersonListProps) => {
 		if (!hasFriendRequestPending) CloseListFriendRequest();
 	}, [props.friendOf]);
 
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+		  if (friendsListRef.current && friendsListRef.current.classList.contains('active-friends-list') && !friendsListRef.current.contains(event.target)) {
+			friendsListRef.current.classList.remove('active-friends-list');
+		  } else if (friendsListRef.current && friendsListRef.current.classList.contains('active-friend-list') && !friendsListRef.current.contains(event.target)) {
+			friendsListRef.current.classList.remove('active-friend-list');
+			const button1 = document.getElementById('open-chan-joined-button');
+			const button2 = document.getElementById('open-friend-list-button');
+			const button3 = document.getElementById('open-infos-conv-button');
+
+			button1?.classList.remove('hidden-button');
+			button2?.classList.remove('hidden-button');
+			button3?.classList.remove('hidden-button');
+		  }
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+		  document.removeEventListener("mousedown", handleClickOutside);
+		};
+	  }, [friendsListRef]);
+
 	return (
-		<div className="priv-conv-list" id="priv-conv-list">
+		<div className="priv-conv-list" id="priv-conv-list" ref={friendsListRef}>
 			<span className="close-friend-list" id="close-friend-list" onClick={closeFriendList}>
 				close
 			</span>

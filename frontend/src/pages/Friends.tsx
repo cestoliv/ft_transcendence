@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useContext } from 'react';
+import React, { ChangeEvent, useEffect, useContext, useRef} from 'react';
 import Chat from '../components/Chat';
 import FriendConv from '../components/FriendConv';
 import InfosConv from '../components/InfosConv';
@@ -22,6 +22,47 @@ type FriendsProps = {
 
 export default function Friends(props: FriendsProps) {
 	const socket = useContext(SocketContext);
+
+	const chanListRef = useRef<HTMLDivElement>(null);
+	const infosConvRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (infosConvRef.current && infosConvRef.current.classList.contains('active-infos-conv') && !infosConvRef.current.contains(event.target)) {
+				infosConvRef.current.classList.remove('active-infos-conv');
+				const button1 = document.getElementById('open-chan-joined-button');
+				const button2 = document.getElementById('open-friend-list-button');
+				const button3 = document.getElementById('open-infos-conv-button');
+
+				button1?.classList.remove('hidden-button');
+				button2?.classList.remove('hidden-button');
+				button3?.classList.remove('hidden-button');
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [infosConvRef]);
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+		  if (chanListRef.current && chanListRef.current.classList.contains('active-chan-list') && !chanListRef.current.contains(event.target)) {
+			chanListRef.current.classList.remove('active-chan-list');
+			const button1 = document.getElementById('open-chan-joined-button');
+			const button2 = document.getElementById('open-friend-list-button');
+			const button3 = document.getElementById('open-infos-conv-button');
+
+			button1?.classList.remove('hidden-button');
+			button2?.classList.remove('hidden-button');
+			button3?.classList.remove('hidden-button');
+		  }
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+		  document.removeEventListener("mousedown", handleClickOutside);
+		};
+	  }, [chanListRef]);
 
 	// const [isEnabled, setIsEnabled] = useState(false);
 	// const [delai, setDelai] = useState<number>(0);
@@ -477,6 +518,7 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	const OpenConvs = (event: any): void => {
+		console.log(event.target.name)
 		if (event.target.name === 'open-chan-joined-button') {
 			const sidenav = document.getElementById('chan-list');
 			sidenav?.classList.add('active-chan-list');
@@ -844,7 +886,7 @@ export default function Friends(props: FriendsProps) {
 					</button>
 				) : null}
 			</div>
-			<div className="chan-list" id="chan-list">
+			<div className="chan-list" id="chan-list" ref={chanListRef}>
 				<ChanList activeConv={activeConv} chanList={chanList} leaveChan={leaveChan} />
 				<div className="chan-list-buttons">
 					<button className="nes-btn is-primary" onClick={OpenCreateChanModal}>
@@ -986,7 +1028,7 @@ export default function Friends(props: FriendsProps) {
 					/>
 				) : null}
 			</div>
-			<div className="infos-conv" id="infos-conv">
+			<div className="infos-conv" id="infos-conv" ref={infosConvRef}>
 				{activeChan && activeConvId != -1 && user && chanConv == 1 ? (
 					<InfosConv user_me={user} activeChan={activeChan} banUser={banUser} setAdmin={setAdmin} />
 				) : null}

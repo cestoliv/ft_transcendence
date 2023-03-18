@@ -365,7 +365,7 @@ export const SearchGame = (props: FriendsProps) => {
 							{/* <button className="searchButton nes-btn" onClick={createGame}>
 								Create a game
 							</button> */}
-							<button className="searchButton nes-btn" onClick={joinMatchmaking}>
+							<button className="searchButton nes-btn is-primary" onClick={joinMatchmaking}>
 								Search a game
 							</button>
 						</div>
@@ -383,12 +383,14 @@ export const SearchGame = (props: FriendsProps) => {
 						</button>
 					</Box>
 				</Modal> */}
-				<button onClick={showOptions} className="show-settings nes-btn">
-					Settings
-				</button>
-				<button onClick={showFriends} className="show-friends nes-btn">
-					Friends
-				</button>
+				<div className="button-wrapper">
+					<button onClick={showOptions} className="show-settings nes-btn">
+						Settings
+					</button>
+					<button onClick={showFriends} className="show-friends nes-btn">
+						Friends
+					</button>
+				</div>
 			</div>
 			<SearchSettings setMode={setMode} setTime={setTime} setPoints={setPoints} createGame={createGame} />
 			{/* <div className="searchGame-settings">
