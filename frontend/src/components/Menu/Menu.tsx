@@ -1,5 +1,5 @@
 import { message } from 'antd';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { SocketContext } from '../../context/socket';
 import { NavLink } from 'react-router-dom';
 import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
@@ -15,6 +15,7 @@ export default function Menu(props: { setCookie: SetCookie }) {
 	const { setAuth } = useAuth();
 	const socket = useContext(SocketContext);
 	const [isOpen, setisOpen] = useState<boolean>(false);
+	const musicModalRef = useRef<HTMLDivElement>(null);
 	const handleLogout = () => {
 		props.setCookie('bearer', null, {
 			path: '/',
@@ -40,6 +41,18 @@ export default function Menu(props: { setCookie: SetCookie }) {
 			setisOpen(true);
 		}
 	};
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (musicModalRef.current && !musicModalRef.current.classList.contains('music-modal-hidden') && !musicModalRef.current.contains(event.target)) {
+				musicModalRef.current.classList.add('music-modal-hidden');
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [musicModalRef]);
 
 	return (
 		<div className="menu">
@@ -109,7 +122,7 @@ export default function Menu(props: { setCookie: SetCookie }) {
 					<img src="https://cdn-icons-png.flaticon.com/512/7734/7734267.png" />
 				</li>
 			</ul>
-			<div className="music-modal modal background-modal music-modal-hidden" id="music-modal">
+			<div className="music-modal modal background-modal music-modal-hidden" id="music-modal" ref={musicModalRef}>
 				<MusicPlayer />
 			</div>
 		</div>

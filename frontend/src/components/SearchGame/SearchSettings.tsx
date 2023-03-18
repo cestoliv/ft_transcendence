@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type SearchSettingsProps = {
 	// setVisibility: React.Dispatch<React.SetStateAction<string>>;
@@ -13,6 +13,7 @@ export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: Sear
 	// 	{ value: 'public', label: 'Public' },
 	// 	{ value: 'private', label: 'Private' },
 	// ];
+	const searchSettingsRef = useRef<HTMLDivElement>(null);
 	const modeOptions = [
 		{ value: 'classic', label: 'Classic' },
 		{ value: 'hardcore', label: 'Hardcore' },
@@ -28,8 +29,21 @@ export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: Sear
 		{ value: '30', label: '30 points' },
 		{ value: 'null', label: 'No limit' },
 	];
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (searchSettingsRef.current && searchSettingsRef.current.classList.contains('active-searchGame-settings') && !searchSettingsRef.current.contains(event.target)) {
+				searchSettingsRef.current.classList.remove('active-searchGame-settings');
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [searchSettingsRef]);
+
 	return (
-		<div className="searchGame-settings slide-left">
+		<div className="searchGame-settings slide-left" ref={searchSettingsRef}>
 			<p className="create-title">Create a game</p>
 			{/* <label htmlFor="visibility_select">Visibility</label>
 			<div className="nes-select is-dark">
@@ -98,7 +112,7 @@ export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: Sear
 				</select>
 			</div>
 			{/* <Select defaultValue="5 points" onChange={(value: string) => setPoints(value)} options={pointsOptions} /> */}
-			<button className="searchButton nes-btn" onClick={createGame}>
+			<button className="searchButton nes-btn is-primary" onClick={createGame}>
 				GO
 			</button>
 		</div>
