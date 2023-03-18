@@ -80,7 +80,7 @@ export const Settings = (props: SettingsProps) => {
 				console.log(r);
 				if (!r) return;
 				if (r.response.ok) message.success('Profil Picture uploaded');
-				else message.error(r.data.message || r.data.messages[0] || 'Error');
+				else message.error(r.data.messages || r.data.messages[0] || 'Error');
 			})
 			.catch(() => {
 				// We need to handle this better, but now there is a CORS error that I can't manage to fix

@@ -224,7 +224,7 @@ export const Friend = (props: FriendProps) => {
 				/>
 			</Badge>
 			<span className="wrapper-active-conv-span">
-				{props.user.displayName}
+				{props.user.username}
 			</span>
 			<div className="friendsList-settings">
 				<img

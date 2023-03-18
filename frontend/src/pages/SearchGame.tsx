@@ -56,10 +56,10 @@ export const SearchGame = (props: FriendsProps) => {
 	};
 
 	const createGame = () => {
-		if (gameInfo || inMatchmaking) {
-			message.error('You are already in a game');
-			return;
-		}
+		// if (gameInfo || inMatchmaking) {
+		// 	message.error('You are already in a game');
+		// 	return;
+		// }
 		socket.emit(
 			'games_create',
 			{
@@ -72,7 +72,6 @@ export const SearchGame = (props: FriendsProps) => {
 				// console.log(data);
 				if (data?.statusCode) {
 					message.error(data.messages);
-					console.error(data.messages);
 					return;
 				}
 				message.success('Game created');
@@ -114,7 +113,7 @@ export const SearchGame = (props: FriendsProps) => {
 		socket.emit('games_quitMatchmaking', (data: any) => {
 			// console.log(data);
 			if (data?.statusCode) {
-				message.error(data.error);
+				message.error(data.messages);
 				return;
 			}
 			setInMatchmaking(data);
@@ -142,7 +141,7 @@ export const SearchGame = (props: FriendsProps) => {
 				username: username,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 			},
 		);
 	};
@@ -154,7 +153,7 @@ export const SearchGame = (props: FriendsProps) => {
 				id: inviter_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
 			},
 		);
@@ -202,7 +201,7 @@ export const SearchGame = (props: FriendsProps) => {
 				id: user_id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setFriends((prevList) => prevList.filter((user) => user.id !== user_id));
 			},
 		);
@@ -233,7 +232,7 @@ export const SearchGame = (props: FriendsProps) => {
 				until: now,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setFriends((prevList) => prevList.filter((user) => user.id !== friend_id));
 			},
 		);
@@ -272,7 +271,7 @@ export const SearchGame = (props: FriendsProps) => {
 				id: props.user_me.id,
 			},
 			(data: any) => {
-				if (data.messages) alert(data.messages);
+				if (data.messages) message.error(data.messages);
 				else {
 					setFriendOf(data.friendOf);
 					setFriends(data.friends);

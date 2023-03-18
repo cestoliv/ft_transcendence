@@ -246,7 +246,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'public',
 				},
 				(data: any) => {
-					if (data.message) message.error(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
 
@@ -268,7 +268,7 @@ export default function Friends(props: FriendsProps) {
 					visibility: 'private',
 				},
 				(data: any) => {
-					if (data.message) message.error(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						const index = chanList.findIndex((channel) => channel.id === activeChan.id);
 
@@ -297,7 +297,7 @@ export default function Friends(props: FriendsProps) {
 					password: passWord,
 				},
 				(data: any) => {
-					if (data.message) message.error(data.messages);
+					if (data.messages) message.error(data.messages);
 					else {
 						const index = chanList.findIndex((channel) => channel.id === chan_id);
 
@@ -465,7 +465,8 @@ export default function Friends(props: FriendsProps) {
 					id: parseInt(newId),
 				},
 				(data: any) => {
-					setActiveChan(data as IChannel);
+					if(data.messages) message.error(data.messages);
+					else setActiveChan(data as IChannel);
 				},
 			);
 			setActivConvId(parseInt(newId));
@@ -700,8 +701,8 @@ export default function Friends(props: FriendsProps) {
 					'channels_messages',
 					{ id: channel.id, before: new Date().toISOString() },
 					(messages: any) => {
-						if (messages.message) {
-							alert(messages.errors);
+						if (messages.messages) {
+							message.error(messages.messages);
 						} else {
 							messages.forEach((message: IChannelMessage) => {
 								messagesSet.add(message); // Ajouter le message à l'ensemble
@@ -734,8 +735,8 @@ export default function Friends(props: FriendsProps) {
 					'users_getMessages',
 					{ id: friend.id, before: new Date().toISOString() },
 					(messages: any) => {
-						if (messages.message) {
-							alert(messages.errors);
+						if (messages.messages) {
+							message.error(messages.messages);
 						} else {
 							// Ajouter les messages de la conversation à "messagesFromAllConversations"
 							if (messages) {

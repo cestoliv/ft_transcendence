@@ -5,6 +5,7 @@ import { socket } from '../context/socket';
 import { useNavigate, useParams } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
+import {message} from 'antd';
 
 type StatsProps = {
 	user_me: IUser;
@@ -37,7 +38,7 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 					setRedirect(true);
 				}
 				setUser(data);
@@ -50,7 +51,7 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 					setRedirect(true);
 				}
 				setMyUser(data);
@@ -65,7 +66,7 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 					setRedirect(true);
 				}
 				setDisplayScores(data);
@@ -78,7 +79,7 @@ export const Stats = (props: StatsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) {
-					alert(data.messages);
+					message.error(data.messages);
 					setRedirect(true);
 				}
 				setUserStat(data);
@@ -145,7 +146,7 @@ export const Stats = (props: StatsProps) => {
 		return lastTenScores.map((score, index) => (
 			<span className="historic-item" key={index} onClick={() => statClickHandler(score)}>
 				{score.mode} - {score.maxDuration}min <br />
-				{score.winner.displayName} {score.winnerScore} VS {score.loser.displayName} {score.loserScore}
+				{score.winner.username} {score.winnerScore} VS {score.loser.username} {score.loserScore}
 			</span>
 		));
 	};
@@ -226,7 +227,7 @@ export const Stats = (props: StatsProps) => {
 					id: user.id, // Id of the user how invited the client
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 				},
 			);
 		} else {
@@ -238,7 +239,7 @@ export const Stats = (props: StatsProps) => {
 					username: user.username,
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 				},
 			);
 		}
@@ -255,7 +256,7 @@ export const Stats = (props: StatsProps) => {
 					until: '2000-01-01T01:00:00-01:00',
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 				},
 			);
 		} else {
@@ -268,7 +269,7 @@ export const Stats = (props: StatsProps) => {
 					until: '2666-01-01T01:00:00-01:00',
 				},
 				(data: any) => {
-					if (data.messages) alert(data.messages);
+					if (data.messages) message.error(data.messages);
 				},
 			);
 		}

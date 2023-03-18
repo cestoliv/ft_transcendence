@@ -125,9 +125,6 @@ function App() {
 		message.info(
 			<div className="invite-notification">
 				<p>You receive an invitation from {data.players[0].user.username}</p>
-				<button className="nes-btn is-error" onClick={() => declineGame(data)}>
-					Decline
-				</button>
 				<button className="nes-btn" onClick={() => joinGame(data)}>
 					Join
 				</button>
@@ -144,20 +141,9 @@ function App() {
 		socket.emit('games_join', { id: joinGameInfo.id }, (data: any) => {
 			console.log('games_join', data);
 			if (data?.statusCode) {
-				message.error(data.error);
+				message.error(data.messages);
 			} else {
 				navigate(`/pong/${joinGameInfo.id}`);
-			}
-		});
-	};
-
-	const declineGame = (gameInfo: any) => {
-		socket.emit('games_decline', { id: gameInfo.id, user_id: gameInfo.players[0].user.id }, (data: any) => {
-			console.log('games_decline', data);
-			if (data?.statusCode) {
-				message.error(data.error);
-			} else {
-				message.success('Game declined');
 			}
 		});
 	};
