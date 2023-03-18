@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { IUser, IStat, ILeaderboards } from '../interfaces';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../context/socket';
+import { message } from 'antd'; 
 
 export const Ladder = () => {
 	const Navigate = useNavigate();
@@ -16,7 +17,7 @@ export const Ladder = () => {
 	useEffect(() => {
 		socket.emit('games_leaderboards', {}, (data: any) => {
 			if (data.messages) {
-				alert(data.messages);
+				message.error(data.messages);
 			} else {
 				setLeaderboards(data);
 				if (leaderboards && leaderboards.elo && leaderboards.mostPlayed) {
@@ -67,7 +68,7 @@ export const Ladder = () => {
 						<img src={score.profile_picture} alt="picture error" />
 					</div>
 					Rank:{index + 1} <br />
-					{score.elo} {score.displayName}
+					{score.elo} {score.username}
 				</span>
 			));
 		} else {
@@ -83,7 +84,7 @@ export const Ladder = () => {
 						<img src={score.user.profile_picture} alt="picture error" />
 					</div>
 					Rank:{index + 1} <br />
-					{score.stats.games} {score.user.displayName}
+					{score.stats.games} {score.user.username}
 				</span>
 			));
 		}
@@ -98,7 +99,7 @@ export const Ladder = () => {
 						<img src={score.profile_picture} alt="picture error" />
 					</div>
 					Rank:{index + 4} <br />
-					{score.elo} {score.displayName}
+					{score.elo} {score.username}
 				</span>
 			));
 		} else if (!selectedLadder && leaderboards.mostPlayed.length > 3) {
@@ -111,7 +112,7 @@ export const Ladder = () => {
 					</div>
 					Rank:{index + 4}
 					<br />
-					{score.stats.games} {score.user.displayName}
+					{score.stats.games} {score.user.username}
 				</span>
 			));
 		}

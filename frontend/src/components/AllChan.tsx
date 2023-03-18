@@ -32,7 +32,7 @@ export const AllChan = (props: AllChanProps) => {
 				id: data.channelId,
 			},
 			(data: any) => {
-				if (data.message) message.error(data.messages);
+				if (data.messages) message.error(data.messages);
 				else setChansInv((prev) => [data as IChannel, ...prev]);
 			},
 		);
