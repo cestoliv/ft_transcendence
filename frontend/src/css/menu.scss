@@ -91,6 +91,8 @@ a {
 
 .music-modal {
 	display: flex;
+	width: 350px;
+	z-index: 10;
 }
 
 .music-player {
@@ -102,6 +104,10 @@ a {
 
 .music-player > * {
 	margin-bottom: 8px;
+}
+
+.music-player h2 {
+	margin-bottom: 12px;
 }
 
 .music-player button{
@@ -118,4 +124,12 @@ a {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+.playList {
+	display: flex;
+}
+
+.playList-btn {
+	width: 100px !important;
 }

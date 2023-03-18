@@ -173,3 +173,9 @@ export interface IMusic {
 	title : string;
 	url : string;
 }
+
+export interface IPlayList {
+	id : number;
+	title : string;
+	music_list : IMusic[];
+}
