@@ -179,7 +179,7 @@ const Pong: React.FC = () => {
 		};
 	}, []);
 
-	const handleRedirect = (_event: any): void => {
+	const handleRedirect = (): void => {
 		setRedirect(true);
 	};
 

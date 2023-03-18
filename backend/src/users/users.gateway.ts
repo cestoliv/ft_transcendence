@@ -16,7 +16,7 @@ import { UserMessage } from './entities/user.message.entity';
 	cors: {
 		origin: async (origin, callback) => {
 			const configService = new ConfigService();
-			callback(null, configService.get<string>('FRONTEND_URL') || '*');
+			callback(null, configService.get<string>('CORS_ORIGIN') || '*');
 		},
 		credentials: true,
 	},

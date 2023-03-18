@@ -40,7 +40,7 @@ export const Friend = (props: FriendProps) => {
 	const OpenInviteGameModal = () => setOpenInviteGameModal(true);
 	const CloseInviteGameModal = () => setOpenInviteGameModal(false);
 
-	const { inMatchmaking, setInMatchmaking } = useMatchmaking();
+	const { inMatchmaking } = useMatchmaking();
 
 	const [mode, setMode] = useState('classic');
 	const [time, setTime] = useState('1');
@@ -67,7 +67,10 @@ export const Friend = (props: FriendProps) => {
 	const CloseFriendActionModal = () => setOpenFriendActionModal(false);
 
 	const [openChanListModal, setOpenChanListModal] = React.useState(false);
-	const OpenChanListModal = () => setOpenChanListModal(true);
+	const OpenChanListModal = () => {
+		if (privateChanJoined.length === 0) message.error('No chan to invit in');
+		else setOpenChanListModal(true);
+	};
 	const CloseChanListModal = () => setOpenChanListModal(false);
 
 	const [openBanTimeModal, setOpenBanTimeModal] = React.useState(false);
@@ -110,36 +113,21 @@ export const Friend = (props: FriendProps) => {
 			return;
 		}
 		socket.emit(
-			'games_create',
+			'games_invite',
 			{
+				user_id: props.user.id,
 				maxDuration: parseInt(time),
 				maxScore: parseInt(points),
 				mode: mode,
 				visibility: 'private',
 			},
-			(dataGame: any) => {
-				console.log(dataGame);
-				if (dataGame?.statusCode) {
-					message.error(dataGame.messages);
+			(data: any) => {
+				if (data?.statusCode) {
+					message.error(data.messages);
+					setGameInfo(null);
 					return;
 				}
-				setGameInfo(dataGame as ILocalGameInfo);
-				socket.emit('games_invite', { id: dataGame.id, user_id: props.user.id }, (data: any) => {
-					if (data?.statusCode) {
-						console.log(dataGame);
-						message.error(data.messages);
-						// TODO: delete game if needed
-						socket.emit('games_quit', { id: dataGame.id }, (data: any) => {
-							if (data?.statusCode) {
-								message.error(data.messages);
-							}
-							return;
-						});
-						return;
-					}
-					message.success('Invitation sent');
-					// if invitation is not accepted in 15s, delete game
-				});
+				setGameInfo(data as ILocalGameInfo);
 			},
 		);
 	};
@@ -154,9 +142,14 @@ export const Friend = (props: FriendProps) => {
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
-					setPrivateChanJoined((prevList) =>
-						prevList.filter((chan) => chan.id !== (data.channelId as number)),
-					);
+					setPrivateChanJoined((prevList) => {
+						const filteredList = prevList.filter((chan) => chan.id !== (data.channelId as number));
+						// Vérifier ici si la liste des channels privés est vide
+						if (filteredList.length === 0) {
+							CloseChanListModal();
+						}
+						return filteredList;
+					});
 				}
 			},
 		);
@@ -193,7 +186,6 @@ export const Friend = (props: FriendProps) => {
 			return;
 		}
 		socket.emit('games_startWatching', { id: props.user.id }, (data: any) => {
-			console.log(data);
 			if (data?.statusCode) {
 				message.error(data.messages);
 				return;
@@ -201,12 +193,7 @@ export const Friend = (props: FriendProps) => {
 			setGameInfo({ ...data, isWatching: true });
 			navigate(`/pong/${data.id}`);
 		});
-		console.log(gameInfo);
 	};
-
-	useEffect(() => {
-		console.log('user', props.user);
-	}, [props.user]);
 
 	function getBadgeStyle() {
 		if (props.user.status === 'online') {

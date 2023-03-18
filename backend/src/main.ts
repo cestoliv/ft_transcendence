@@ -30,7 +30,7 @@ async function bootstrap() {
 		new ValidationPipe({ whitelist: true, transform: true }),
 	);
 	app.enableCors({
-		origin: config.get('FRONTEND_URL'),
+		origin: config.get('CORS_ORIGIN'),
 	});
 	await app.register(fastifyCookie, {
 		secret: config.get('COOKIE_SECRET'),

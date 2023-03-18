@@ -223,7 +223,7 @@ export class AuthService {
 			// Ignore error
 			return user;
 		});
-		const totp_settings = await this.usersService.enableTotp(user);
+		const totp_settings = await this.usersService.enableTotp(user.id);
 
 		return {
 			user: user,

@@ -1,5 +1,6 @@
 import {
 	ConflictException,
+	forwardRef,
 	Inject,
 	Injectable,
 	NotFoundException,
@@ -19,7 +20,7 @@ import { Server } from 'socket.io';
 @Injectable()
 export class GamesService {
 	constructor(
-		@Inject(UsersService)
+		@Inject(forwardRef(() => UsersService))
 		readonly usersService: UsersService,
 		@InjectRepository(Game)
 		private readonly gamesRepository: Repository<Game>,
@@ -64,7 +65,7 @@ export class GamesService {
 			server,
 		);
 		this.games.set(id, game);
-		return game.getInfo();
+		return game;
 	}
 
 	// Find game from it's id or from a user id

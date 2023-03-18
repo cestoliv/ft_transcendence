@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
 import { IChannel, IUser } from '../interfaces';
@@ -15,11 +15,7 @@ export const ChansBan = (props: ChansBanProps) => {
 			while (x < props.chan.banned.length) {
 				const now = Date.now();
 				const isoDate = new Date(props.chan.banned[x].until);
-				if (
-					props.chan.banned[x].userId === props.user_me.id &&
-					isoDate.getTime() > now
-				)
-					return true;
+				if (props.chan.banned[x].userId === props.user_me.id && isoDate.getTime() > now) return true;
 				x++;
 			}
 			return false;

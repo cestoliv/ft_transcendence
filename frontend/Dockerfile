@@ -11,13 +11,13 @@ WORKDIR /transcendence
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 COPY tsconfig.json tsconfig.json
+
+# Install npm dependencies
+RUN npm i
+
 COPY public public
 COPY src src
-RUN echo hello mgl
-RUN echo $REACT_APP_API_URL
-RUN echo $DISABLE_ESLINT_PLUGIN
-# Install npm dependencies and build
-RUN npm i
+
 RUN npm run build
 
 FROM node:alpine as main
@@ -27,13 +27,15 @@ WORKDIR /transcendence
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 COPY tsconfig.json tsconfig.json
-COPY --from=build /transcendence/public ./public
-COPY --from=build /transcendence/build ./build
+
 # Install only production
 RUN npm install --omit=dev
 
 # Install serve
 RUN npm install -g serve
+
+COPY --from=build /transcendence/public ./public
+COPY --from=build /transcendence/build ./build
 
 EXPOSE 3000
 ENV PORT=3000

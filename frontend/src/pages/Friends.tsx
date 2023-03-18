@@ -8,13 +8,7 @@ import AllChan from '../components/AllChan';
 import { useState } from 'react';
 import { message } from 'antd';
 
-import {
-	IChannel,
-	IUser,
-	IUserFriend,
-	IChannelMessage,
-	IUserMessage,
-} from '../interfaces';
+import { IChannel, IUser, IUserFriend, IChannelMessage, IUserMessage } from '../interfaces';
 
 // modal
 import Modal from '@mui/material/Modal';
@@ -35,7 +29,6 @@ export default function Friends(props: FriendsProps) {
 	const [user, setUser] = useState<IUser>();
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [allChan, setAllChan] = useState<IChannel[]>([]);
-	const [chanMessages, setChanMessages] = useState<IChannelMessage[] | null>([]);
 	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 	const [allPrivateConvMessages, setAllPrivateConvMessages] = useState<IUserMessage[]>([]);
 
@@ -179,6 +172,39 @@ export default function Friends(props: FriendsProps) {
 		});
 	};
 
+	const setAdmin = (chan_id: number, member_id: number, x: number): void => {
+		if (x == 1) {
+			socket.emit(
+				'channels_addAdmin',
+				{
+					id: chan_id,
+					user_id: member_id,
+				},
+				(data: any) => {
+					if (data.messages) message.error(data.messages);
+					else {
+						setActiveChan(data);
+					}
+				},
+			);
+		}
+		if (x == 2) {
+			socket.emit(
+				'channels_removeAdmin',
+				{
+					id: chan_id,
+					user_id: member_id,
+				},
+				(data: any) => {
+					if (data.messages) message.error(data.messages);
+					else {
+						setActiveChan(data);
+					}
+				},
+			);
+		}
+	};
+
 	const banUser = (banTime: string, chan_id: number, member_id: number): void => {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() + parseInt(banTime));
@@ -310,7 +336,7 @@ export default function Friends(props: FriendsProps) {
 				if (data.messages) message.error(data.messages);
 				else {
 					setFriends((prevFriends) => [...prevFriends, data.inviter as IUser]);
-					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
+					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
 				}
 			},
 		);
@@ -325,7 +351,7 @@ export default function Friends(props: FriendsProps) {
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
-					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
+					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
 				}
 			},
 		);
@@ -592,7 +618,7 @@ export default function Friends(props: FriendsProps) {
 		const index = friends.findIndex((friend) => friend.id === (data.id as number));
 
 		if (index !== -1) {
-			const updatedFriendList : IUser[] = [...friends];
+			const updatedFriendList: IUser[] = [...friends];
 			updatedFriendList[index] = data as IUser;
 			setFriends(updatedFriendList);
 		}
@@ -663,12 +689,11 @@ export default function Friends(props: FriendsProps) {
 	//   }, [isEnabled]);
 
 	useEffect(() => {
-		setAllChanMessages([]);
 		console.log('setAllChanMessages UseEffect');
 		// Récupérer la liste des channels joints
+		setAllChanMessages([]);
 		socket.emit('channels_listJoined', {}, (data: any) => {
-			const messagesFromAllChannels: IChannelMessage[] = []; // variable temporaire pour stocker les messages
-			// Pour chaque channel joint, récupérer les messages du channel et les ajouter à "messagesFromAllChannels"
+			const messagesSet = new Set<IChannelMessage>(); // Ensemble pour stocker les messages uniques
 			data.forEach((channel: any) => {
 				socket.emit(
 					'channels_messages',
@@ -677,16 +702,14 @@ export default function Friends(props: FriendsProps) {
 						if (messages.message) {
 							alert(messages.errors);
 						} else {
-							// Ajouter les messages du channel à "messagesFromAllChannels"
 							messages.forEach((message: IChannelMessage) => {
-								messagesFromAllChannels.push(message);
+								messagesSet.add(message); // Ajouter le message à l'ensemble
 							});
+							setAllChanMessages(Array.from(messagesSet)); // Convertir l'ensemble en tableau et l'ajouter à la liste
 						}
 					},
 				);
 			});
-			// Ajouter tous les messages récupérés à "allChanMessages"
-			setAllChanMessages(messagesFromAllChannels);
 		});
 	}, [chanList]);
 
@@ -745,7 +768,9 @@ export default function Friends(props: FriendsProps) {
 	useEffect(() => {
 		console.log('ChansList UseEffect');
 		socket.emit('channels_list', {}, (data: IChannel[]) => {
-			const chanJoined : IChannel[] = data.filter((channel) => channel.members.some((member) => member.id === props.user_me.id));
+			const chanJoined: IChannel[] = data.filter((channel) =>
+				channel.members.some((member) => member.id === props.user_me.id),
+			);
 			// Mettez à jour l'état de votre composant avec la liste des canaux privés non rejoint par l'utilisateur donné.
 			setChanList(chanJoined);
 		});
@@ -961,7 +986,7 @@ export default function Friends(props: FriendsProps) {
 			</div>
 			<div className="infos-conv" id="infos-conv">
 				{activeChan && activeConvId != -1 && user && chanConv == 1 ? (
-					<InfosConv user_me={user} activeChan={activeChan} banUser={banUser} />
+					<InfosConv user_me={user} activeChan={activeChan} banUser={banUser} setAdmin={setAdmin} />
 				) : null}
 			</div>
 		</div>

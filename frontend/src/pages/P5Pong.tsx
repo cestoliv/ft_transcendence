@@ -9,7 +9,6 @@ import useAuth from '../hooks/useAuth';
 import { throttle } from '../utils';
 import { useNavigate } from 'react-router-dom';
 import useGameInfo from '../hooks/useGameInfo';
-import NotFound from './NotFound';
 
 const Canvas = (gameId: any) => {
 	gameId = gameId.gameId;
@@ -336,8 +335,6 @@ const Pong = () => {
 	});
 	socket.off('games_end'); // Unbind previous event
 	socket.on('games_end', (data: any) => {
-		console.log('game end !');
-		console.log(data);
 		if (!data.winner) {
 			navigate('/searchGame', { replace: true });
 			return;
@@ -353,7 +350,6 @@ const Pong = () => {
 	});
 	socket.off('games_watch_end'); // Unbind previous event
 	socket.on('games_watch_end', (data: any) => {
-		console.log(data);
 		setEndGameInfo(data);
 		setIsModalOpen(true);
 	});
@@ -376,12 +372,18 @@ const Pong = () => {
 	};
 
 	useEffect(() => {
+		if (gameInfo?.isWatching) {
+			setGameScore({
+				creator: gameInfo.players[0].score,
+				opponent: gameInfo.players[1].score,
+				you: 0,
+			});
+		}
 		return () => {
 			if (gameInfo) {
 				if (gameInfo.isWatching) {
 					socket.emit('games_watch_stop', { id: gameId });
 				} else {
-					console.log(gameInfo);
 					socket.emit('games_quit', { id: gameId });
 				}
 			}

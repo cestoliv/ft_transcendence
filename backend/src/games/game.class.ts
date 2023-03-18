@@ -120,6 +120,7 @@ export class LocalGame {
 		user: User;
 		score: number;
 	};
+	creatorId: number;
 
 	constructor(
 		id: string,
@@ -145,21 +146,33 @@ export class LocalGame {
 		};
 		this.winner = null;
 		this.loser = null;
+		this.creatorId = creatorId;
 
 		// Ball
 		this.resetBall();
 
-		new Promise(async () => {
-			// Add creator to game
-			await this.addPlayer(creatorId);
-			// Send updated games available to all users
-			this.server.emit(
-				'games_available',
-				await this.gamesService.getAvailableGamesInfo(),
-			);
-		}).then(() => {
-			/* Do nothing */
-		});
+		// new Promise(async () => {
+		// 	// Add creator to game
+		// 	await this.addPlayer(creatorId);
+		// 	// Send updated games available to all users
+		// 	this.server.emit(
+		// 		'games_available',
+		// 		await this.gamesService.getAvailableGamesInfo(),
+		// 	);
+		// })
+		// 	.then(() => {
+		// 		/* Do nothing */
+		// 	})
+		// 	.catch((err) => console.log('error_create', err));
+	}
+
+	async initGame() {
+		await this.addPlayer(this.creatorId);
+		// Send updated games available to all users
+		this.server.emit(
+			'games_available',
+			await this.gamesService.getAvailableGamesInfo(),
+		);
 	}
 
 	getInfo(): LocalGameInfo {
@@ -305,9 +318,7 @@ export class LocalGame {
 	async end(winner: User | null = null) {
 		if (this.state === 'ended') return;
 
-		console.log('hereeee')
 		if (this.state === 'waiting') {
-			console.log('is waiting')
 			this.state = 'ended';
 			this.winner = null;
 			this.players.forEach((player) => {
@@ -371,7 +382,6 @@ export class LocalGame {
 		};
 
 		// Send score to players
-		console.log('sending games_end')
 		this.connectedClientsService
 			.get(this.players[0].user.id)
 			.emit('games_end', {
@@ -537,10 +547,10 @@ export class LocalGame {
 			!(
 				this.ball.x + this.ball.radius < pX ||
 				this.ball.x - this.ball.radius >
-				pX + this.players[0].paddle.width ||
+					pX + this.players[0].paddle.width ||
 				this.ball.y + this.ball.radius < pY ||
 				this.ball.y - this.ball.radius >
-				pY + this.players[0].paddle.height
+					pY + this.players[0].paddle.height
 			)
 		)
 			this.ball.speed = this._paddleBounce(
@@ -556,10 +566,10 @@ export class LocalGame {
 			!(
 				this.ball.x + this.ball.radius < pX ||
 				this.ball.x - this.ball.radius >
-				pX + this.players[1].paddle.width ||
+					pX + this.players[1].paddle.width ||
 				this.ball.y + this.ball.radius < pY ||
 				this.ball.y - this.ball.radius >
-				pY + this.players[1].paddle.height
+					pY + this.players[1].paddle.height
 			)
 		)
 			this.ball.speed = this._paddleBounce(
@@ -574,57 +584,6 @@ export class LocalGame {
 		if (this.ball.x + this.ball.radius >= this.screen.width)
 			this.addScore(this.players[0]);
 
-		// if (this.ball.y < 10 || this.ball.y > this.screen.height - 10) {
-		// 	this.ball.speed.y *= -1;
-		// }
-		// this.ball.y += this.ball.speed.y;
-
-		// // x: opponent
-		// if (this.ball.x - this.ball.radius <= this.players[0].paddle.x) {
-		// 	if (
-		// 		this.ball.y > this.ball.y - this.players[0].paddle.radius &&
-		// 		this.ball.y <
-		// 			this.players[0].paddle.y + this.players[0].paddle.radius
-		// 	) {
-		// 		// opponent hits the ball
-		// 		const diff =
-		// 			this.ball.y -
-		// 			(this.players[0].paddle.y - this.players[0].paddle.radius);
-		// 		const angle = p5Map(
-		// 			diff,
-		// 			0,
-		// 			this.players[0].paddle.radius,
-		// 			degRad(45),
-		// 			degRad(45),
-		// 		);
-		// 		this.ball.speed.x = Math.sin(angle) * this.options.speed;
-		// 		this.ball.speed.y = Math.cos(angle) * this.options.speed;
-		// 	} else this.addScore(this.players[1]);
-		// }
-
-		// // // x: me
-		// if (this.ball.x + this.ball.radius >= this.players[1].paddle.x) {
-		// 	if (
-		// 		this.ball.y >
-		// 			this.players[1].paddle.y - this.players[1].paddle.radius &&
-		// 		this.ball.y <
-		// 			this.players[1].paddle.y + this.players[1].paddle.radius
-		// 	) {
-		// 		// I hits the ball
-		// 		const diff =
-		// 			this.ball.y -
-		// 			(this.players[1].paddle.y - this.players[1].paddle.radius);
-		// 		const angle = p5Map(
-		// 			diff,
-		// 			0,
-		// 			this.players[0].paddle.radius,
-		// 			degRad(225),
-		// 			degRad(135),
-		// 		);
-		// 		this.ball.speed.x = Math.sin(angle) * this.options.speed;
-		// 		this.ball.speed.y = Math.cos(angle) * this.options.speed;
-		// 	} else this.addScore(this.players[0]);
-		// }
 		this.ball.x += this.ball.speed.x;
 
 		this.connectedClientsService

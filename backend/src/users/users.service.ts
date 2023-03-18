@@ -31,6 +31,9 @@ import { BaseGateway } from 'src/base.gateway';
 import { Status } from './enums/status.enum';
 import { ConfigService } from '@nestjs/config';
 
+import { Interval } from '@nestjs/schedule';
+import { GamesService } from 'src/games/games.service';
+
 @Injectable()
 export class UsersService {
 	constructor(
@@ -46,6 +49,8 @@ export class UsersService {
 		private readonly userMessagesRepository: Repository<UserMessage>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
+		@Inject(forwardRef(() => GamesService))
+		private readonly gamesService: GamesService,
 
 		private readonly configService: ConfigService,
 	) {}
@@ -180,7 +185,9 @@ export class UsersService {
 		return this.usersRepository.delete({ id });
 	}
 
-	async enableTotp(user: User): Promise<{ secret: string; url: string }> {
+	async enableTotp(userId: number): Promise<{ secret: string; url: string }> {
+		const user = await this.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
 		// Generate TOTP secret
 		const secret = authenticator.generateSecret();
 		const url = authenticator.keyuri('', 'Transcendence', secret);
@@ -200,22 +207,23 @@ export class UsersService {
 			iv.toString('hex') + ':' + encrypted.toString('hex');
 
 		// Update user TOTP secret
-		await this.update(user.id, user.id, {
-			otp: encryptedSecret,
-		});
+		user.otp = encryptedSecret;
+		await this.save(user);
 
 		return { secret, url };
 	}
 
-	async disableTotp(user: User): Promise<{ otp: null }> {
+	async disableTotp(userId: number): Promise<{ otp: null }> {
+		const user = await this.findOne(userId);
+		if (!user) throw new NotFoundException('User not found');
 		// Update user TOTP secret
 		if (!user.id42)
 			throw new ForbiddenException(
 				"You can't disable TOTP if you don't have a 42 account",
 			);
-		await this.update(user.id, user.id, {
-			otp: null,
-		});
+		user.otp = null;
+		await this.save(user);
+
 		return { otp: null };
 	}
 
@@ -569,5 +577,32 @@ export class UsersService {
 			this.gateway.propagateUserUpdate(user, 'users_update');
 		}
 		return user;
+	}
+
+	// Cron to check status, every 1 minutes
+	@Interval(60000)
+	async loop(): Promise<void> {
+		const users = await this.findAll();
+		users.forEach(async (user) => {
+			const online = await this.gateway.connectedClientsService.has(
+				user.id,
+			);
+			const inGame = await this.gamesService
+				.findStartedGame(user.id)
+				.then(() => true)
+				.catch(() => false);
+
+			const status: Status = online ? Status.Online : Status.Offline;
+			if (inGame) user.status = Status.Playing;
+
+			// If the status has changed
+			if (user.status != status) {
+				user.status = status;
+				await this.save(user);
+
+				// Propage the new status
+				this.gateway.propagateUserUpdate(user, 'users_update');
+			}
+		});
 	}
 }

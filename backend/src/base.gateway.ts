@@ -72,15 +72,25 @@ export abstract class BaseGateway implements OnGatewayConnection {
 			socket.userId = user.id;
 
 			// Check if the user is already connected
-			if (this.connectedClientsService.has(user.id)) {
+			if (
+				this.connectedClientsService.has(user.id) &&
+				this.connectedClientsService.get(user.id).id != socket.id
+			) {
 				console.log(
-					`Client already connected: ${user.username} (${socket.id})`,
+					`Client already connected (disconnecting): ${user.username} (${socket.id})`,
 				);
-				return;
-			} else
-				console.log(
-					`Client connected: ${user.username} (${socket.id})`,
+				this.connectedClientsService.get(user.id).emit('error', {
+					statusCode: 409,
+					message: 'Conflict',
+					errors: ['You are connected somewhere else'],
+				});
+				this.connectedClientsService.get(user.id).disconnect();
+				this.connectedClientsService.delete(
+					this.connectedClientsService.get(user.id).userId,
 				);
+			}
+
+			console.log(`Client connected: ${user.username} (${socket.id})`);
 
 			this.connectedClientsService.add(user.id, socket);
 

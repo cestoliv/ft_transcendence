@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
 import { IChannel } from '../interfaces';
@@ -26,11 +26,8 @@ export const Chan = (props: ChanProps) => {
 		>
 			<span className="wrapper-active-conv-span" onClick={props.activeConv}>
 				{props.chan_name}
-			</span> 
-			<img
-				src="https://cdn-icons-png.flaticon.com/128/391/391372.png"
-				onClick={handleLeaveClick}
-			/>
+			</span>
+			<img src="https://cdn-icons-png.flaticon.com/128/391/391372.png" onClick={handleLeaveClick} />
 		</div>
 	);
 };

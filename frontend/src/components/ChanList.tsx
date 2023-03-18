@@ -1,12 +1,9 @@
-import React, { ChangeEvent, useEffect, useContext, useState } from 'react';
-import Popup from 'reactjs-popup';
+import React from 'react';
 import 'reactjs-popup/dist/index.css';
 
 import Chan from './Chan';
 
-import { IChannel, IUser, IUserFriend, IChannelMessage } from '../interfaces';
-
-import { SocketContext } from '../context/socket';
+import { IChannel } from '../interfaces';
 
 type ChanListProps = {
 	chanList: IChannel[];
