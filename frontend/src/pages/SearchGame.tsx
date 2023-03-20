@@ -146,7 +146,7 @@ export const SearchGame = (props: FriendsProps) => {
 		);
 	};
 
-	const accept_friend_request = (inviter_id: number): void => {
+	const accept_friend_request = (inviter_id: number, display_message: number): void => {
 		socket.emit(
 			'users_acceptFriend',
 			{
@@ -154,32 +154,16 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
-				else setFriends((prevFriends) => [...prevFriends, data.inviter]);
+				else {
+					setFriends((prevFriends) => [...prevFriends, data.inviter as IUser]);
+					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
+					if (display_message) message.destroy();
+				}
 			},
 		);
-		const indexToUpdate = friendOf.findIndex(
-			(friend) =>
-				(friend.inviterId === inviter_id && friend.inviteeId === user?.id) ||
-				(friend.inviterId === user?.id && friend.inviteeId === inviter_id),
-		);
-		if (indexToUpdate !== -1) {
-			// Créer un nouvel objet ami avec les mêmes propriétés que l'objet original, mais avec la propriété `accepted` mise à jour
-			const updatedFriend = {
-				...friendOf[indexToUpdate],
-				accepted: true,
-			};
-
-			// Créer une nouvelle liste d'amis en copiant tous les éléments de la liste d'origine
-			// mais en remplaçant l'élément à l'index `indexToUpdate` par le nouvel objet ami mis à jour
-			const updatedFriendOf = [...friendOf];
-			updatedFriendOf[indexToUpdate] = updatedFriend;
-
-			// Mettre à jour la liste d'amis en attente d'être acceptés avec la nouvelle liste mise à jour
-			setFriendOf(updatedFriendOf);
-		}
 	};
 
-	const refuse_friend_request = (inviter_id: number): void => {
+	const refuse_friend_request = (inviter_id: number, display_message: number): void => {
 		socket.emit(
 			'users_removeFriend',
 			{
@@ -188,7 +172,8 @@ export const SearchGame = (props: FriendsProps) => {
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
-					setFriendOf((prevList) => prevList.filter((item) => item.inviteeId !== (data.inviteeId as number)));
+					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
+					if (display_message) message.destroy();
 				}
 			},
 		);
@@ -237,6 +222,41 @@ export const SearchGame = (props: FriendsProps) => {
 			},
 		);
 	};
+
+	// start socket.on user
+
+	socket.off('users_update'); // Unbind previous event
+	socket.on('users_update', (data: any) => {
+		console.log('users_update', data);
+		const index = friends.findIndex((friend) => friend.id === (data.id as number));
+
+		if (index !== -1) {
+			const updatedFriendList: IUser[] = [...friends];
+			updatedFriendList[index] = data as IUser;
+			setFriends(updatedFriendList);
+		}
+	});
+
+	socket.off('users_friendshipInvitation'); // Unbind previous event
+	socket.on('users_friendshipInvitation', (data: any) => {
+		setFriendOf((prevList) => [...prevList, data as IUserFriend]);
+	});
+
+	socket.off('users_friendshipAccepted'); // Unbind previous event
+	socket.on('users_friendshipAccepted', (data: any) => {
+		setFriends((prevList) => [...prevList, data.invitee as IUser]);
+	});
+
+	socket.off('users_friendshipRemoved'); // Unbind previous event
+	socket.on('users_friendshipRemoved', (data: any) => {
+		setFriends((prevList) => prevList.filter((friend) => friend.id !== (data.invitee.id as number)));
+		setFriends((prevList) => prevList.filter((friend) => friend.id !== (data.inviter.id as number)));
+	});
+
+	socket.off('users_banned'); // Unbind previous event
+	socket.on('users_banned', (data: any) => {
+		setFriends((prevList) => prevList.filter((user) => user.id !== (data.userId as number)));
+	});
 
 	useEffect(() => {
 		socket.emit(

@@ -147,8 +147,6 @@ export default function Friends(props: FriendsProps) {
 			CloseCreateChanModal();
 		}
 		if (event.target.name === 'button-join-chan') {
-			// let chan : IChannel | undefined;
-			// chan = allChan.find(element => element.name == joinChanName);
 			socket.emit(
 				'channels_join',
 				{
@@ -376,7 +374,7 @@ export default function Friends(props: FriendsProps) {
 		);
 	};
 
-	const accept_friend_request = (inviter_id: number): void => {
+	const accept_friend_request = (inviter_id: number, display_message: number): void => {
 		socket.emit(
 			'users_acceptFriend',
 			{
@@ -387,12 +385,13 @@ export default function Friends(props: FriendsProps) {
 				else {
 					setFriends((prevFriends) => [...prevFriends, data.inviter as IUser]);
 					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
+					if (display_message) message.destroy();
 				}
 			},
 		);
 	};
 
-	const refuse_friend_request = (inviter_id: number): void => {
+	const refuse_friend_request = (inviter_id: number, display_message: number): void => {
 		socket.emit(
 			'users_removeFriend',
 			{
@@ -402,6 +401,7 @@ export default function Friends(props: FriendsProps) {
 				if (data.messages) message.error(data.messages);
 				else {
 					setFriendOf((prevList) => prevList.filter((item) => item.inviterId !== (data.inviterId as number)));
+					if (display_message) message.destroy();
 				}
 			},
 		);

@@ -5,17 +5,17 @@ import { IUserFriend } from '../interfaces';
 
 type FriendRequestsProps = {
 	friend_request: IUserFriend;
-	accept_friend_request: (inviter_id: number) => void;
-	refuse_friend_request: (inviter_id: number) => void;
+	accept_friend_request: (inviter_id: number, display_message: number) => void;
+	refuse_friend_request: (inviter_id: number, display_message: number) => void;
 };
 
 export const FriendRequests = (props: FriendRequestsProps) => {
 	const accept_friend_requestClick = (): void => {
-		props.accept_friend_request(props.friend_request.inviter.id);
+		props.accept_friend_request(props.friend_request.inviter.id, 0);
 	};
 
 	const refuse_friend_request = (): void => {
-		props.refuse_friend_request(props.friend_request.inviter.id);
+		props.refuse_friend_request(props.friend_request.inviter.id, 0);
 	};
 
 	return (
