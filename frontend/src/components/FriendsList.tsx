@@ -65,24 +65,32 @@ export const FriendsList = (props: PersonListProps) => {
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-		  if (friendsListRef.current && friendsListRef.current.classList.contains('active-friends-list') && !friendsListRef.current.contains(event.target)) {
-			friendsListRef.current.classList.remove('active-friends-list');
-		  } else if (friendsListRef.current && friendsListRef.current.classList.contains('active-friend-list') && !friendsListRef.current.contains(event.target)) {
-			friendsListRef.current.classList.remove('active-friend-list');
-			const button1 = document.getElementById('open-chan-joined-button');
-			const button2 = document.getElementById('open-friend-list-button');
-			const button3 = document.getElementById('open-infos-conv-button');
+			if (
+				friendsListRef.current &&
+				friendsListRef.current.classList.contains('active-friends-list') &&
+				!friendsListRef.current.contains(event.target as Node)
+			) {
+				friendsListRef.current.classList.remove('active-friends-list');
+			} else if (
+				friendsListRef.current &&
+				friendsListRef.current.classList.contains('active-friend-list') &&
+				!friendsListRef.current.contains(event.target as Node)
+			) {
+				friendsListRef.current.classList.remove('active-friend-list');
+				const button1 = document.getElementById('open-chan-joined-button');
+				const button2 = document.getElementById('open-friend-list-button');
+				const button3 = document.getElementById('open-infos-conv-button');
 
-			button1?.classList.remove('hidden-button');
-			button2?.classList.remove('hidden-button');
-			button3?.classList.remove('hidden-button');
-		  }
+				button1?.classList.remove('hidden-button');
+				button2?.classList.remove('hidden-button');
+				button3?.classList.remove('hidden-button');
+			}
 		}
-		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-		  document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	  }, [friendsListRef]);
+	}, [friendsListRef]);
 
 	return (
 		<div className="priv-conv-list" id="priv-conv-list" ref={friendsListRef}>
@@ -90,7 +98,7 @@ export const FriendsList = (props: PersonListProps) => {
 				close
 			</span>
 			<div className="friendsList-wrapper">
-				{props.friends &&
+				{props.friends.length > 0 ? (
 					props.friends.map((user) => (
 						<Friend
 							key={user.id}
@@ -102,7 +110,13 @@ export const FriendsList = (props: PersonListProps) => {
 							muteFriend={props.muteFriend}
 							gameInfo={props.gameInfo}
 						/>
-					))}
+					))
+				) : (
+					<div className="no-friends">
+						<img src="https://static.thenounproject.com/png/5174-200.png" alt="no-friend" />
+						<p>No friends...</p>
+					</div>
+				)}
 			</div>
 			<div className="add-accept-friend">
 				<button className="en-attente-button nes-btn is-primary" onClick={OpenListFriendRequest}>

@@ -24,9 +24,7 @@ export const Chan = (props: ChanProps) => {
 			className="wrapper-active-conv list-item"
 			onClick={props.activeConv}
 		>
-			<span className="wrapper-active-conv-span">
-				{props.chan_name}
-			</span>
+			<span className="wrapper-active-conv-span">{props.chan_name}</span>
 			<img src="https://cdn-icons-png.flaticon.com/128/391/391372.png" onClick={handleLeaveClick} />
 		</div>
 	);

@@ -45,7 +45,7 @@ const Login = (props: ILogin) => {
 			setTotpUrl(data.url);
 			setNewUsername('');
 		} else {
-			message.error(data.error);
+			message.error(data.message);
 		}
 	};
 
@@ -69,7 +69,7 @@ const Login = (props: ILogin) => {
 			setAuth({ bearer: data.bearer, otp_ok: true, user: auth.user });
 			window.location.replace('/');
 		} else {
-			message.error(data.error);
+			message.error(data.message);
 		}
 	};
 
@@ -98,7 +98,7 @@ const Login = (props: ILogin) => {
 				user: null,
 			});
 		} else {
-			message.error(data.error);
+			message.error(data.message);
 		}
 	};
 
