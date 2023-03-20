@@ -49,14 +49,18 @@ export default function MusicPlayer() {
 
 	const togglePlay = () => {
 		const audio = document.getElementById('audio') as HTMLAudioElement;
-
-		if (isPlaying) {
-			audio.pause();
-		} else {
+		if (!alreadyStarted) {
 			audio.play();
+			setIsPlaying(!isPlaying);
+			setAlreadyStarted(true);
+		} else {
+			if (isPlaying) {
+				audio.pause();
+			} else {
+				audio.play();
+			}
+			setIsPlaying(!isPlaying);
 		}
-
-		setIsPlaying(!isPlaying);
 	};
 
 	const toggleMute = () => {
@@ -121,15 +125,6 @@ export default function MusicPlayer() {
 	};
 
 	useEffect(() => {
-		setTimeout(() => {
-			const audio = document.getElementById('audio') as HTMLAudioElement;
-			audio.play();
-			setIsPlaying(!isPlaying);
-			setAlreadyStarted(true);
-		}, 2000);
-	}, []);
-
-	useEffect(() => {
 		if (alreadyStarted) {
 			const audio = document.getElementById('audio') as HTMLAudioElement;
 			audio.volume = volume;
@@ -152,7 +147,7 @@ export default function MusicPlayer() {
 			<div className="music-player modal" id="music-player" onClick={stopPropagation}>
 				<h2>{playList[activePlayList].title}</h2>
 				<span>{playList[activePlayList].music_list[activeMusic].title}</span>
-				<audio id="audio" autoPlay onEnded={handleEnded}>
+				<audio id="audio" onEnded={handleEnded}>
 					<source src={playList[activePlayList].music_list[activeMusic].url} type="audio/mpeg" />
 				</audio>
 				<div className="music-player-settings">

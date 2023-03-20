@@ -23,8 +23,6 @@ type ChanUserProps = {
 };
 
 export const ChanUser = (props: ChanUserProps) => {
-	const socket = useContext(SocketContext);
-
 	const [banTimeValue, setBanTimeValue] = useState<string>('');
 	const [muteTimeValue, setMuteTimeValue] = useState<string>('');
 
