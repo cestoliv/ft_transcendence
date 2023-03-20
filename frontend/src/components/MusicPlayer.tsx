@@ -50,7 +50,11 @@ export default function MusicPlayer() {
 
 	const togglePlay = () => {
 		const audio = document.getElementById('audio') as HTMLAudioElement;
-
+		if (!alreadyStarted) {
+			audio.play();
+			setIsPlaying(!isPlaying);
+			setAlreadyStarted(true);
+		}
 		if (isPlaying) {
 			audio.pause();
 		} else {
@@ -97,6 +101,7 @@ export default function MusicPlayer() {
 
 	const switchPlaylist = (event: any) => {
 		const id = event.target.getAttribute('data-id');
+		if (id == playList[activePlayList].id) return;
 		setActiveMusic(0); // Ajout de cette ligne pour définir la première musique de la nouvelle playlist
 		setActivePlayList(id - 1);
 		setIsPlaying(false);
@@ -112,14 +117,14 @@ export default function MusicPlayer() {
 		setVolume(volume);
 	};
 
-	useEffect(() => {
-		setTimeout(() => {
-			const audio = document.getElementById('audio') as HTMLAudioElement;
-			audio.play();
-			setIsPlaying(!isPlaying);
-			setAlreadyStarted(true);
-		}, 2000);
-	}, []);
+	// useEffect(() => {
+	// 	setTimeout(() => {
+	// 		const audio = document.getElementById('audio') as HTMLAudioElement;
+	// 		audio.play();
+	// 		setIsPlaying(!isPlaying);
+	// 		setAlreadyStarted(true);
+	// 	}, 2500);
+	// }, []);
 
 	useEffect(() => {
 		if (alreadyStarted) {

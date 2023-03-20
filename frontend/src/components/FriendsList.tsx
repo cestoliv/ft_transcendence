@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useEffect, useRef } from 'react';
+import React, { ChangeEvent, useState, useEffect, useRef, useContext } from 'react';
 import 'reactjs-popup/dist/index.css';
 import Friend from './Friend';
 import FriendRequests from './FriendRequests';
@@ -9,6 +9,8 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { message } from 'antd';
 
+import { SocketContext } from '../context/socket';
+
 type PersonListProps = {
 	user_me: IUser;
 	chanList: IChannel[];
@@ -16,8 +18,8 @@ type PersonListProps = {
 	friendOf: IUserFriend[];
 	activeConv: (even: React.MouseEvent<HTMLDivElement>) => void;
 	AddFriend: (username: string) => void;
-	accept_friend_request: (inviter_id: number) => void;
-	refuse_friend_request: (inviter_id: number) => void;
+	accept_friend_request: (inviter_id: number, display_message: number) => void;
+	refuse_friend_request: (inviter_id: number, display_message: number) => void;
 	banFriend: (banTime: string, friend_id: number) => void;
 	muteFriend: (muteTime: string, friend_id: number) => void;
 	removeFriend: (user_id: number) => void;
@@ -25,6 +27,8 @@ type PersonListProps = {
 };
 
 export const FriendsList = (props: PersonListProps) => {
+	const socket = useContext(SocketContext);
+
 	const friendsListRef = useRef<HTMLDivElement>(null);
 	const [addFriendValue, setAddFriendValue] = useState<string>('');
 
@@ -57,6 +61,23 @@ export const FriendsList = (props: PersonListProps) => {
 		button2?.classList.remove('hidden-button');
 		button3?.classList.remove('hidden-button');
 	};
+
+	socket.off('users_friendshipInvitation'); // Unbind previous event
+	socket.on('users_friendshipInvitation', (data: any) => {
+		message.info(
+			<div className="invite-notification">
+				<p>You receive a friend invitation from {data.inviter.username}</p>
+				<button className="nes-btn is-success" onClick={() => props.accept_friend_request(data.inviterId, 1)}>
+					Accept
+				</button>
+				<button className="nes-btn is-error" onClick={() => props.refuse_friend_request(data.inviterId, 1)}>
+					Refuse
+				</button>
+			</div>,
+			10,
+		);
+		props.friendOf.push(data);
+	});
 
 	useEffect(() => {
 		const hasFriendRequestPending = props.friendOf.some((friend) => !friend.accepted);
