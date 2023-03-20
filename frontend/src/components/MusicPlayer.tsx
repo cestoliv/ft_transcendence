@@ -2,15 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { PlayCircleOutlined, PauseCircleOutlined, CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { BsFillVolumeMuteFill } from 'react-icons/bs';
 import { GoUnmute } from 'react-icons/go';
-import { IMusic } from '../components/IMusic';
-import { IPlayList } from '../components/IPlayList';
-
-import qala from '../assets/boop.mp3';
-import what_you_love from '../assets/what_you_love.mp3';
-import sparks from '../assets/sparks.mp3';
-import life_is_a_game from '../assets/life_is_a_game.mp3';
-import Ryu_stage from '../assets/Ryu_stage.mp3';
-import Bomb_Jack from '../assets/Bomb_Jack.mp3';
 
 export default function MusicPlayer() {
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -20,16 +11,36 @@ export default function MusicPlayer() {
 	const [alreadyStarted, setAlreadyStarted] = useState<boolean>(false);
 	const [muted, setMuted] = useState<boolean>(false);
 
+	interface IMusic {
+		id: number;
+		title: string;
+		url: string;
+	}
+
+	interface IPlayList {
+		id: number;
+		title: string;
+		music_list: IMusic[];
+	}
+
 	const musicList: IMusic[] = [
-		{ id: 1, title: 'Enzalla - Rose', url: qala },
-		{ id: 2, title: 'c4c - What you love', url: what_you_love },
-		{ id: 3, title: 'Mr Hong & Pastels - Sparks', url: sparks },
-		{ id: 4, title: 'Pastels - Life is a game', url: life_is_a_game },
+		{ id: 1, title: 'Enzalla - Rose', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/boop.mp3` },
+		{ id: 2, title: 'c4c - What you love', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/what_you_love.mp3` },
+		{ id: 3, title: 'Mr Hong & Pastels - Sparks', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/sparks.mp3` },
+		{
+			id: 4,
+			title: 'Pastels - Life is a game',
+			url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/life_is_a_game.mp3`,
+		},
 	];
 
 	const arcadeMusicList: IMusic[] = [
-		{ id: 1, title: 'Street Fighter 2 - Ryu stage', url: Ryu_stage },
-		{ id: 2, title: 'Bomb Jack - Level Theme', url: Bomb_Jack },
+		{
+			id: 1,
+			title: 'Street Fighter 2 - Ryu stage',
+			url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/Ryu_stage.mp3`,
+		},
+		{ id: 2, title: 'Bomb Jack - Level Theme', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/Bomb_Jack.mp3` },
 	];
 
 	const playList: IPlayList[] = [

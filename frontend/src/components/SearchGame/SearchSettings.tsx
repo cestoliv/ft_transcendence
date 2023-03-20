@@ -32,13 +32,17 @@ export const SearchSettings = ({ setMode, setTime, setPoints, createGame }: Sear
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-			if (searchSettingsRef.current && searchSettingsRef.current.classList.contains('active-searchGame-settings') && !searchSettingsRef.current.contains(event.target)) {
+			if (
+				searchSettingsRef.current &&
+				searchSettingsRef.current.classList.contains('active-searchGame-settings') &&
+				!searchSettingsRef.current.contains(event.target as Node)
+			) {
 				searchSettingsRef.current.classList.remove('active-searchGame-settings');
 			}
 		}
-		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [searchSettingsRef]);
 

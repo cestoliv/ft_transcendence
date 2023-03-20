@@ -1,16 +1,16 @@
-version: "3"
+version: '3'
 services:
   db:
     image: postgres:15
     restart: always
     volumes:
-      - "./docker/data/db:/var/lib/postgresql/data"
+      - './docker/data/db:/var/lib/postgresql/data'
     environment:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - db
 
@@ -31,8 +31,8 @@ services:
         NGINX_SERVER_NAME_FRONT: ${NGINX_SERVER_NAME_FRONT}
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     depends_on:
       - frontend
       - backend
@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     volumes:
-     # Lots of lines, but we don't want node_modules to be mounted
+      # Lots of lines, but we don't want node_modules to be mounted
       - ./frontend/public:/transcendence/public
       - ./frontend/src:/transcendence/src
       - ./frontend/.eslintrc.js:/transcendence/.eslintrc.js
@@ -54,9 +54,10 @@ services:
       - ./frontend/prettier.config.js:/transcendence/prettier.config.js
       - ./frontend/tsconfig.json:/transcendence/tsconfig.json
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       REACT_APP_API_URL: ${API_URL}
+      REACT_APP_FRONTEND_URL: ${FRONTEND_URL}
       REACT_APP_SOCKET_URL: ${SOCKET_URL}
       REACT_APP_COOKIE_DOMAIN: ${COOKIE_DOMAIN}
       ESLINT_NO_DEV_ERRORS: 1

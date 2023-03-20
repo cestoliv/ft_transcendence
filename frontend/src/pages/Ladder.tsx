@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { IUser, IStat, ILeaderboards } from '../interfaces';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../context/socket';
-import { message } from 'antd'; 
+import { message } from 'antd';
 
 export const Ladder = () => {
 	const Navigate = useNavigate();
