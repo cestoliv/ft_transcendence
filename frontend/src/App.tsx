@@ -22,6 +22,7 @@ import useMatchmaking from './hooks/useMatchmaking';
 import NotFound from './pages/NotFound';
 import Ladder from './pages/Ladder';
 import { ILocalGameInfo } from './interfaces';
+import MusicPlayer from './components/MusicPlayer';
 
 function App() {
 	const navigate = useNavigate();
@@ -196,6 +197,7 @@ function App() {
 					</Route>
 					<Route path="*" element={<NotFound />} />
 				</Routes>
+				<MusicPlayer />
 			</SocketContext.Provider>
 		</ConfigProvider>
 	);

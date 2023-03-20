@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircleOutlined, PauseCircleOutlined, CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { BsFillVolumeMuteFill } from 'react-icons/bs';
-import { GoUnmute } from 'react-icons/go';
+
+import '../css/music-player.scss';
 
 export default function MusicPlayer() {
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -54,14 +53,14 @@ export default function MusicPlayer() {
 			audio.play();
 			setIsPlaying(!isPlaying);
 			setAlreadyStarted(true);
-		}
-		if (isPlaying) {
-			audio.pause();
 		} else {
-			audio.play();
+			if (isPlaying) {
+				audio.pause();
+			} else {
+				audio.play();
+			}
+			setIsPlaying(!isPlaying);
 		}
-
-		setIsPlaying(!isPlaying);
 	};
 
 	const toggleMute = () => {
@@ -117,14 +116,14 @@ export default function MusicPlayer() {
 		setVolume(volume);
 	};
 
-	// useEffect(() => {
-	// 	setTimeout(() => {
-	// 		const audio = document.getElementById('audio') as HTMLAudioElement;
-	// 		audio.play();
-	// 		setIsPlaying(!isPlaying);
-	// 		setAlreadyStarted(true);
-	// 	}, 2500);
-	// }, []);
+	const closeMusicPlayer = () => {
+		const modal = document.getElementById('music-modal');
+		modal?.classList.add('hidden');
+	};
+
+	const stopPropagation = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		event.stopPropagation();
+	};
 
 	useEffect(() => {
 		if (alreadyStarted) {
@@ -145,47 +144,66 @@ export default function MusicPlayer() {
 	}, [volume]);
 
 	return (
-		<div className="music-modal-hidden music-player" id="music-player">
-			<h2>{playList[activePlayList].title}</h2>
-			<span>{playList[activePlayList].music_list[activeMusic].title}</span>
-			<div className="sound">
-				{muted ? (
-					<BsFillVolumeMuteFill
-						style={{ fontSize: '30px', color: '#FDCA40', marginRight: '2px' }}
-						onClick={toggleMute}
+		<div className="music-modal-overlay hidden" id="music-modal" onClick={closeMusicPlayer}>
+			<div className="music-player modal" id="music-player" onClick={stopPropagation}>
+				<h2>{playList[activePlayList].title}</h2>
+				<span>{playList[activePlayList].music_list[activeMusic].title}</span>
+				<audio id="audio" onEnded={handleEnded}>
+					<source src={playList[activePlayList].music_list[activeMusic].url} type="audio/mpeg" />
+				</audio>
+				<div className="music-player-settings">
+					<button onClick={lastMusic}>
+						<img src="/icons/next.png" alt="previous" />
+					</button>
+					{isPlaying ? (
+						<button onClick={togglePlay}>
+							<img src="/icons/pause.png" alt="pause" />
+						</button>
+					) : (
+						<button onClick={togglePlay}>
+							<img src="/icons/play.png" alt="play" />
+						</button>
+					)}
+					<button onClick={nextMusic}>
+						<img src="/icons/next.png" alt="next" />
+					</button>
+				</div>
+				<div className="playlists">
+					<button
+						className="playList-btn nes-btn is-primary"
+						onClick={switchPlaylist}
+						data-id={playList[0].id}
+					>
+						{playList[0].title}
+					</button>
+					<button
+						className="playList-btn nes-btn is-primary"
+						onClick={switchPlaylist}
+						data-id={playList[1].id}
+					>
+						{playList[1].title}
+					</button>
+				</div>
+				<div className="sound">
+					{muted ? (
+						<button onClick={toggleMute}>
+							<img src="/icons/mute.png" alt="mute" />
+						</button>
+					) : (
+						<button onClick={toggleMute}>
+							<img src="/icons/speaker.png" alt="volume" />
+						</button>
+					)}
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.01"
+						value={volume}
+						onChange={handleVolumeChange}
+						className="volume-input slider nes-btn"
 					/>
-				) : (
-					<GoUnmute style={{ fontSize: '30px', color: '#02C39A', marginRight: '2px' }} onClick={toggleMute} />
-				)}
-				<input
-					type="range"
-					min="0"
-					max="1"
-					step="0.01"
-					value={volume}
-					onChange={handleVolumeChange}
-					className="volume-input"
-				/>
-			</div>
-			<audio id="audio" autoPlay onEnded={handleEnded}>
-				<source src={playList[activePlayList].music_list[activeMusic].url} type="audio/mpeg" />
-			</audio>
-			<div className="music-player-settings">
-				<CaretLeftOutlined style={{ fontSize: '30px', color: '#00A896' }} onClick={lastMusic} />
-				{isPlaying ? (
-					<PauseCircleOutlined style={{ fontSize: '30px', color: '#FDCA40' }} onClick={togglePlay} />
-				) : (
-					<PlayCircleOutlined style={{ fontSize: '30px', color: '#02C39A' }} onClick={togglePlay} />
-				)}
-				<CaretRightOutlined style={{ fontSize: '30px', color: '#00A896' }} onClick={nextMusic} />
-			</div>
-			<div className="playlists">
-				<button className="playList-btn nes-btn is-primary" onClick={switchPlaylist} data-id={playList[0].id}>
-					{playList[0].title}
-				</button>
-				<button className="playList-btn nes-btn is-primary" onClick={switchPlaylist} data-id={playList[1].id}>
-					{playList[1].title}
-				</button>
+				</div>
 			</div>
 		</div>
 	);

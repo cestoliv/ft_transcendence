@@ -23,7 +23,6 @@ export const SearchGame = (props: FriendsProps) => {
 	const [chanList, setChanList] = useState<IChannel[]>([]);
 	const [friendOf, setFriendOf] = useState<IUserFriend[]>([]);
 	const [friends, setFriends] = useState<IUser[]>([]);
-	const [allChanMessages, setAllChanMessages] = useState<IChannelMessage[]>([]);
 
 	// list of available games
 	const [availableGames, setAvailableGames] = useState<ILocalGameInfo[]>([]);
