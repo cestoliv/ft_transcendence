@@ -1,33 +1,97 @@
-.home {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    gap: 30px;
-    h2 {
-        text-transform: uppercase;
-        text-align: center;
-        font-size: 45px;
-        text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
-        span {
-            font-size: 60px;
-        }
-    }
+$bg: var(--bg-color);
+$text-color: #d7b94c;
+$caret-color: white;
+$text-length: 50;
+$animation-time: 4s;
 
+.home {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
+	gap: 30px;
+	h2 {
+		text-transform: uppercase;
+		text-align: center;
+		font-size: 45px;
+		text-shadow: 0px 0px 6px rgba(255, 255, 255, 0.7);
+		span {
+			font-size: 60px;
+		}
+	}
+	.made-by {
+		position: absolute !important;
+		bottom: 15px;
+		display: flex;
+		align-items: center;
+		font-size: 10px;
+		gap: 10px;
+		img {
+			height: 20px;
+		}
+	}
+	.typing {
+		position: relative;
+		&::after {
+			content: '|';
+			position: absolute;
+			right: 0;
+			width: 100%;
+			color: $caret-color;
+			background: $bg;
+			animation: typing $animation-time steps($text-length) forwards, caret 1s infinite;
+		}
+	}
+	// Animation
+	@keyframes typing {
+		to {
+			width: 0;
+		}
+	}
+	@keyframes caret {
+		50% {
+			color: transparent;
+		}
+	}
 }
 
 .button-start-game {
-    background-color: #64B5F6;
-    padding: 15px;
-    border-radius: 13px;
-    border-style: none;
-    font-size: 20px;
-    align-self: center;
+	background-color: #64b5f6;
+	padding: 15px;
+	border-radius: 13px;
+	border-style: none;
+	font-size: 20px;
+	align-self: center;
 }
 
 .button-start-game:hover {
-    background-color: #1976D2;
-    border-style: none;
-    cursor: pointer;
+	background-color: #1976d2;
+	border-style: none;
+	cursor: pointer;
+}
+
+@media (max-width: 768px) {
+	.home {
+		a {
+			font-size: 10px;
+		}
+
+		h2 {
+			font-size: 30px;
+			span {
+				font-size: 40px;
+			}
+		}
+	}
+}
+
+@media (max-width: 630px) {
+	.home {
+		.made-by {
+			p {
+				font-size: 1.5vw;
+			}
+		}
+	}
 }
