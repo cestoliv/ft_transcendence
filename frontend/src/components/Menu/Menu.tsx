@@ -1,5 +1,5 @@
 import { message } from 'antd';
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { SocketContext } from '../../context/socket';
 import { NavLink } from 'react-router-dom';
 import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
@@ -7,14 +7,11 @@ import useAuth from '../../hooks/useAuth';
 import { SetCookie } from '../../types';
 import { BsFillMusicPlayerFill } from 'react-icons/bs';
 
-import MusicPlayer from '../MusicPlayer';
-
 export default function Menu(props: { setCookie: SetCookie }) {
 	const { setAuth } = useAuth();
 	const socket = useContext(SocketContext);
 	const [openMenu, setOpenMenu] = useState<boolean>(false);
-	const [isOpen, setisOpen] = useState<boolean>(false);
-	const musicModalRef = useRef<HTMLDivElement>(null);
+
 	const handleLogout = () => {
 		props.setCookie('bearer', null, {
 			path: '/',
@@ -29,33 +26,8 @@ export default function Menu(props: { setCookie: SetCookie }) {
 
 	const toggleMusicModal = () => {
 		const modal = document.getElementById('music-modal');
-		const music_player = document.getElementById('music-player');
-		if (isOpen && modal) {
-			modal.classList.add('music-modal-hidden');
-			music_player?.classList.add('music-modal-hidden');
-			setisOpen(false);
-		} else {
-			modal?.classList.remove('music-modal-hidden');
-			music_player?.classList.remove('music-modal-hidden');
-			setisOpen(true);
-		}
+		modal?.classList.toggle('hidden');
 	};
-
-	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (
-				musicModalRef.current &&
-				!musicModalRef.current.classList.contains('music-modal-hidden') &&
-				!musicModalRef.current.contains(event.target as Node)
-			) {
-				musicModalRef.current.classList.add('music-modal-hidden');
-			}
-		}
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [musicModalRef]);
 
 	return (
 		<div className="menu">
