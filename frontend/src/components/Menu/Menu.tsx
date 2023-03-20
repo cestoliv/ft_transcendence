@@ -1,5 +1,5 @@
 import { message } from 'antd';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { SocketContext } from '../../context/socket';
 import { NavLink } from 'react-router-dom';
 import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
@@ -102,9 +102,6 @@ export default function Menu(props: { setCookie: SetCookie }) {
 				className="mobile-button-menu"
 				src="https://static.thenounproject.com/png/644033-200.png"
 			/>
-			<div className="music-modal modal background-modal music-modal-hidden" id="music-modal" ref={musicModalRef}>
-				<MusicPlayer />
-			</div>
 			{openMenu && (
 				<div className="mobile-menu">
 					<ul>
