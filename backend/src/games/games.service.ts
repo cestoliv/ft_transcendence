@@ -123,8 +123,10 @@ export class GamesService {
 
 		// Compute stats
 		games.forEach((game) => {
-			if (game.winner.id == user.id) player.stats.wins++;
-			else if (game.loser.id == user.id) player.stats.losses++;
+			if (!game.isDraw) {
+				if (game.winner.id == user.id) player.stats.wins++;
+				else if (game.loser.id == user.id) player.stats.losses++;
+			}
 		});
 		player.stats.winrate =
 			(player.stats.wins / (player.stats.wins + player.stats.losses)) *
@@ -185,6 +187,7 @@ export class GamesService {
 		game.winnerScore = localGame.winner.score;
 		game.loser = localGame.loser.user;
 		game.loserScore = localGame.loser.score;
+		game.isDraw = localGame.isDraw;
 		return this.gamesRepository.save(game);
 	}
 
@@ -326,9 +329,12 @@ export class GamesService {
 						winrate: 0,
 					},
 				});
-
-			players.get(game.winner.id).stats.wins++;
-			players.get(game.loser.id).stats.losses++;
+			if (!game.isDraw) {
+				players.get(game.winner.id).stats.wins++;
+				players.get(game.loser.id).stats.losses++;
+			}
+			players.get(game.winner.id).stats.games++;
+			players.get(game.loser.id).stats.games++;
 		});
 		// Append the users to the leaderboard
 		players.forEach((player) => {
@@ -336,7 +342,7 @@ export class GamesService {
 			player.stats = {
 				wins: player.stats.wins,
 				losses: player.stats.losses,
-				games: player.stats.wins + player.stats.losses,
+				games: player.stats.games,
 				winrate:
 					(player.stats.wins /
 						(player.stats.wins + player.stats.losses)) *

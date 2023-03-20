@@ -72,3 +72,7 @@ export function throttle<T extends (...args: any[]) => any>(callback: T, limit: 
 		return callback(...args);
 	}) as T;
 }
+
+export function capitalize(s: string): string {
+	return s[0].toUpperCase() + s.slice(1);
+}

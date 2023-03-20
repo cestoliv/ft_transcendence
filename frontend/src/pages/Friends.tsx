@@ -363,6 +363,7 @@ export default function Friends(props: FriendsProps) {
 			},
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
+				else message.success('Friend request sent to ' + data.invitee.username);
 			},
 		);
 	};
@@ -480,7 +481,7 @@ export default function Friends(props: FriendsProps) {
 	const activeConv = (event: any) => {
 		let newId;
 		let element;
-		
+
 		if (
 			event.target.classList != 'wrapper-active-conv list-item' &&
 			event.target.classList != 'wrapper-active-conv-span' &&

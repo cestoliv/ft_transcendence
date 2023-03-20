@@ -39,4 +39,7 @@ export class Game {
 
 	@Column()
 	loserScore: number;
+
+	@Column()
+	isDraw: boolean;
 }

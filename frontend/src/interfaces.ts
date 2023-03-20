@@ -37,6 +37,8 @@ export interface IGame {
 
 	loser: IUser;
 	loserScore: number;
+
+	isDraw: boolean;
 }
 
 export interface ILeaderboards {

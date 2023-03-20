@@ -5,7 +5,8 @@ import { socket } from '../context/socket';
 import { useNavigate, useParams } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import '../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
-import {message} from 'antd';
+import { message } from 'antd';
+import { capitalize } from '../utils';
 
 type StatsProps = {
 	user_me: IUser;
@@ -143,12 +144,30 @@ export const Stats = (props: StatsProps) => {
 	};
 	const gameHistory = () => {
 		const lastTenScores = displayScores.slice(-10);
-		return lastTenScores.map((score, index) => (
-			<span className="historic-item" key={index} onClick={() => statClickHandler(score)}>
-				{score.mode} - {score.maxDuration}min <br />
-				{score.winner.username} {score.winnerScore} VS {score.loser.username} {score.loserScore}
-			</span>
-		));
+		return lastTenScores.map((game, index) => {
+			let side = 'draw';
+			if (!game.isDraw) {
+				if (user.id === game.winner.id) side = 'left';
+				else side = 'right';
+			}
+
+			// Current user on the left
+			const left = {
+				user: game.winner.id === user.id ? game.winner : game.loser,
+				score: game.winner.id === user.id ? game.winnerScore : game.loserScore,
+			};
+			const right = {
+				user: game.winner.id === user.id ? game.loser : game.winner,
+				score: game.winner.id === user.id ? game.loserScore : game.winnerScore,
+			};
+
+			return (
+				<span className={`historic-item ${side}`} key={index} onClick={() => statClickHandler(game)}>
+					{capitalize(game.mode)} - {game.maxDuration}min <br />
+					{left.user.username} {left.score} VS {right.user.username} {right.score}
+				</span>
+			);
+		});
 	};
 	const defineRank = () => {
 		const current_elo: number = user.elo;
@@ -317,7 +336,7 @@ export const Stats = (props: StatsProps) => {
 						<h1>Stats</h1>
 						<div className="stats-item">
 							<span>Nombre de parties</span>
-							<span className="score">{userStat.stats.wins + userStat.stats.losses}</span>
+							<span className="score">{userStat.stats.games}</span>
 						</div>
 						<div className="stats-item">
 							<span>Gagnées</span>
@@ -395,7 +414,7 @@ export const Stats = (props: StatsProps) => {
 					<h1>Stats</h1>
 					<div className="stats-item">
 						<span>Nombre de parties</span>
-						<span className="score">{userStat.stats.wins + userStat.stats.losses}</span>
+						<span className="score">{userStat.stats.games}</span>
 					</div>
 					<div className="stats-item">
 						<span>Gagnées</span>

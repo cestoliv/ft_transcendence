@@ -121,6 +121,7 @@ export class LocalGame {
 		score: number;
 	};
 	creatorId: number;
+	isDraw: boolean;
 
 	constructor(
 		id: string,
@@ -150,20 +151,6 @@ export class LocalGame {
 
 		// Ball
 		this.resetBall();
-
-		// new Promise(async () => {
-		// 	// Add creator to game
-		// 	await this.addPlayer(creatorId);
-		// 	// Send updated games available to all users
-		// 	this.server.emit(
-		// 		'games_available',
-		// 		await this.gamesService.getAvailableGamesInfo(),
-		// 	);
-		// })
-		// 	.then(() => {
-		// 		/* Do nothing */
-		// 	})
-		// 	.catch((err) => console.log('error_create', err));
 	}
 
 	async initGame() {
@@ -304,6 +291,7 @@ export class LocalGame {
 					});
 			});
 			setTimeout(() => {
+				this.isDraw = this.players[0].score === this.players[1].score;
 				this.end();
 			}, this.options.maxDuration * 1000 * 60);
 		}, 3000);
@@ -426,8 +414,7 @@ export class LocalGame {
 					(p) => p.user.id !== player.user.id,
 				);
 				let gameResult: 0 | 0.5 | 1 = 0; // 0 = loss, 0.5 = draw, 1 = win
-				if (this.players[0].score === this.players[1].score)
-					gameResult = 0.5;
+				if (this.isDraw) gameResult = 0.5;
 				else if (this.winner.user.id == player.user.id) gameResult = 1;
 
 				await this.gamesService.updateElo(
@@ -465,6 +452,7 @@ export class LocalGame {
 		const opponent = this.players.find((p) => p.user.id !== quitterId);
 
 		// End the game with the opponent as winner
+		this.isDraw = false;
 		this.end(opponent.user);
 	}
 
@@ -508,8 +496,10 @@ export class LocalGame {
 		});
 
 		// Check score
-		if (this.options.maxScore && player.score >= this.options.maxScore)
+		if (this.options.maxScore && player.score >= this.options.maxScore) {
+			this.isDraw = false;
 			this.end();
+		}
 
 		this.resetBall();
 		this.resetPlayers();

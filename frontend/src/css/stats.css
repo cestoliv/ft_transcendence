@@ -10,7 +10,7 @@
 	max-width: 100%;
 	max-height: 90%;
 	min-height: 780px;
-	grid-template-areas: 
+	grid-template-areas:
 	"rank profil hist"
 	"stats stats hist";
 	flex-grow: 1;
@@ -132,7 +132,7 @@
 	width: 30px;
 	background-color: #209cee;
 	border: 5px groove #209cee;
-	
+
 	background-image: url(../png/block.png);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
@@ -171,9 +171,9 @@
 }
 
 .stats{
-	
+
 	display: grid;
-	grid-template-areas: 
+	grid-template-areas:
 	"header"
 	"nb_games"
 	"win"
@@ -257,9 +257,17 @@
 	font-size: 0.6rem;
 }
 
-.historic-item:hover{
-	background: rgb(18,255,0);
+.historic-item.draw:hover {
+	background: blue;
+	background: linear-gradient(90deg, blue 0%, #17181f 50%, blue 100%);
+}
+.historic-item.left:hover {
+	background: green;
 	background: linear-gradient(90deg, green 0%, #17181f 50%, red 100%);
+}
+.historic-item.right:hover {
+	background: red;
+	background: linear-gradient(90deg, red 0%, #17181f 50%, green 100%);
 }
 
 @media (max-width: 1400px){
@@ -269,7 +277,7 @@
 		grid-template-rows: 50% 50% 50%;
 		max-width: 100%;
 		min-width: 360px;
-		grid-template-areas: 
+		grid-template-areas:
 		"rank profil"
 		"stats stats"
 		"hist hist";
@@ -284,7 +292,7 @@
 		grid-template-rows: 50% 50% 50% 50%;
 		max-width: 100%;
 		min-width: 360px;
-		grid-template-areas: 
+		grid-template-areas:
 		"rank"
 		"profil"
 		"stats"
