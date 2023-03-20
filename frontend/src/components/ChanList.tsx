@@ -30,16 +30,26 @@ export const ChanList = (props: ChanListProps) => {
 			<span className="close-chan-list" id="close-chan-list" onClick={closeChanList}>
 				close
 			</span>
-			{props.chanList.map((chan: any) => (
-				<Chan
-					key={chan.id}
-					chan_id={chan.id}
-					activeConv={props.activeConv}
-					leaveChan={props.leaveChan}
-					chan_name={chan.name}
-					chanList={props.chanList}
-				/>
-			))}
+			{props.chanList.length > 0 ? (
+				props.chanList.map((chan: any) => (
+					<Chan
+						key={chan.id}
+						chan_id={chan.id}
+						activeConv={props.activeConv}
+						leaveChan={props.leaveChan}
+						chan_name={chan.name}
+						chanList={props.chanList}
+					/>
+				))
+			) : (
+				<div className="no-chans">
+					<img
+						src="https://cdn1.iconfinder.com/data/icons/pixel-art-essential/512/Bubble-512.png"
+						alt="No chans"
+					/>
+					<p>No chans...</p>
+				</div>
+			)}
 		</div>
 	);
 };
