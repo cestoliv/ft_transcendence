@@ -61,7 +61,6 @@ export class UsersService {
 		const user = new User();
 		user.id42 = createUserDto.id42;
 		user.username = createUserDto.username;
-		user.displayName = createUserDto.displayName || 'Unnamed';
 		user.elo = 1000;
 		user.firstConnection = createUserDto.firstConnection;
 		user.status = Status.Offline;
@@ -85,7 +84,6 @@ export class UsersService {
 			'id',
 			'id42',
 			'username',
-			'displayName',
 			'elo',
 			'firstConnection',
 			'status',
@@ -109,7 +107,6 @@ export class UsersService {
 			'id',
 			'id42',
 			'username',
-			'displayName',
 			'elo',
 			'firstConnection',
 			'status',
@@ -133,7 +130,6 @@ export class UsersService {
 			'id',
 			'id42',
 			'username',
-			'displayName',
 			'elo',
 			'firstConnection',
 			'status',
@@ -155,8 +151,16 @@ export class UsersService {
 		if (user.id !== updaterId)
 			throw new ForbiddenException('You can only update your own user');
 
+		// Check username format
+		if (updateUserDto.username) {
+			updateUserDto.username = updateUserDto.username.toLowerCase();
+			if (!/^[a-z0-9_]{3,20}$/.test(updateUserDto.username))
+				throw new BadRequestException(
+					'Username must be between 3 and 20 characters and can only contain letters, numbers and underscores',
+				);
+		}
+
 		user.username = updateUserDto.username;
-		user.displayName = updateUserDto.displayName;
 		user.otp = updateUserDto.otp;
 
 		// Set first connection to false

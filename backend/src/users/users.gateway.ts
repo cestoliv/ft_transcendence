@@ -69,7 +69,6 @@ export class UsersGateway extends BaseGateway {
 		const updateUserDto = new UpdateUserDto();
 		if (payload !== undefined && typeof payload == 'object') {
 			updateUserDto.username = payload.username;
-			updateUserDto.displayName = payload.displayName;
 		}
 
 		const val = validateSync(updateUserDto);

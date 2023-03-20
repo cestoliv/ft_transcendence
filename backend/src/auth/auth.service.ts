@@ -98,7 +98,6 @@ export class AuthService {
 			user = await this.usersService.create({
 				id42: userData.id,
 				username: newUsername,
-				displayName: userData.displayname,
 				otp: null,
 				firstConnection: true,
 				profile_picture_42: userData.image.link,
@@ -205,7 +204,6 @@ export class AuthService {
 			user = await this.usersService.create({
 				id42: null,
 				username: username,
-				displayName: null,
 				otp: null,
 				firstConnection: true,
 				profile_picture_42: null,

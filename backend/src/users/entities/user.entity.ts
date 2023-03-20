@@ -26,9 +26,6 @@ export class User {
 	username: string;
 
 	@Column()
-	displayName: string;
-
-	@Column()
 	elo: number;
 
 	@Column()

@@ -18,10 +18,6 @@ export class CreateUserDto {
 	username: string;
 
 	@IsString()
-	@IsNotEmpty()
-	displayName: string;
-
-	@IsString()
 	@IsOptional()
 	otp: string;
 
