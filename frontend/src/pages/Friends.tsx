@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useContext, useRef} from 'react';
+import React, { ChangeEvent, useEffect, useContext, useRef } from 'react';
 import Chat from '../components/Chat';
 import FriendConv from '../components/FriendConv';
 import InfosConv from '../components/InfosConv';
@@ -28,7 +28,11 @@ export default function Friends(props: FriendsProps) {
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-			if (infosConvRef.current && infosConvRef.current.classList.contains('active-infos-conv') && !infosConvRef.current.contains(event.target)) {
+			if (
+				infosConvRef.current &&
+				infosConvRef.current.classList.contains('active-infos-conv') &&
+				!infosConvRef.current.contains(event.target as Node)
+			) {
 				infosConvRef.current.classList.remove('active-infos-conv');
 				const button1 = document.getElementById('open-chan-joined-button');
 				const button2 = document.getElementById('open-friend-list-button');
@@ -39,30 +43,34 @@ export default function Friends(props: FriendsProps) {
 				button3?.classList.remove('hidden-button');
 			}
 		}
-		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [infosConvRef]);
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-		  if (chanListRef.current && chanListRef.current.classList.contains('active-chan-list') && !chanListRef.current.contains(event.target)) {
-			chanListRef.current.classList.remove('active-chan-list');
-			const button1 = document.getElementById('open-chan-joined-button');
-			const button2 = document.getElementById('open-friend-list-button');
-			const button3 = document.getElementById('open-infos-conv-button');
+			if (
+				chanListRef.current &&
+				chanListRef.current.classList.contains('active-chan-list') &&
+				!chanListRef.current.contains(event.target as Node)
+			) {
+				chanListRef.current.classList.remove('active-chan-list');
+				const button1 = document.getElementById('open-chan-joined-button');
+				const button2 = document.getElementById('open-friend-list-button');
+				const button3 = document.getElementById('open-infos-conv-button');
 
-			button1?.classList.remove('hidden-button');
-			button2?.classList.remove('hidden-button');
-			button3?.classList.remove('hidden-button');
-		  }
+				button1?.classList.remove('hidden-button');
+				button2?.classList.remove('hidden-button');
+				button3?.classList.remove('hidden-button');
+			}
 		}
-		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-		  document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	  }, [chanListRef]);
+	}, [chanListRef]);
 
 	// const [isEnabled, setIsEnabled] = useState(false);
 	// const [delai, setDelai] = useState<number>(0);
@@ -507,7 +515,7 @@ export default function Friends(props: FriendsProps) {
 					id: parseInt(newId),
 				},
 				(data: any) => {
-					if(data.messages) message.error(data.messages);
+					if (data.messages) message.error(data.messages);
 					else setActiveChan(data as IChannel);
 				},
 			);
@@ -519,7 +527,7 @@ export default function Friends(props: FriendsProps) {
 	};
 
 	const OpenConvs = (event: any): void => {
-		console.log(event.target.name)
+		console.log(event.target.name);
 		if (event.target.name === 'open-chan-joined-button') {
 			const sidenav = document.getElementById('chan-list');
 			sidenav?.classList.add('active-chan-list');

@@ -223,9 +223,7 @@ export const Friend = (props: FriendProps) => {
 					onClick={props.activeConv}
 				/>
 			</Badge>
-			<span className="wrapper-active-conv-span">
-				{props.user.username}
-			</span>
+			<span className="wrapper-active-conv-span">{props.user.username}</span>
 			<div className="friendsList-settings">
 				<img
 					src="https://static.thenounproject.com/png/2758640-200.png"

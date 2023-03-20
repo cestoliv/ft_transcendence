@@ -6,8 +6,6 @@ import '../../../node_modules/@syncfusion/ej2-icons/styles/bootstrap.css';
 import useAuth from '../../hooks/useAuth';
 import { SetCookie } from '../../types';
 import { BsFillMusicPlayerFill } from 'react-icons/bs';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
 
 import MusicPlayer from '../MusicPlayer';
 
@@ -44,13 +42,17 @@ export default function Menu(props: { setCookie: SetCookie }) {
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-			if (musicModalRef.current && !musicModalRef.current.classList.contains('music-modal-hidden') && !musicModalRef.current.contains(event.target)) {
+			if (
+				musicModalRef.current &&
+				!musicModalRef.current.classList.contains('music-modal-hidden') &&
+				!musicModalRef.current.contains(event.target as Node)
+			) {
 				musicModalRef.current.classList.add('music-modal-hidden');
 			}
 		}
-		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [musicModalRef]);
 

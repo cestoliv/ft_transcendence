@@ -1,5 +1,4 @@
 import { SetCookie, RemoveCookie } from './types';
-import qala from "./assets/boop.mp3";
 
 export interface IUser {
 	id: number;
@@ -171,13 +170,13 @@ export interface ILocalGameInfo {
 }
 
 export interface IMusic {
-	id : number;
-	title : string;
-	url : string;
+	id: number;
+	title: string;
+	url: string;
 }
 
 export interface IPlayList {
-	id : number;
-	title : string;
-	music_list : IMusic[];
+	id: number;
+	title: string;
+	music_list: IMusic[];
 }

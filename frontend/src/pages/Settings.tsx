@@ -44,7 +44,7 @@ export const Settings = (props: SettingsProps) => {
 
 	const [isChecked2FA, setIsChecked2FA] = useState(false);
 
-	const [displayname, setDisplayName] = useState<string>('');
+	const [userName, setUserName] = useState<string>('');
 
 	const [file, setFile] = useState<File | null>(null);
 	const [fileName, setFileName] = useState<string>('');
@@ -90,7 +90,7 @@ export const Settings = (props: SettingsProps) => {
 	};
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-		if (event.target.name === 'name') setDisplayName(event.target.value);
+		if (event.target.name === 'name') setUserName(event.target.value);
 	};
 
 	const handle2FA = async () => {
@@ -154,14 +154,16 @@ export const Settings = (props: SettingsProps) => {
 			'users_update',
 			{
 				id: props.user_me.id,
-				displayName: displayname,
+				username: userName,
 			},
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
-					message.success('Username uploaded');
-					setDisplayName('');
-					navigate(0);
+					message.success('Username updated');
+					setUserName('');
+					setTimeout(() => {
+						navigate(0);
+					}, 1000);
 				}
 			},
 		);
@@ -186,13 +188,13 @@ export const Settings = (props: SettingsProps) => {
 			'users_update',
 			{
 				id: props.user_me.id,
-				displayName: displayname ? displayname : auth?.user?.displayName,
+				username: userName ? userName : auth?.user?.username,
 			},
 			(data: any) => {
 				if (data.messages) message.error(data.messages);
 				else {
 					message.success('Username uploaded');
-					setDisplayName('');
+					setUserName('');
 					navigate(0);
 				}
 			},
@@ -216,7 +218,6 @@ export const Settings = (props: SettingsProps) => {
 					</Badge>
 				</div>
 				<div className="user-name">
-					<p>{props.user_me.displayName}</p>
 					<p>@{props.user_me.username}</p>
 				</div>
 				<Modal open={isOpenPictureModal} onClose={closePictureModalHandler}>
@@ -246,8 +247,8 @@ export const Settings = (props: SettingsProps) => {
 					<input
 						type="text"
 						name="name"
-						placeholder="change display name"
-						value={displayname}
+						placeholder="change username"
+						value={userName}
 						className="nes-input is-dark"
 						onChange={handleChange}
 					/>
