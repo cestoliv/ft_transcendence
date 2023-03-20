@@ -14,9 +14,14 @@ const Home = () => {
 					<span>42</span>Pong
 				</h2>
 			</div>
-			<Link className="nes-btn" to="/searchGame">
+			<Link className="nes-btn is-primary" to="/searchGame">
 				Play !
 			</Link>
+			<div className="made-by typing">
+				<p>Made with</p>
+				<img src="https://cdn.pixabay.com/photo/2017/09/23/16/33/pixel-heart-2779422_1280.png" alt="Heart" />
+				<p>by hprudhom, ocartier, mservage, paime</p>
+			</div>
 		</div>
 	);
 };

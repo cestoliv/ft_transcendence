@@ -11,8 +11,17 @@
 	font-size: 20px;
 	min-height: 70px;
 	box-shadow: rgb(0 0 0 / 15%) 0px 3px 2.6px;
+	.mobile-button-menu {
+		height: 25px;
+		filter: invert(1);
+		display: none;
+	}
 	.e-icons {
 		color: white;
+	}
+	.mobile-menu {
+		display: none;
+		box-shadow: (0, 0, 0, 0.15) 0px 3px 2.6px;
 	}
 	.menu-title {
 		text-decoration: none;
@@ -110,7 +119,7 @@ a {
 	margin-bottom: 12px;
 }
 
-.music-player button{
+.music-player button {
 	height: 50px;
 }
 
@@ -132,4 +141,30 @@ a {
 
 .playList-btn {
 	width: 100px !important;
+}
+
+@media (max-width: 520px) {
+	.menu {
+		.menu-nav {
+			display: none;
+		}
+		.mobile-button-menu {
+			display: block;
+		}
+		.mobile-menu {
+			background: black;
+			display: flex;
+			width: 100%;
+			height: 60px;
+			left: 0;
+			top: 74px;
+			z-index: 1;
+			position: absolute;
+			justify-content: center;
+			ul {
+				width: 100%;
+				justify-content: space-evenly;
+			}
+		}
+	}
 }
