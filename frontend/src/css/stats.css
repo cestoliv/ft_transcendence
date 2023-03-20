@@ -259,15 +259,15 @@
 
 .historic-item.draw:hover {
 	background: blue;
-	background: linear-gradient(90deg, blue 0%, #17181f 50%, blue 100%);
+	background: linear-gradient(90deg, blue 0%, #17181f 20%);
 }
 .historic-item.left:hover {
 	background: green;
-	background: linear-gradient(90deg, green 0%, #17181f 50%, red 100%);
+	background: linear-gradient(90deg, green 0%, #17181f 20%);
 }
 .historic-item.right:hover {
 	background: red;
-	background: linear-gradient(90deg, red 0%, #17181f 50%, green 100%);
+	background: linear-gradient(90deg, red 0%, #17181f 20%);
 }
 
 @media (max-width: 1400px){
