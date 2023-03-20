@@ -166,7 +166,8 @@ function App() {
 				<span>g</span>
 			</p>
 		);
-	if (auth.bearer != null && !userLoading && auth.user?.firstConnection) return <Settings user_me={user} />;
+	if (auth.bearer != null && !userLoading && auth.user?.firstConnection)
+		return <Settings user_me={user} setUser={setUser} />;
 
 	return (
 		<ConfigProvider
@@ -189,7 +190,7 @@ function App() {
 						<Route path="/searchGame" element={<SearchGame user_me={user} />} />
 						<Route path="/stats/:userId" element={<Stats user_me={user} />} />
 						<Route path="/404" element={<NoUserFound />} />
-						<Route path="/settings" element={<Settings user_me={user} />} />
+						<Route path="/settings" element={<Settings user_me={user} setUser={setUser} />} />
 						<Route path="/pong/:gameId" element={<Pong />} />
 						<Route path="/ladder" element={<Ladder />} />
 					</Route>

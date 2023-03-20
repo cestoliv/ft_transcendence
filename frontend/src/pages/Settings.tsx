@@ -11,6 +11,7 @@ import useAuth from '../hooks/useAuth';
 
 type SettingsProps = {
 	user_me: IUser;
+	setUser: (user: IUser) => void;
 };
 
 type Totp = {
@@ -60,7 +61,6 @@ export const Settings = (props: SettingsProps) => {
 	const submitProfilPicture = async (event: any) => {
 		event.preventDefault();
 		const formData = new FormData();
-		console.log(file);
 		if (file) formData.append('profil_picture', file);
 		await fetch(`${process.env.REACT_APP_API_URL}/users/profile-picture`, {
 			method: 'POST',
@@ -77,15 +77,16 @@ export const Settings = (props: SettingsProps) => {
 				};
 			})
 			.then((r) => {
-				console.log(r);
 				if (!r) return;
-				if (r.response.ok) message.success('Profil Picture uploaded');
-				else message.error(r.data.messages || r.data.messages[0] || 'Error');
+				if (r.response.ok) {
+					props.setUser(r.data);
+					setIsOpenPictureModal(false);
+					message.success('Profil Picture uploaded');
+				} else message.error(r.data.message ? r.data.message : 'Error');
 			})
 			.catch(() => {
 				// We need to handle this better, but now there is a CORS error that I can't manage to fix
 				message.error('File too large');
-				//message.error(error.message || 'Network Error');
 			});
 	};
 
@@ -130,8 +131,11 @@ export const Settings = (props: SettingsProps) => {
 			},
 		});
 		if (response.ok) {
+			const user = await response.json();
+			props.setUser(user);
+			setIsOpenPictureModal(false);
 			message.success('Profil Picture uploaded');
-		}
+		} else message.error('An error occured');
 	};
 
 	const submitRandomProfilPicture = async (event: any) => {
@@ -143,8 +147,11 @@ export const Settings = (props: SettingsProps) => {
 			},
 		});
 		if (response.ok) {
+			const user = await response.json();
+			props.setUser(user);
+			setIsOpenPictureModal(false);
 			message.success('Profil Picture uploaded');
-		}
+		} else message.error('An error occured');
 	};
 
 	const changeSettings = (event: any): void => {
@@ -248,7 +255,7 @@ export const Settings = (props: SettingsProps) => {
 						type="text"
 						name="name"
 						placeholder="change username"
-						value={userName}
+						value={userName ? userName : auth?.user?.username}
 						className="nes-input is-dark"
 						onChange={handleChange}
 					/>
