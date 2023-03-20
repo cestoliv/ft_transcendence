@@ -86,3 +86,7 @@
 button {
 	cursor: pointer;
 }
+
+.nes-btn:focus {
+	box-shadow: none !important;
+}
