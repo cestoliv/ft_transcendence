@@ -20,39 +20,40 @@ $animation-time: 4s;
 			font-size: 60px;
 		}
 	}
-	.made-by {
-		position: absolute !important;
-		bottom: 15px;
-		display: flex;
-		align-items: center;
-		font-size: 10px;
-		gap: 10px;
-		img {
-			height: 20px;
-		}
+}
+.made-by {
+	cursor: pointer;
+	position: absolute !important;
+	bottom: 15px;
+	display: flex;
+	align-items: center;
+	font-size: 10px;
+	gap: 10px;
+	img {
+		height: 20px;
 	}
-	.typing {
-		position: relative;
-		&::after {
-			content: '|';
-			position: absolute;
-			right: 0;
-			width: 100%;
-			color: $caret-color;
-			background: $bg;
-			animation: typing $animation-time steps($text-length) forwards, caret 1s infinite;
-		}
+}
+.typing {
+	position: relative;
+	&::after {
+		content: '|';
+		position: absolute;
+		right: 0;
+		width: 100%;
+		color: $caret-color;
+		background: $bg;
+		animation: typing $animation-time steps($text-length) forwards, caret 1s infinite;
 	}
-	// Animation
-	@keyframes typing {
-		to {
-			width: 0;
-		}
+}
+// Animation
+@keyframes typing {
+	to {
+		width: 0;
 	}
-	@keyframes caret {
-		50% {
-			color: transparent;
-		}
+}
+@keyframes caret {
+	50% {
+		color: transparent;
 	}
 }
 
@@ -87,11 +88,9 @@ $animation-time: 4s;
 }
 
 @media (max-width: 630px) {
-	.home {
-		.made-by {
-			p {
-				font-size: 1.5vw;
-			}
+	.made-by {
+		p {
+			font-size: 1.5vw;
 		}
 	}
 }

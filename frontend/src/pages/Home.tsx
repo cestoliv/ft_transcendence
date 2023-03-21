@@ -6,6 +6,10 @@ const Home = () => {
 	const socket = useContext(SocketContext);
 	window.socket = socket;
 
+	const handleGithub = () => {
+		window.open('https://github.com/cestoliv/ft_transcendence', '_blank', 'noopener,noreferrer');
+	};
+
 	return (
 		<div className="home">
 			<div className="welcome">
@@ -17,10 +21,10 @@ const Home = () => {
 			<Link className="nes-btn is-primary" to="/searchGame">
 				Play !
 			</Link>
-			<div className="made-by typing">
+			<div onClick={handleGithub} className="made-by typing">
 				<p>Made with</p>
 				<img src="https://cdn.pixabay.com/photo/2017/09/23/16/33/pixel-heart-2779422_1280.png" alt="Heart" />
-				<p>by hprudhom, ocartier, mservage, paime</p>
+				<p>by hprudhom, ocartier, mservage, paime.</p>
 			</div>
 		</div>
 	);

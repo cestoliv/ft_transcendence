@@ -74,12 +74,12 @@ export default function Menu(props: { setCookie: SetCookie }) {
 						to="/ladder"
 						className={({ isActive }: { isActive: boolean }) => (isActive ? 'activeLink' : undefined)}
 					>
-						<img src="https://fanaplay.fr/6277-medium_default/playmobil-30046843-echelle-pour-creneau-09.jpg" />
+						<img src="/img/ladder.png" />
 					</NavLink>
 				</li>
 				<li>
 					<span onClick={toggleMusicModal}>
-						<BsFillMusicPlayerFill />
+						<img src="/img/mp3.png" alt="mp3 icon" />
 					</span>
 				</li>
 				<li>
@@ -152,12 +152,12 @@ export default function Menu(props: { setCookie: SetCookie }) {
 									isActive ? 'activeLink' : undefined
 								}
 							>
-								<img src="https://fanaplay.fr/6277-medium_default/playmobil-30046843-echelle-pour-creneau-09.jpg" />
+								<img src="/img/ladder.png" />
 							</NavLink>
 						</li>
 						<li>
 							<span onClick={toggleMusicModal}>
-								<BsFillMusicPlayerFill />
+								<img src="/img/mp3.png" alt="mp3 icon" />
 							</span>
 						</li>
 						<li>
