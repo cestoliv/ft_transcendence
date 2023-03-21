@@ -58,7 +58,8 @@ function App() {
 			// Connect to socket
 			socket.connect();
 			setAlreadyConnected(false);
-			navigate('/');
+			// if the user is on the login page, redirect him to the home page
+			if (window.location.pathname === '/login') navigate('/');
 		} else if (response.status === 401 && data.message.startsWith('TOTP')) {
 			// User need to enter a TOTP
 			if (auth.bearer !== cookies.bearer || auth.otp_ok !== false)
