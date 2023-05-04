@@ -48,7 +48,7 @@
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
-		"@nestjs/cli": "^9.2.0",
+		"@nestjs/cli": "^9.4.2",
 		"@types/cookie": "^0.5.1",
 		"@types/cron": "^2.0.0",
 		"@types/passport-jwt": "^3.0.8",
