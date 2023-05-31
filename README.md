@@ -1,5 +1,7 @@
 # ft_transcendence
 
+![Our grade (100%)](.readme/grade.svg)
+
 4 people to work on 42's first web development project. The objective: to create an online multiplayer Pong with chat (friends, channels) and matchmaking functionalities (+ a few bonuses from us).
 
 ![The welcome screen](.readme/welcome-screen.png)
