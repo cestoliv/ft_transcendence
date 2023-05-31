@@ -1,6 +1,20 @@
-# Developing
+# ft_transcendence
 
-Create an `.env` file at the base of the project (next to the `docker-compose.dev.yml`)
+4 people to work on 42's first web development project. The objective: to create an online multiplayer Pong with chat (friends, channels) and matchmaking functionalities (+ a few bonuses from us).
+
+![The welcome screen](.readme/welcome-screen.png)
+
+Despite time constraints, we paid particular attention to the design and user interface, as well as the backend and database architecture.
+
+![The bonus music player](.readme/music-player.png)
+## Database structure
+
+![The database structure diagram](.readme/database-structure.png)
+
+**Give it a try!**
+## Usage
+
+Create a `.env` file at the base of the project (next to the `docker-compose.dev.yml`)
 
 Generate the secrets with `openssl rand -hex 16`.
 
@@ -9,6 +23,7 @@ DB_NAME=transcendence
 DB_USER=transcendence
 DB_PASS=transcendence
 
+# Optionnal section, only if you want 42 intra Oauth
 API42_CLIENT_ID=<your 42 app client ID>
 API42_CLIENT_SECRET=<your 42 app client SECRET>
 API42_REDIRECT_URI=http://api.transcendence.local/api/v1/auth/42oauth
@@ -35,37 +50,10 @@ Edit the `/etc/hosts` file on your system to include:
 127.0.0.1    transcendence.local
 ```
 
-Then, you dan start the docker containers in developing mode (all changes made to local files will take direct effect):
+Then, you then start the docker containers!
 
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
+docker-compose up --build
 ```
 
-You will be able to access the webapp by visiting `http://transcendence.local`
-
-# Creating an account without 42
-
-The fonctionnality isn't actually implemented in the interface.
-
-**Create the account**
-```bash
-curl -X POST http://api.transcendence.local/api/v1/auth/register -d '{"username": "ocartier5"}' -H "Content-Type: application/json" | jq
-# return (if there is no problem)
-# {
-#   "user": {
-#     "id42": null,
-#     "username": "im_not_a_42_student",
-#     "otp": null,
-#     "id": 21
-#   },
-#   "secret": "CEPQ4XANMBZQ2QBA",
-#   "url": "otpauth://totp/Transcendence:?secret=CEPQ4XANMBZQ2QBA&period=30&digits=6&algorithm=SHA1&issuer=Transcendence"
-# }
-```
-Store the TOTP `secret` in your password manager or use it in https://totp.app/ (for example).
-
-**Connect to your new account**
-
-Go to `http://api.transcendence.local/api/v1/auth/login?username=im_not_a_42_student`. *replace with you new username*
-
-That should redirect you to a page were you will be able to input your TOTP and enter the app.
+You will be able to access the web app by visiting `http://transcendence.local`

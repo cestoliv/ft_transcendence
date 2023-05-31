@@ -23,13 +23,13 @@ export default function MusicPlayer() {
 	}
 
 	const musicList: IMusic[] = [
-		{ id: 1, title: 'Enzalla - Rose', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/boop.mp3` },
-		{ id: 2, title: 'c4c - What you love', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/what_you_love.mp3` },
-		{ id: 3, title: 'Mr Hong & Pastels - Sparks', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/sparks.mp3` },
+		{ id: 1, title: 'Enzalla - Rose', url: `/sounds/boop.mp3` },
+		{ id: 2, title: 'c4c - What you love', url: `/sounds/what_you_love.mp3` },
+		{ id: 3, title: 'Mr Hong & Pastels - Sparks', url: `/sounds/sparks.mp3` },
 		{
 			id: 4,
 			title: 'Pastels - Life is a game',
-			url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/life_is_a_game.mp3`,
+			url: `/sounds/life_is_a_game.mp3`,
 		},
 	];
 
@@ -37,9 +37,9 @@ export default function MusicPlayer() {
 		{
 			id: 1,
 			title: 'Street Fighter 2 - Ryu stage',
-			url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/Ryu_stage.mp3`,
+			url: `/sounds/Ryu_stage.mp3`,
 		},
-		{ id: 2, title: 'Bomb Jack - Level Theme', url: `${process.env.REACT_APP_FRONTEND_URL}/sounds/Bomb_Jack.mp3` },
+		{ id: 2, title: 'Bomb Jack - Level Theme', url: `/sounds/Bomb_Jack.mp3` },
 	];
 
 	const playList: IPlayList[] = [
